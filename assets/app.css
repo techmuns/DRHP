@@ -607,13 +607,11 @@ a:hover { text-decoration: underline; }
 .ipo-head { flex-wrap: wrap; row-gap: 9px; }
 .ipo-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .ipo-note { margin-left: 2px; }
-/* company → prospectus link + a small badge showing how exact the source is */
-.ipo-co { color: var(--navy); font-weight: 600; }
-.ipo-co:hover { color: var(--emerald); text-decoration: underline; }
+/* rows open a detail panel; a small badge flags rows with a real source doc */
+#ipo-pipeline tbody tr.ipo-row { cursor: pointer; }
 .ipo-doc { display: inline-block; margin-left: 7px; padding: 1px 6px; border-radius: 5px; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; vertical-align: middle; }
 .ipo-doc.pdf  { background: var(--emerald-soft); color: var(--emerald); }
 .ipo-doc.sebi { background: #EAF1F7; color: #1B4B73; }
-.ipo-doc.find { background: var(--grey-soft); color: var(--ink-faint); }
 
 /* clickable sector bars on the benchmark card */
 .bar-row.mh-bar { cursor: pointer; border-radius: 8px; padding: 3px 6px; margin: 0 -6px; transition: background .14s; }

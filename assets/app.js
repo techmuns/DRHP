@@ -699,26 +699,30 @@ function renderAppendixRows(){
   }).join('') || `<tr><td colspan="17" class="subtle">No DRHP filings match these filters — see the IPO Pipeline (NSE) below for board/stage-level data.</td></tr>`;
 }
 
-/* Resolve a company in the NSE pipeline to its prospectus document.
-   Preference: the exact SEBI PDF we already hold → the SEBI filing page →
-   a SEBI-scoped document search (NSE's feed itself carries no document URL,
-   so we never fabricate one — the search lands on the official SEBI PDF). */
-function pipelineDoc(name, srcByNorm){
-  const s = srcByNorm[normalizeName(name)] || {};
-  if(s.pdf)  return {href:s.pdf,  kind:'pdf',  title:'Open the exact SEBI prospectus PDF'};
-  if(s.sebi) return {href:s.sebi, kind:'sebi', title:'Open the SEBI filing page'};
-  const q = encodeURIComponent(`${name} DRHP RHP prospectus`);
-  return {href:`https://www.google.com/search?q=${q}+site:sebi.gov.in+filetype:pdf`, kind:'search', title:'Find the prospectus PDF on SEBI'};
-}
-function pipelineNameCell(name, srcByNorm){
-  const d = pipelineDoc(name, srcByNorm);
-  // only badge rows we actually hold a document for; search-fallback rows stay a clean link
-  const tag = d.kind==='pdf'  ? `<span class="ipo-doc pdf" title="Exact prospectus PDF on file">PDF</span>`
-            : d.kind==='sebi' ? `<span class="ipo-doc sebi" title="SEBI filing page on file">SEBI</span>`
-            : '';
-  return `<a class="ipo-co" href="${esc(d.href)}" target="_blank" rel="noopener" title="${d.title}">${esc(name)}</a>${tag}`;
+/* Turn one NSE pipeline row into the shared drawer record, folding in a matched
+   SEBI filing's sources/financials/score when we happen to hold them. */
+function nseToRec(r){
+  const f = (DATA.filings||[]).find(x => x.company_name_normalized === normalizeName(r.company_name));
+  return {
+    name: r.company_name,
+    board: r.board || (f && f.board) || null,
+    sector: r.sector || (f && f.sector) || null,
+    subSector: (f && f.sub_sector) || null,
+    stage: r.stage || null,
+    filingType: (f && f.filing_type) || null,
+    filingDate: (f && f.filing_date) || null,
+    issueOpen: r.issue_open || null, issueClose: r.issue_close || null, listingDate: r.listing_date || null,
+    issueSizeCr: r.issue_size_cr, subscriptionX: r.subscription_x, issuePrice: r.issue_price,
+    currentPrice: r.current_price, gainPct: r.gain_pct, priceBand: r.price_band, symbol: r.symbol,
+    score: f && f.score ? f.score.total : null,
+    bucket: f && f.score ? f.score.bucket : null,
+    sources: f ? f.sources : null,
+    financials: f ? f.financials : null,
+    origin: f ? 'both' : 'nse',
+  };
 }
 
+let IPO_VIEW = [];   // current pipeline rows as drawer records, for click lookup
 function renderIpoPipeline(){
   const host = document.getElementById('ipo-pipeline'); if(!host) return;
   const m = ipoMarket();
@@ -727,8 +731,6 @@ function renderIpoPipeline(){
       <div class="pending-tag">Pending source — NSE IPO data not reached this run.</div></div>`;
     return;
   }
-  const srcByNorm = {};
-  (DATA.filings||[]).forEach(f=>{ if(f.sources) srcByNorm[f.company_name_normalized] = {pdf:f.sources.drhp_pdf_url, sebi:f.sources.sebi_url}; });
   const allRows = [...(m.open_upcoming||[]), ...(m.recent_listings||[])];
   const total = allRows.length;
   const stagesPresent = [...new Set(allRows.map(r=>r.stage).filter(Boolean))]
@@ -738,6 +740,7 @@ function renderIpoPipeline(){
     (ipoFilter.stage==='All' || r.stage===ipoFilter.stage));
   const active = ipoFilter.board!=='All' || ipoFilter.stage!=='All';
   const note = active ? `${all.length} of ${total} · filtered` : `${total} issues`;
+  IPO_VIEW = all.map(nseToRec);
   const pill = (dim, label, opts, disp)=>{
     const cur = ipoFilter[dim];
     const o = [`<option value="All" ${cur==='All'?'selected':''}>All</option>`]
@@ -756,8 +759,12 @@ function renderIpoPipeline(){
     </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Company</th><th>Board</th><th>Stage</th><th>Open</th><th>Close</th><th>Listed</th><th>Price Band</th><th class="num">Size (₹ Cr)</th><th class="num">Sub.</th><th class="num">Gain/Loss</th></tr></thead>
-      <tbody>${all.map(r=>`<tr>
-        <td class="company">${pipelineNameCell(r.company_name, srcByNorm)}</td>
+      <tbody>${all.map((r,i)=>{
+        const rec = IPO_VIEW[i];
+        const badge = rec.sources && rec.sources.drhp_pdf_url ? `<span class="ipo-doc pdf" title="Exact prospectus PDF on file">PDF</span>`
+                    : rec.sources && rec.sources.sebi_url ? `<span class="ipo-doc sebi" title="SEBI filing page on file">SEBI</span>` : '';
+        return `<tr class="ipo-row" data-idx="${i}">
+        <td class="company">${esc(r.company_name)}${badge}</td>
         <td>${boardChip(r.board)}</td>
         <td>${stageChip(r.stage)}</td>
         <td class="subtle">${r.issue_open?dfmt(r.issue_open):'—'}</td>
@@ -766,15 +773,19 @@ function renderIpoPipeline(){
         <td class="subtle">${r.price_band?esc(r.price_band):'—'}</td>
         <td class="num">${r.issue_size_cr==null?'—':money(r.issue_size_cr)}</td>
         <td class="num">${subx(r.subscription_x)}</td>
-        <td class="num"><span class="pending-cell">Pending</span></td></tr>`).join('')
+        <td class="num"><span class="pending-cell">Pending</span></td></tr>`;}).join('')
         || `<tr><td colspan="10" class="subtle">No IPO issues match these filters — <button class="mh-clear-inline" id="ipo-clear-inline">Clear filters</button></td></tr>`}</tbody>
     </table></div>
-    <div class="table-foot">Click a company to open its prospectus — the <b>exact SEBI PDF</b> where we hold it, otherwise a SEBI document search (NSE's feed carries no document link, so it's never fabricated). Current price &amp; listing gain/loss aren't in NSE's feed — shown as pending, never estimated.</div>
+    <div class="table-foot">Click any row for the full record we hold — dates, price band, issue size, subscription and source. Where we’ve scraped the SEBI filing, the panel links to the exact document (PDF/SEBI badge). Current price &amp; listing gain/loss aren’t in NSE’s feed — shown as pending, never estimated.</div>
   </div>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{ ipoFilter[s.dataset.f]=s.value; renderIpoPipeline(); }));
   const reset = ()=>{ ipoFilter={board:'All',stage:'All'}; renderIpoPipeline(); };
   const cl = host.querySelector('#ipo-clear'); if(cl) cl.addEventListener('click', reset);
   const cli = host.querySelector('#ipo-clear-inline'); if(cli) cli.addEventListener('click', reset);
+  host.querySelectorAll('.ipo-row').forEach(tr=>tr.addEventListener('click', e=>{
+    if(e.target.closest('a')) return;
+    openDrawer(IPO_VIEW[+tr.dataset.idx]);
+  }));
 }
 
 function renderFooter(){
