@@ -388,15 +388,18 @@ function renderMarketHeat(){
       `<div class="pending-tag">Market data is being updated.</div>`;
     return;
   }
+  mhSnapshot();
   mhSelectors();
   mhSummary();
-  mhLifecycle();
   mhBenchmark();
   mhDonut();
   mhInsightsCard();
-  mhSnapshot();
   mhTable();
 }
+
+/* only these three dimensions appear as dropdown selectors; the rest stay
+   filterable through the visuals (donut legend = recommendation, bars = sector) */
+const RIBBON_KEYS = ['issueType','stage','sector'];
 
 /* compact control ribbon — one dropdown pill per dimension + Clear all */
 function mhSelectors(){
@@ -412,8 +415,9 @@ function mhSelectors(){
       <span class="mh-pill-lbl">${d.label}</span>
       <select class="mh-pill-sel" data-dim="${d.key}">${o}</select></label>`;
   };
+  const ribbonDims = RIBBON_KEYS.map(k=>MH_DIMS.find(d=>d.key===k)).filter(Boolean);
   host.innerHTML = `
-    <div class="mh-ribbon-pills">${MH_DIMS.map(pill).join('')}</div>
+    <div class="mh-ribbon-pills">${ribbonDims.map(pill).join('')}</div>
     <button class="mh-ribbon-clear ${mhActive()?'':'hide'}">Clear all</button>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{
     mh[s.dataset.dim] = s.value; mhSyncUrl(); renderMarketHeat();
