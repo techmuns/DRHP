@@ -111,6 +111,15 @@ function ipoMarket(){ return DATA.ipo_market || {available:false}; }
 
 let boardFilter = 'All';
 let apxFilter = {board:'All', stage:'All', sector:'All', bucket:'All'};
+let kpiFilter = null;   // {kind:'bucket'|'stage', value} — set by clicking a KPI card
+
+function passKpi(f){
+  if(!kpiFilter) return true;
+  if(kpiFilter.kind === 'bucket') return f.score && f.score.bucket === kpiFilter.value;
+  if(kpiFilter.kind === 'stage')  return f.stage === kpiFilter.value;
+  return true;
+}
+function filteredFilings(){ return (DATA.filings || []).filter(passKpi); }
 
 function ipoFilteredLists(){
   const m = ipoMarket();
@@ -158,21 +167,31 @@ function renderSnapshot(){
   const s = DATA.summary, f = DATA.filings, d = s.deltas;
 
   const kpis = [
-    {k:'doc',     cls:'',     label:'New DRHPs',        val:s.new_drhp_count, dl:d&&d.new_drhp},
-    {k:'trend',   cls:'',     label:'IPOs / Prospects', val:s.new_ipo_count,  dl:d&&d.new_ipo},
-    {k:'target',  cls:'dig',  label:'Dig Deeper',       val:s.buckets.dig_deeper, dl:d&&d.dig_deeper},
-    {k:'eye',     cls:'mon',  label:'Monitor',          val:s.buckets.monitor,    dl:d&&d.monitor},
-    {k:'bookmark',cls:'watch',label:'Watch',            val:s.buckets.watch,      dl:d&&d.watch},
+    {k:'doc',     cls:'',     label:'New DRHPs',        val:s.new_drhp_count, dl:d&&d.new_drhp, fk:'stage',  fv:'DRHP'},
+    {k:'trend',   cls:'',     label:'IPOs / Prospects', val:s.new_ipo_count,  dl:d&&d.new_ipo,  fk:'stage',  fv:'IPO'},
+    {k:'target',  cls:'dig',  label:'Dig Deeper',       val:s.buckets.dig_deeper, dl:d&&d.dig_deeper, fk:'bucket', fv:'DIG DEEPER'},
+    {k:'eye',     cls:'mon',  label:'Monitor',          val:s.buckets.monitor,    dl:d&&d.monitor,    fk:'bucket', fv:'MONITOR'},
+    {k:'bookmark',cls:'watch',label:'Watch',            val:s.buckets.watch,      dl:d&&d.watch,      fk:'bucket', fv:'WATCH'},
   ];
+  const isSel = c => kpiFilter && kpiFilter.kind===c.fk && kpiFilter.value===c.fv;
   document.getElementById('kpi-grid').innerHTML = kpis.map(c => `
-    <div class="kpi ${c.cls}">
+    <div class="kpi ${c.cls} ${isSel(c)?'selected':''}" data-fk="${c.fk}" data-fv="${esc(c.fv)}" title="Filter to ${esc(c.label)}">
       <div class="kpi-icon">${icon(c.k,20)}</div>
       <div class="kpi-label">${c.label}</div>
       <div class="kpi-value">${c.val}</div>
       ${deltaPill(c.dl===undefined?null:c.dl)}
     </div>`).join('');
 
-  const ranked = [...f].sort((a,b)=>(b.score.total??-1)-(a.score.total??-1)).slice(0,3);
+  const fbar = document.getElementById('kpi-filter-bar');
+  if(fbar){
+    if(kpiFilter){
+      const lab = kpis.find(c=>c.fk===kpiFilter.kind && c.fv===kpiFilter.value);
+      const n = filteredFilings().length;
+      fbar.innerHTML = `<span class="kpi-filter-note">Filtered to <b>${lab?esc(lab.label):esc(kpiFilter.value)}</b> · ${n} filing${n!==1?'s':''}</span><button class="kpi-clear">Clear ✕</button>`;
+    } else { fbar.innerHTML = ''; }
+  }
+
+  const ranked = filteredFilings().sort((a,b)=>(b.score.total??-1)-(a.score.total??-1)).slice(0,3);
   document.getElementById('top3').innerHTML = ranked.map(x=>`
     <tr>
       <td>${companyCell(x, false)}</td>
@@ -240,7 +259,7 @@ function renderMarketHeat(){
   };
   renderDonut(counts);
 
-  document.getElementById('week-filings').innerHTML = f.map(x=>`
+  document.getElementById('week-filings').innerHTML = filteredFilings().map(x=>`
     <tr>
       <td>${companyCell(x)}</td>
       <td class="subtle">${esc(x.sector||'—')}</td>
@@ -299,7 +318,7 @@ function renderInsights(sc, f){
 
 /* ---------------- Tab 3: Score Watchlist ---------------- */
 function renderWatchlist(){
-  const f = [...DATA.filings].sort((a,b)=>(b.score.total??-1)-(a.score.total??-1));
+  const f = filteredFilings().sort((a,b)=>(b.score.total??-1)-(a.score.total??-1));
   document.getElementById('watchlist').innerHTML = f.map((x,i)=>{
     const fin=x.financials;
     return `<tr>
@@ -337,7 +356,7 @@ function renderCompetitor(){
   if(openPeers.length) ins.push(`${openPeers.length} same-sector IPO${openPeers.length>1?'s are':' is'} currently open on NSE.`);
   if(!ins.length) ins.push('No same-sector clustering detected in this week’s filings.');
 
-  const rows = f.map(x => {
+  const rows = filteredFilings().map(x => {
     const same = (bySector[x.sector||'Unclassified']||[]).length - 1;
     return `<tr>
       <td class="company">${esc(x.company_name)}</td>
@@ -397,7 +416,7 @@ function renderAppendix(){
 }
 
 function renderAppendixRows(){
-  const f = (DATA.filings||[]).filter(x=>
+  const f = (DATA.filings||[]).filter(x=> passKpi(x) &&
     (apxFilter.board==='All'  || x.board===apxFilter.board) &&
     (apxFilter.stage==='All'  || x.current_stage===apxFilter.stage) &&
     (apxFilter.sector==='All' || x.sector===apxFilter.sector) &&
@@ -581,14 +600,25 @@ function wireNav(){
   navBtns.forEach(b => b.addEventListener('click', () => activate(b.dataset.target)));
 }
 
-/* ---------------- KPI cards: click to select (green border) ---------------- */
+/* ---------------- KPI cards: click to filter the dashboard by bucket/stage ---------------- */
+function applyKpiViews(){
+  renderSnapshot();
+  renderMarketHeat();
+  renderWatchlist();
+  renderCompetitor();
+  renderAppendixRows();
+}
 function wireKpiSelect(){
   const main = document.querySelector('.main');
   if(!main) return;
   main.addEventListener('click', e => {
+    if(e.target.closest('.kpi-clear')){ kpiFilter = null; applyKpiViews(); return; }
     if(e.target.closest('a, button, select, input, label')) return;
-    const k = e.target.closest('.kpi');
-    if(k) k.classList.toggle('selected');
+    const k = e.target.closest('.kpi[data-fk]');
+    if(!k) return;
+    const kind = k.dataset.fk, value = k.dataset.fv;
+    kpiFilter = (kpiFilter && kpiFilter.kind===kind && kpiFilter.value===value) ? null : {kind, value};
+    applyKpiViews();
   });
 }
 
