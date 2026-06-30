@@ -45,6 +45,10 @@ def build_filing(resolved: ResolvedFiling, scratch_dir: str) -> Filing:
     sector, sub_sector = classify(resolved.company_name, enrichment.business_summary or "")
     score = score_financials(enrichment.financials)
 
+    issue = enrichment.issue
+    if issue.total_cr is not None and issue.market_cap_cr not in (None, 0):
+        issue.issue_to_mktcap_pct = round(issue.total_cr / issue.market_cap_cr * 100, 2)
+
     return Filing(
         id=resolved.id,
         company_name=resolved.company_name,

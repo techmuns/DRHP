@@ -138,9 +138,18 @@ def enrich(resolved: ResolvedFiling, scratch_dir: str = "/tmp") -> Enrichment:
 
     fin = build_financials(raw, resolved.company_name, resolved.normalized_name)
 
-    itype, fresh_cr, ofs_cr = extract_issue(lines) if lines else (None, None, None)
-    total_cr = round((fresh_cr or 0) + (ofs_cr or 0), 2) if (fresh_cr is not None and ofs_cr is not None) else None
-    issue = Issue(type=itype, fresh_cr=fresh_cr, ofs_cr=ofs_cr, total_cr=total_cr)
+    info = extract_issue(lines) if lines else None
+    issue = Issue(
+        type=info.type if info else None,
+        fresh_cr=info.fresh_cr if info else None,
+        ofs_cr=info.ofs_cr if info else None,
+        total_cr=info.total_cr if info else None,
+        market_cap_cr=info.market_cap_cr if info else None,
+        fresh_shares=info.fresh_shares if info else None,
+        ofs_shares=info.ofs_shares if info else None,
+        total_shares=info.total_shares if info else None,
+        face_value=info.face_value if info else None,
+    )
 
     summary = extract_business_summary(lines) if lines else None
     return Enrichment(financials=fin, issue=issue, business_summary=summary, drhp_pdf_url=url)
