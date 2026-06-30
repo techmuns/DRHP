@@ -653,6 +653,69 @@ a:hover { text-decoration: underline; }
 .mh-leg:hover { background: #F1F8F4; }
 .mh-leg.on { background: var(--emerald-soft); border-color: rgba(8,122,90,0.22); }
 
+/* ============================================================================
+   Market Heat — premium two-column redesign
+   ========================================================================== */
+.mh-ribbon { box-shadow: 0 4px 14px rgba(8,60,45,0.05), inset 0 1px 0 rgba(232,201,94,0.10); padding: 12px 14px; }
+
+/* lifecycle status — horizontal story progress bar */
+.mh-lifecycle-card { padding: 16px 18px; }
+.lc-story { display: flex; align-items: center; flex-wrap: wrap; gap: 0; }
+.lc-seg {
+  flex: 1 1 0; min-width: 104px; display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; border-radius: 12px; cursor: pointer; text-align: left; font-family: var(--font);
+  background: var(--bg); border: 1px solid rgba(8,122,90,0.12); transition: all .15s;
+}
+.lc-seg:hover { border-color: var(--emerald); background: #F4FAF7; }
+.lc-seg.on { background: linear-gradient(135deg,#0C6B5B,#0A7B68); border-color: #0A7B68; box-shadow: 0 4px 12px rgba(10,123,104,0.22); }
+.lc-seg.on .lc-tx { color: rgba(255,255,255,0.86); }
+.lc-seg.on .lc-n { color: #fff; }
+.lc-seg.on .lc-ic { background: rgba(255,255,255,0.18); color: #fff; }
+.lc-ic { width: 28px; height: 28px; border-radius: 8px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; background: var(--emerald-soft); color: var(--emerald); }
+.lc-body { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
+.lc-tx { font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-n { font-size: 17px; font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
+.lc-link { flex: 0 0 14px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(8,122,90,0.30), rgba(8,122,90,0.10)); }
+
+/* two-column grid: ~60% / ~40%; stretch so the columns share a clean baseline */
+.mh-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: stretch; }
+.mh-col-left { display: flex; flex-direction: column; }
+.mh-col-right { display: flex; flex-direction: column; gap: 16px; }
+
+/* Activity by Sector — fills the column and centres its rows for balance */
+.act-list { display: flex; flex-direction: column; flex: 1; justify-content: center; gap: 4px; }
+.act-row { display: grid; grid-template-columns: 34px 1.1fr 1.5fr 30px; align-items: center; gap: 13px; padding: 11px 8px; border-radius: 10px; cursor: pointer; transition: background .14s; }
+.act-row + .act-row { border-top: 1px solid var(--border-soft); }
+.act-row:hover { background: #F4FAF7; }
+.act-row.on { background: var(--emerald-soft); }
+.act-ico { width: 34px; height: 34px; border-radius: 9px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; background: var(--emerald-soft); color: var(--emerald); }
+.act-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.act-track { height: 12px; border-radius: 6px; background: var(--grey-soft); overflow: hidden; }
+.act-fill { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #0A5E54, #0E8F72); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18); }
+.act-n { font-size: 15px; font-weight: 700; color: var(--navy); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Recommendation Mix coverage box (soft sage) */
+.cov-box { margin-top: 16px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--emerald-soft); border: 1px solid rgba(8,122,90,0.16); }
+.cov-pct { font-size: 22px; font-weight: 800; color: var(--emerald); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+.cov-tx { font-size: 11.5px; color: var(--ink-soft); line-height: 1.4; }
+
+/* Quick Insights — soft colour-coded badges */
+.insight .ico.tone-sage { background: var(--emerald-soft); color: var(--emerald); }
+.insight .ico.tone-gold { background: var(--gold-soft); color: var(--gold); }
+.insight .ico.tone-blue { background: #E9F1F8; color: #2C6196; }
+.insight .ico.tone-lavender { background: #EFEAF7; color: #6A4A8C; }
+
+/* Overall Activity Snapshot strip */
+.mh-snapshot { padding: 16px 20px; }
+.snap-strip { display: flex; align-items: stretch; }
+.snap-cell { flex: 1 1 0; text-align: center; padding: 6px 12px; }
+.snap-n { font-family: var(--serif); font-size: 32px; font-weight: 600; color: var(--head-green); line-height: 1; letter-spacing: -0.01em; }
+.snap-l { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); margin-top: 8px; }
+.snap-div { width: 1px; background: var(--border-soft); align-self: stretch; margin: 2px 0; flex: 0 0 auto; }
+
+@media (max-width: 1080px) { .mh-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .snap-strip { flex-wrap: wrap; } .snap-cell { flex-basis: 50%; } .snap-div { display: none; } }
+
 /* table extras */
 #mh-table tbody tr.mh-row { cursor: pointer; }
 .src-tag { display: inline-flex; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; background: #EEF2F7; color: #51607A; }

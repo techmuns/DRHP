@@ -23,11 +23,20 @@ const I = {
   bank:'<path d="M3 9l9-5 9 5"/><path d="M4 9h16"/><path d="M6 9v8M10 9v8M14 9v8M18 9v8"/><path d="M3 20h18"/>',
   cross:'<path d="M10 3.5h4a1 1 0 011 1V9h4.5a1 1 0 011 1v4a1 1 0 01-1 1H15v4.5a1 1 0 01-1 1h-4a1 1 0 01-1-1V15H4.5a1 1 0 01-1-1v-4a1 1 0 011-1H9V4.5a1 1 0 011-1z"/>',
   cube:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>',
+  xmark:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  rocket:'<path d="M12 3c3 1.5 5 5 5 9l-2 3H9l-2-3c0-4 2-7.5 5-9z"/><path d="M9 15l-2 4 3-1M15 15l2 4-3-1"/><circle cx="12" cy="9.5" r="1.4"/>',
 };
 /* sector → tile icon (falls back to a generic building) */
 const SECTOR_ICON = {
   Consumer:'people', Financials:'bank', Healthcare:'cross', Materials:'cube',
   Industrials:'chart', Technology:'spark', Energy:'flame',
+};
+/* lifecycle stage → story-bar icon */
+const STAGE_ICON = {
+  'DRHP Filed':'doc', 'Updated/Corrected':'spark', 'Approved':'check', 'Upcoming':'clock',
+  'IPO Open':'rocket', 'Listing Soon':'flame', 'Listed':'check', 'Withdrawn':'xmark',
 };
 const icon = (k, sz=18) =>
   `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${I[k]||''}</svg>`;
@@ -380,10 +389,12 @@ function renderMarketHeat(){
     return;
   }
   mhSelectors();
-  mhLifecycle();
   mhSummary();
+  mhLifecycle();
   mhBenchmark();
   mhDonut();
+  mhInsightsCard();
+  mhSnapshot();
   mhTable();
 }
 
@@ -411,16 +422,25 @@ function mhSelectors(){
   if(cl) cl.addEventListener('click',()=>{ mh = mhReset(); mhSyncUrl(); renderMarketHeat(); });
 }
 
-/* lifecycle guidance strip — compact chips with counts; click to set stage */
+/* lifecycle status — horizontal story progress bar (Filed → … → Withdrawn) */
 function mhLifecycle(){
   const host = document.getElementById('mh-lifecycle'); if(!host) return;
   const rows = mhFiltered('stage');
   const counts = {};
   rows.forEach(r=>{ if(r.stage) counts[r.stage]=(counts[r.stage]||0)+1; });
   const stages = Object.keys(counts).sort((a,b)=>STAGE_ORDER.indexOf(a)-STAGE_ORDER.indexOf(b));
-  if(!stages.length){ host.innerHTML=''; return; }
-  const chips = stages.map((s,i)=>`${i?'<span class="mh-lc-arrow">→</span>':''}<button class="mh-lc-chip ${mh.stage===s?'on':''}" data-dim="stage" data-val="${esc(s)}">${esc(stageLabel(s))} <b>${counts[s]}</b></button>`).join('');
-  host.innerHTML = `<span class="mh-lc-lab">Lifecycle</span><div class="mh-lc-track">${chips}</div>`;
+  if(!stages.length){ host.style.display='none'; host.innerHTML=''; return; }
+  host.style.display='';
+  const seg = stages.map((s,i)=>{
+    const on = mh.stage===s;
+    const x = STAGE[s]||{cls:'st-filed'};
+    return `${i?'<span class="lc-link" aria-hidden="true"></span>':''}<button class="lc-seg ${x.cls} ${on?'on':''}" data-dim="stage" data-val="${esc(s)}" title="Filter to ${esc(stageLabel(s))}">
+      <span class="lc-ic">${icon(STAGE_ICON[s]||'doc',15)}</span>
+      <span class="lc-body"><span class="lc-tx">${esc(stageLabel(s))}</span><span class="lc-n">${counts[s]}</span></span>
+    </button>`;
+  }).join('');
+  host.innerHTML = `<div class="panel-head"><h3>Lifecycle Status</h3><span class="muted tiny">Filed → Listed</span></div>
+    <div class="lc-story">${seg}</div>`;
   mhWireFacets(host);
 }
 
@@ -439,7 +459,7 @@ function mhSummary(){
   }));
 }
 
-/* left card — sector activity bars, which also act as a sector filter */
+/* left column — Activity by Sector: icon · name · gradient bar · count */
 function mhBenchmark(){
   const host = document.getElementById('mh-benchmark'); if(!host) return;
   const secRows = mhFiltered('sector');
@@ -447,19 +467,22 @@ function mhBenchmark(){
   secRows.forEach(r=>{ if(r.sector) secCounts[r.sector]=(secCounts[r.sector]||0)+1; });
   const secArr = Object.entries(secCounts).sort((a,b)=>b[1]-a[1]);
   const maxC = Math.max(1, ...secArr.map(x=>x[1]));
+  const total = secArr.reduce((a,x)=>a+x[1],0);
   const bars = secArr.length ? secArr.map(([s,n])=>`
-    <div class="bar-row mh-bar ${mh.sector===s?'on':''}" data-dim="sector" data-val="${esc(s)}" role="button" tabindex="0">
-      <div class="bl">${esc(s)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${n/maxC*100}%"></div></div>
-      <div class="bv">${n}</div></div>`).join('')
-    : `<div class="subtle tiny" style="padding:6px 0">No classified sectors in this view. Sector is disclosed on the SEBI filing — NSE-only listings stay unclassified.</div>`;
+    <div class="act-row mh-bar ${mh.sector===s?'on':''}" data-dim="sector" data-val="${esc(s)}" role="button" tabindex="0">
+      <span class="act-ico">${icon(SECTOR_ICON[s]||'building',16)}</span>
+      <span class="act-name">${esc(s)}</span>
+      <span class="act-track"><span class="act-fill" style="width:${n/maxC*100}%"></span></span>
+      <span class="act-n">${n}</span>
+    </div>`).join('')
+    : `<div class="subtle tiny" style="padding:14px 2px">No classified sectors in this view.</div>`;
   host.innerHTML = `
-    <div class="panel-head"><h3>Activity by Sector</h3></div>
-    <div class="bars">${bars}</div>`;
+    <div class="panel-head"><h3>Activity by Sector</h3><span class="muted tiny">${total} classified</span></div>
+    <div class="act-list">${bars}</div>`;
   mhWireFacets(host);
 }
 
-/* right card — recommendation donut + quick insights */
+/* right column top — Recommendation Mix: donut + legend + coverage box */
 function mhDonut(){
   const host = document.getElementById('mh-donut'); if(!host) return;
   const rows = mhFiltered('reco');
@@ -480,7 +503,15 @@ function mhDonut(){
   const legend = Object.entries(counts).map(([k,v])=>`
     <button class="li mh-leg ${mh.reco===k?'on':''}" data-dim="reco" data-val="${esc(k)}">
       <span class="sw" style="background:${PAL[k]}"></span>${BUCKET[k].label} <b>${v}</b></button>`).join('')
-    || `<div class="subtle tiny">No scored records in this view — recommendations need disclosed financials.</div>`;
+    || `<div class="subtle tiny">No scored records in this view.</div>`;
+
+  // adequate coverage = filings with enough disclosed financials to score
+  const scoreable = rows.filter(r=>r.bucket).length;
+  const adequate = rows.filter(r=>r.bucket && r.bucket!=='INSUFFICIENT').length;
+  const covPct = scoreable ? Math.round(adequate/scoreable*100) : 0;
+  const cov = scoreable
+    ? `<div class="cov-box"><span class="cov-pct">${covPct}%</span><span class="cov-tx">adequate coverage — ${adequate} of ${scoreable} filings carry enough disclosed financials to score.</span></div>`
+    : '';
 
   host.innerHTML = `
     <div class="panel-head"><h3>Recommendation Mix</h3></div>
@@ -491,30 +522,50 @@ function mhDonut(){
       </svg>
       <div class="legend">${legend}</div>
     </div>
-    <div class="panel-divider"></div>
-    <div class="panel-head"><h3>Quick Insights</h3></div>
-    <div class="insights">${mhInsights()}</div>`;
+    ${cov}`;
   mhWireFacets(host);
 }
 
-function mhInsights(){
+/* right column bottom — Quick Insights with soft colour-coded badges */
+function mhInsightsCard(){
+  const host = document.getElementById('mh-insights'); if(!host) return;
   const rows = mhFiltered();
   const out = [];
   const secCounts = {};
   rows.forEach(r=>{ if(r.sector) secCounts[r.sector]=(secCounts[r.sector]||0)+1; });
   const topSec = Object.entries(secCounts).sort((a,b)=>b[1]-a[1])[0];
-  if(topSec) out.push({ico:'flame', t:`<b>${esc(topSec[0])}</b> leads this view with <b>${topSec[1]}</b> record${topSec[1]>1?'s':''}.`});
+  if(topSec) out.push({ico:'flame', tone:'gold', t:`<b>${esc(topSec[0])}</b> leads this view with <b>${topSec[1]}</b> record${topSec[1]>1?'s':''}.`});
   const open = rows.filter(r=>r.stage==='IPO Open').length;
-  if(open) out.push({ico:'trend', t:`<b>${open}</b> issue${open>1?'s are':' is'} currently open for subscription.`});
+  if(open) out.push({ico:'rocket', tone:'sage', t:`<b>${open}</b> issue${open>1?'s are':' is'} currently open for subscription.`});
   const listed = rows.filter(r=>r.stage==='Listed').length;
-  if(listed) out.push({ico:'target', t:`<b>${listed}</b> recent listing${listed>1?'s':''} in view — listing gain/loss is held pending (no live price feed).`});
+  if(listed) out.push({ico:'check', tone:'blue', t:`<b>${listed}</b> recent listing${listed>1?'s':''} in this view.`});
   const scored = rows.filter(r=>r.score!=null).length;
   if(scored){
     const strong = rows.filter(r=>r.score!=null && r.score>=25).length;
-    out.push({ico:'chart', t:`<b>${strong} of ${scored}</b> scored record${scored>1?'s':''} clear the “Dig Deeper” bar (score ≥ 25).`});
+    out.push({ico:'chart', tone:'lavender', t:`<b>${strong} of ${scored}</b> scored record${scored>1?'s':''} clear the “Dig Deeper” bar (score ≥ 25).`});
   }
-  if(!out.length) out.push({ico:'spark', t:`No records match the current filters.`});
-  return out.slice(0,4).map(o=>`<div class="insight"><div class="ico">${icon(o.ico,17)}</div><div class="it">${o.t}</div></div>`).join('');
+  if(!out.length) out.push({ico:'spark', tone:'sage', t:`No records match the current filters.`});
+  host.innerHTML = `<div class="panel-head"><h3>Quick Insights</h3></div>
+    <div class="insights">${out.slice(0,4).map(o=>`
+      <div class="insight"><div class="ico tone-${o.tone}">${icon(o.ico,16)}</div><div class="it">${o.t}</div></div>`).join('')}</div>`;
+}
+
+/* full-width activity snapshot strip — 4 headline metrics with dividers */
+function mhSnapshot(){
+  const host = document.getElementById('mh-snapshot'); if(!host) return;
+  const rows = mhFiltered();
+  const scoreable = rows.filter(r=>r.bucket).length;
+  const adequate = rows.filter(r=>r.bucket && r.bucket!=='INSUFFICIENT').length;
+  const covPct = scoreable ? Math.round(adequate/scoreable*100)+'%' : '—';
+  const items = [
+    {n: rows.length, l:'Total Issues'},
+    {n: rows.filter(r=>r.score!=null).length, l:'Scored'},
+    {n: covPct, l:'Adequate Coverage'},
+    {n: rows.filter(r=>r.stage==='IPO Open').length, l:'Open for Subscription'},
+  ];
+  host.innerHTML = `<div class="panel-head"><h3>Overall Activity Snapshot</h3></div>
+    <div class="snap-strip">${items.map((it,i)=>`${i?'<span class="snap-div"></span>':''}
+      <div class="snap-cell"><div class="snap-n">${it.n}</div><div class="snap-l">${it.l}</div></div>`).join('')}</div>`;
 }
 
 /* shared wiring for clickable bars / stage chips / donut legend */
