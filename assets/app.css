@@ -713,6 +713,17 @@ a:hover { text-decoration: underline; }
 .snap-l { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); margin-top: 8px; }
 .snap-div { width: 1px; background: var(--border-soft); align-self: stretch; margin: 2px 0; flex: 0 0 auto; }
 
+/* green headline variant — deep emerald card with light text */
+.mh-snapshot-green {
+  background: linear-gradient(145deg, #06493F 0%, #08705F 55%, #07584D 100%);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 10px 26px rgba(5,45,38,0.18), inset 0 1px 0 rgba(255,255,255,0.16);
+}
+.mh-snapshot-green .panel-head h3 { color: #FFFFFF; }
+.mh-snapshot-green .snap-n { color: #FFFFFF; }
+.mh-snapshot-green .snap-l { color: rgba(244,250,247,0.78); }
+.mh-snapshot-green .snap-div { background: rgba(255,255,255,0.16); }
+
 @media (max-width: 1080px) { .mh-grid { grid-template-columns: 1fr; } }
 @media (max-width: 700px) { .snap-strip { flex-wrap: wrap; } .snap-cell { flex-basis: 50%; } .snap-div { display: none; } }
 
