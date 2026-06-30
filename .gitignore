@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Scratch / temp PDFs the pipeline downloads while running
+/tmp/
+*.tmp
+drhp_*.pdf
+
+# NOTE: public/data/ and data/snapshots/ are intentionally committed — they are the
+# pipeline's output and the snapshot history the dashboard reads.

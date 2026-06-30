@@ -1,0 +1,64 @@
+name: Weekly DRHP/IPO Monitor
+
+# Runs the data pipeline every week, commits the refreshed data + snapshot to main,
+# and lets the connected Cloudflare Pages project redeploy the dashboard automatically.
+#
+# Triggers:
+#   * schedule  — every Monday 03:00 UTC (08:30 IST), covering the prior 7 days
+#   * manual    — "Run workflow" button, with an optional run-date override
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      run_date:
+        description: "Run date YYYY-MM-DD (blank = today)"
+        required: false
+        default: ""
+
+# Allow the job to push the refreshed data back to the repository.
+permissions:
+  contents: write
+
+# Never let two runs commit on top of each other.
+concurrency:
+  group: weekly-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run the pipeline
+        run: |
+          if [ -n "${{ github.event.inputs.run_date }}" ]; then
+            python -m drhp_pipeline.pipeline --run-date "${{ github.event.inputs.run_date }}"
+          else
+            python -m drhp_pipeline.pipeline
+          fi
+        env:
+          PYTHONPATH: src
+
+      - name: Commit and push refreshed data
+        run: |
+          git config user.name  "drhp-monitor-bot"
+          git config user.email "actions@github.com"
+          git add public/data data/snapshots
+          if git diff --cached --quiet; then
+            echo "No data changes this run — nothing to commit."
+          else
+            git commit -m "data: weekly DRHP/IPO monitor refresh ($(date -u +%Y-%m-%d))"
+            git push origin HEAD:main
+          fi
