@@ -167,11 +167,11 @@ function renderSnapshot(){
   const s = DATA.summary, f = DATA.filings, d = s.deltas;
 
   const kpis = [
-    {k:'doc',     cls:'',     label:'New DRHPs',        val:s.new_drhp_count, dl:d&&d.new_drhp, fk:'stage',  fv:'DRHP'},
-    {k:'trend',   cls:'',     label:'IPOs / Prospects', val:s.new_ipo_count,  dl:d&&d.new_ipo,  fk:'stage',  fv:'IPO'},
-    {k:'target',  cls:'dig',  label:'Dig Deeper',       val:s.buckets.dig_deeper, dl:d&&d.dig_deeper, fk:'bucket', fv:'DIG DEEPER'},
-    {k:'eye',     cls:'mon',  label:'Monitor',          val:s.buckets.monitor,    dl:d&&d.monitor,    fk:'bucket', fv:'MONITOR'},
-    {k:'bookmark',cls:'watch',label:'Watch',            val:s.buckets.watch,      dl:d&&d.watch,      fk:'bucket', fv:'WATCH'},
+    {k:'doc',     cls:'kv1', label:'New DRHPs',        val:s.new_drhp_count, dl:d&&d.new_drhp, fk:'stage',  fv:'DRHP'},
+    {k:'trend',   cls:'kv2', label:'IPOs / Prospects', val:s.new_ipo_count,  dl:d&&d.new_ipo,  fk:'stage',  fv:'IPO'},
+    {k:'target',  cls:'kv3', label:'Dig Deeper',       val:s.buckets.dig_deeper, dl:d&&d.dig_deeper, fk:'bucket', fv:'DIG DEEPER'},
+    {k:'eye',     cls:'kv4', label:'Monitor',          val:s.buckets.monitor,    dl:d&&d.monitor,    fk:'bucket', fv:'MONITOR'},
+    {k:'bookmark',cls:'kv5', label:'Watch',            val:s.buckets.watch,      dl:d&&d.watch,      fk:'bucket', fv:'WATCH'},
   ];
   const isSel = c => kpiFilter && kpiFilter.kind===c.fk && kpiFilter.value===c.fv;
   document.getElementById('kpi-grid').innerHTML = kpis.map(c => `
