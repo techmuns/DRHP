@@ -10,7 +10,7 @@ with nobody pressing anything, it:
 4. scores every filing on a fixed 100-point formula and sorts it into a recommendation
    bucket,
 5. saves a weekly **snapshot** (so the dashboard can later say "+2 vs last week"), and
-6. writes one clean data file, **`public/data/latest.json`**, that the dashboard reads.
+6. writes one clean data file, **`data/latest.json`**, that the dashboard reads.
 
 The dashboard (Phase 1, built separately) only ever reads that one file. The two are
 connected by a **frozen data contract** — see [`docs/DATA_CONTRACT.md`](docs/DATA_CONTRACT.md).
@@ -42,13 +42,13 @@ You only do this once. (It needs a Cloudflare account — free tier is fine.)
 3. Build settings — it's a plain static site, so:
    - **Framework preset:** None
    - **Build command:** *(leave empty)*
-   - **Build output directory:** `public`
+   - **Build output directory:** `/` *(repository root — the default)*
    - **Production branch:** `main`
 4. Click **Save and Deploy**. Cloudflare now watches the `main` branch.
 5. Done. From now on, every weekly data commit to `main` makes Cloudflare redeploy the
    dashboard automatically.
 
-The dashboard is at `public/index.html`; it reads `public/data/latest.json` at load
+The dashboard is at `index.html`; it reads `data/latest.json` at load
 time, so a new data commit is all it takes to refresh the live site.
 
 Nothing else to wire up — the weekly Action already commits to `main`, and Cloudflare
@@ -58,10 +58,10 @@ takes it from there.
 
 ## The dashboard (Phase 1)
 
-A print-ready, static dashboard at `public/index.html` (`public/assets/` holds the
+A print-ready, static dashboard at `index.html` (`assets/` holds the
 styles and logic). It's deliberately framework-free — plain HTML/CSS/JS — so there's
-no build step and Cloudflare serves the `public/` folder as-is. It reads
-`public/data/latest.json` and renders five tabs: **Weekly Snapshot, Market Heat, Score
+no build step and Cloudflare serves the repo root as-is. It reads
+`data/latest.json` and renders five tabs: **Weekly Snapshot, Market Heat, Score
 Watchlist, Competitor Watch, Tracker Appendix**. A **Print / Save PDF** button (and the
 print stylesheet) lay every tab out in order across A4 pages, with the wide appendix on
 its own landscape page.
@@ -85,9 +85,9 @@ prior snapshot to compare against.
 
 | File | Purpose |
 |------|---------|
-| `public/data/latest.json` | The single file the dashboard reads. Follows the frozen contract. |
+| `data/latest.json` | The single file the dashboard reads. Follows the frozen contract. |
 | `data/snapshots/<date>.json` | A full copy of each week's data. Powers "vs last week". **Kept in git on purpose.** |
-| `public/data/tracker_appendix.xlsx` | Excel mirror of the week's filings for the appendix view, with a column flagging any figures to double-check. |
+| `data/tracker_appendix.xlsx` | Excel mirror of the week's filings for the appendix view, with a column flagging any figures to double-check. |
 
 ---
 

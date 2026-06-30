@@ -55,7 +55,7 @@ jobs:
         run: |
           git config user.name  "drhp-monitor-bot"
           git config user.email "actions@github.com"
-          git add public/data data/snapshots
+          git add data
           if git diff --cached --quiet; then
             echo "No data changes this run — nothing to commit."
           else
