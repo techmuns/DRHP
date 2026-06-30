@@ -677,13 +677,14 @@ a:hover { text-decoration: underline; }
 .lc-n { font-size: 17px; font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
 .lc-link { flex: 0 0 14px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(8,122,90,0.30), rgba(8,122,90,0.10)); }
 
-/* two-column grid: ~60% / ~40%; stretch so the columns share a clean baseline */
-.mh-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: stretch; }
-.mh-col-left { display: flex; flex-direction: column; }
-.mh-col-right { display: flex; flex-direction: column; gap: 16px; }
-
-/* Activity by Sector — fills the column and centres its rows for balance */
-.act-list { display: flex; flex-direction: column; flex: 1; justify-content: center; gap: 4px; }
+/* three equal columns, all the same height; content vertically centred */
+.mh-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; align-items: stretch; }
+.mh-col { display: flex; flex-direction: column; }
+/* centre each card's body in the shared frame height (margin-auto trick) */
+.mh-col .act-list { display: flex; flex-direction: column; flex: 1; justify-content: center; gap: 4px; }
+#mh-donut .donut-wrap { margin-top: auto; }
+#mh-donut .cov-box { margin-bottom: auto; }
+#mh-insights .insights { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .act-row { display: grid; grid-template-columns: 34px 1.1fr 1.5fr 30px; align-items: center; gap: 13px; padding: 11px 8px; border-radius: 10px; cursor: pointer; transition: background .14s; }
 .act-row + .act-row { border-top: 1px solid var(--border-soft); }
 .act-row:hover { background: #F4FAF7; }
