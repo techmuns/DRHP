@@ -109,9 +109,8 @@ function dataStatusChip(f){ const ok = f.score && f.score.bucket!=='INSUFFICIENT
 function subx(v){ return v==null ? '—' : Number(v).toFixed(2)+'×'; }
 function ipoMarket(){ return DATA.ipo_market || {available:false}; }
 
-let boardFilter = 'All';
 let apxFilter = {board:'All', stage:'All', sector:'All', bucket:'All'};
-let kpiFilter = null;   // {kind:'bucket'|'stage', value} — set by clicking a KPI card
+let kpiFilter = null;   // legacy: KPI clicks now navigate to Market Heat, so this stays null
 
 function passKpi(f){
   if(!kpiFilter) return true;
@@ -121,11 +120,100 @@ function passKpi(f){
 }
 function filteredFilings(){ return (DATA.filings || []).filter(passKpi); }
 
-function ipoFilteredLists(){
-  const m = ipoMarket();
-  const keep = r => boardFilter==='All' || r.board===boardFilter;
-  return { open:(m.open_upcoming||[]).filter(keep), listed:(m.recent_listings||[]).filter(keep) };
+/* ====================================================================== */
+/* Market Heat — one shared filter state + one merged dataset             */
+/* ====================================================================== */
+let MARKET = [];   // every IPO-lifecycle record, merged from filings + NSE
+let mh = {board:'All', stage:'All', sector:'All', reco:'All'};
+
+/* canonical lifecycle order (used to sort the Lifecycle selector) */
+const STAGE_ORDER = ['DRHP Filed','Updated/Corrected','Approved','Upcoming','IPO Open','Listing Soon','Listed','Withdrawn'];
+const STAGE_KEYS = {'DRHP Filed':'FILED','Updated/Corrected':'UPDATED','Approved':'APPROVED','Upcoming':'UPCOMING','IPO Open':'IPO_OPEN','Listing Soon':'LISTING_SOON','Listed':'LISTED','Withdrawn':'WITHDRAWN'};
+const RECO_KEYS  = {'DIG DEEPER':'DIG_DEEPER','MONITOR':'MONITOR','WATCH':'WATCH','INSUFFICIENT':'INSUFFICIENT'};
+const invert = (o) => Object.fromEntries(Object.entries(o).map(([k,v])=>[v,k]));
+
+/* strip legal suffixes the same way the Python pipeline does, so a SEBI filing
+   and its NSE row collapse onto one record */
+function normalizeName(s){
+  return String(s||'').toLowerCase()
+    .replace(/&/g,' and ')
+    .replace(/\b(private|pvt|limited|ltd|llp)\b/g,' ')
+    .replace(/[^a-z0-9 ]/g,' ')
+    .replace(/\s+/g,' ').trim();
 }
+
+function buildMarket(){
+  const m = ipoMarket();
+  const fByNorm = new Map();
+  const out = [];
+  (DATA.filings||[]).forEach(f=>{
+    const rec = {
+      norm: f.company_name_normalized || normalizeName(f.company_name),
+      name: f.company_name,
+      board: f.board || null,
+      sector: f.sector || null,
+      subSector: f.sub_sector || null,
+      stage: f.current_stage || null,
+      filingType: f.filing_type || null,
+      filingDate: f.filing_date || null,
+      issueOpen: null, issueClose: null, listingDate: null,
+      issueSizeCr: (f.issue && f.issue.total_cr != null) ? f.issue.total_cr : null,
+      subscriptionX: null, issuePrice: null, currentPrice: null, gainPct: null,
+      priceBand: null, symbol: null,
+      score: f.score ? f.score.total : null,
+      bucket: f.score ? f.score.bucket : null,
+      sources: f.sources || null,
+      financials: f.financials || null,
+      origin: 'filing',
+    };
+    fByNorm.set(rec.norm, rec);
+    out.push(rec);
+  });
+  const mergeNse = (r)=>{
+    const norm = normalizeName(r.company_name);
+    const ex = fByNorm.get(norm);
+    if(ex && !ex._nse){
+      ex._nse = true; ex.origin = 'both';
+      ex.board = ex.board || r.board || null;
+      ex.sector = ex.sector || r.sector || null;
+      ex.stage = r.stage || ex.stage;            // NSE stage is the more-advanced truth
+      ex.issueOpen = r.issue_open || ex.issueOpen;
+      ex.issueClose = r.issue_close || ex.issueClose;
+      ex.listingDate = r.listing_date || ex.listingDate;
+      if(ex.issueSizeCr == null) ex.issueSizeCr = r.issue_size_cr;
+      if(ex.subscriptionX == null) ex.subscriptionX = r.subscription_x;
+      if(ex.issuePrice == null) ex.issuePrice = r.issue_price;
+      ex.priceBand = ex.priceBand || r.price_band;
+      ex.symbol = r.symbol;
+      return;
+    }
+    out.push({
+      norm, name: r.company_name, board: r.board || null, sector: r.sector || null, subSector: null,
+      stage: r.stage || null, filingType: null, filingDate: null,
+      issueOpen: r.issue_open || null, issueClose: r.issue_close || null, listingDate: r.listing_date || null,
+      issueSizeCr: r.issue_size_cr, subscriptionX: r.subscription_x, issuePrice: r.issue_price,
+      currentPrice: r.current_price, gainPct: r.gain_pct, priceBand: r.price_band, symbol: r.symbol,
+      score: null, bucket: null, sources: null, financials: null, origin: 'nse',
+    });
+  };
+  if(m.available){
+    (m.open_upcoming||[]).forEach(mergeNse);
+    (m.recent_listings||[]).forEach(mergeNse);
+  }
+  MARKET = out;
+}
+
+/* one record matches the current filter set, optionally ignoring one dimension
+   (so a facet's own chart still shows every still-clickable option) */
+function mhMatch(r, except){
+  if(except!=='board'  && mh.board!=='All'  && r.board!==mh.board)   return false;
+  if(except!=='stage'  && mh.stage!=='All'  && r.stage!==mh.stage)   return false;
+  if(except!=='sector' && mh.sector!=='All' && r.sector!==mh.sector) return false;
+  if(except!=='reco'   && mh.reco!=='All'   && r.bucket!==mh.reco)   return false;
+  return true;
+}
+function mhFiltered(except){ return MARKET.filter(r=>mhMatch(r, except)); }
+function mhActive(){ return mh.board!=='All' || mh.stage!=='All' || mh.sector!=='All' || mh.reco!=='All'; }
 
 /* ====================================================================== */
 let DATA = null;
@@ -140,18 +228,21 @@ async function main(){
       `<div class="errbox">Couldn't load the data file (<code>data/latest.json</code>).<br>${esc(e.message)}</div>`;
     return;
   }
+  buildMarket();
+  const fromUrl = mhFromUrl();
   renderHeader();
   renderSnapshot();
   renderPulse();
   renderMarketHeat();
-  renderLifecycleHeat();
-  renderIpoTables();
   renderWatchlist();
   renderCompetitor();
   renderAppendix();
   renderFooter();
   wireNav();
   wireKpiSelect();
+  wireCrossNav();
+  wireDrawer();
+  if(fromUrl) activateTab('tab-heat');
 }
 
 function renderHeader(){
@@ -215,7 +306,7 @@ function renderSnapshot(){
 
   const sc = [...(s.sector_concentration||[])].sort((a,b)=>b.count-a.count);
   document.getElementById('sectors').innerHTML = sc.map(x=>`
-    <div class="sector-chip">
+    <div class="sector-chip clickable" data-sector="${esc(x.sector)}" role="button" tabindex="0" title="Explore ${esc(x.sector)} in Market Heat">
       <div class="sc-ico">${icon('building',17)}</div>
       <div class="sc-name">${esc(x.sector)}</div>
       <div class="sc-count">${x.count}</div>
@@ -229,56 +320,122 @@ function renderSnapshot(){
   } else { note.style.display='none'; }
 }
 
-/* ---------------- Tab 2: Market Heat ---------------- */
+/* ---------------- Tab 2: Market Heat (unified explorer) ---------------- */
 function renderMarketHeat(){
-  const s = DATA.summary, f = DATA.filings;
-  const sc = [...(s.sector_concentration||[])].sort((a,b)=>b.count-a.count);
-
-  const maxC = Math.max(1, ...sc.map(x=>x.count));
-  document.getElementById('bars-count').innerHTML = sc.map(x=>`
-    <div class="bar-row"><div class="bl">${esc(x.sector)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${x.count/maxC*100}%"></div></div>
-      <div class="bv">${x.count}</div></div>`).join('');
-
-  const maxI = Math.max(...sc.map(x=>x.total_issue_cr||0));
-  const issueEl = document.getElementById('bars-issue');
-  if(maxI>0){
-    issueEl.innerHTML = sc.map(x=>`
-      <div class="bar-row"><div class="bl">${esc(x.sector)}</div>
-        <div class="bar-track"><div class="bar-fill green" style="width:${(x.total_issue_cr||0)/maxI*100}%"></div></div>
-        <div class="bv">${money(x.total_issue_cr)}</div></div>`).join('');
-  } else {
-    issueEl.innerHTML = `<div class="subtle tiny" style="padding:6px 0">Issue sizes not yet disclosed for this week's filings (draft filings often mask the amount until a price band is set).</div>`;
+  if(!document.getElementById('mh-selectors')) return;
+  if(!ipoMarket().available && MARKET.length===0){
+    document.getElementById('mh-selectors').innerHTML = '';
+    document.getElementById('mh-table-card').innerHTML =
+      `<div class="pending-tag">Pending source — market data not reached this run.</div>`;
+    return;
   }
-
-  const counts = {
-    'DIG DEEPER': f.filter(x=>x.score.bucket==='DIG DEEPER').length,
-    'MONITOR':    f.filter(x=>x.score.bucket==='MONITOR').length,
-    'WATCH':      f.filter(x=>x.score.bucket==='WATCH').length,
-    'INSUFFICIENT': f.filter(x=>x.score.bucket==='INSUFFICIENT').length,
-  };
-  renderDonut(counts);
-
-  document.getElementById('week-filings').innerHTML = filteredFilings().map(x=>`
-    <tr>
-      <td>${companyCell(x)}</td>
-      <td class="subtle">${esc(x.sector||'—')}</td>
-      <td class="subtle">${dfmt(x.filing_date)}</td>
-      <td>${esc(x.issue.type||'—')}</td>
-      <td class="num">${money(x.issue.total_cr)}</td>
-      <td class="num score-cell">${scoreNum(x.score.total)}</td>
-      <td>${bucketTag(x.score.bucket)}</td>
-    </tr>`).join('') || `<tr><td colspan="7" class="subtle">No filings this week.</td></tr>`;
-
-  renderInsights(sc, f);
+  mhSelectors();
+  mhSummary();
+  mhBenchmark();
+  mhDonut();
+  mhTable();
 }
 
-function renderDonut(counts){
+/* capsule selectors — one row per dimension, counts are facet-aware */
+function mhSelectors(){
+  const host = document.getElementById('mh-selectors'); if(!host) return;
+  const stages = [...new Set(MARKET.map(r=>r.stage).filter(Boolean))]
+    .sort((a,b)=>(STAGE_ORDER.indexOf(a))-(STAGE_ORDER.indexOf(b)));
+  const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
+  const recos = ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'].filter(b=>MARKET.some(r=>r.bucket===b));
+  const groups = [
+    {dim:'board',  label:'Board',          opts:['Mainboard','SME']},
+    {dim:'stage',  label:'Lifecycle',      opts:stages},
+    {dim:'reco',   label:'Recommendation', opts:recos, lab:b=>BUCKET[b].label},
+    {dim:'sector', label:'Sector',         opts:sectors},
+  ];
+  const valOf = (r,dim)=> dim==='reco' ? r.bucket : dim==='board' ? r.board : dim==='stage' ? r.stage : r.sector;
+  host.innerHTML = groups.map(g=>{
+    const facet = mhFiltered(g.dim);
+    const cap = (val, text)=>{
+      const on = mh[g.dim]===val;
+      const n = val==='All' ? facet.length : facet.filter(r=>valOf(r,g.dim)===val).length;
+      return `<button class="mh-cap ${on?'on':''}" data-dim="${g.dim}" data-val="${esc(val)}">
+        ${esc(text)} <span class="mh-cap-n">${n}</span></button>`;
+    };
+    return `<div class="mh-sel-group">
+      <span class="mh-sel-label">${g.label}</span>
+      <div class="mh-caps">
+        ${cap('All','All')}
+        ${g.opts.map(o=>cap(o, g.lab?g.lab(o):o)).join('')}
+      </div></div>`;
+  }).join('');
+  host.querySelectorAll('.mh-cap').forEach(b=>b.addEventListener('click',()=>{
+    const dim=b.dataset.dim, val=b.dataset.val;
+    mh[dim] = (mh[dim]===val) ? 'All' : val;   // click an active capsule to clear it
+    mhSyncUrl(); renderMarketHeat();
+  }));
+}
+
+/* active-filter summary with removable chips */
+function mhSummary(){
+  const host = document.getElementById('mh-summary'); if(!host) return;
+  if(!mhActive()){ host.innerHTML = `<span class="mh-show-all">Showing: <b>All Market Heat Data</b></span>`; return; }
+  const labels = {board:'Board', stage:'Stage', sector:'Sector', reco:'Reco.'};
+  const chips = Object.keys(labels).filter(k=>mh[k]!=='All').map(k=>{
+    const txt = k==='reco' ? BUCKET[mh[k]].label : mh[k];
+    return `<button class="mh-fchip" data-dim="${k}">${labels[k]}: <b>${esc(txt)}</b> <span class="x">✕</span></button>`;
+  }).join('');
+  host.innerHTML = `<span class="mh-sum-lab">Filters</span>${chips}<button class="mh-clear-all">Clear all</button>`;
+  host.querySelectorAll('.mh-fchip').forEach(b=>b.addEventListener('click',()=>{
+    mh[b.dataset.dim]='All'; mhSyncUrl(); renderMarketHeat();
+  }));
+  host.querySelector('.mh-clear-all').addEventListener('click',()=>{
+    mh={board:'All',stage:'All',sector:'All',reco:'All'}; mhSyncUrl(); renderMarketHeat();
+  });
+}
+
+/* left card — sector bars + lifecycle chips, both act as filters */
+function mhBenchmark(){
+  const host = document.getElementById('mh-benchmark'); if(!host) return;
+  const secRows = mhFiltered('sector');
+  const secCounts = {};
+  secRows.forEach(r=>{ if(r.sector) secCounts[r.sector]=(secCounts[r.sector]||0)+1; });
+  const secArr = Object.entries(secCounts).sort((a,b)=>b[1]-a[1]);
+  const maxC = Math.max(1, ...secArr.map(x=>x[1]));
+  const bars = secArr.length ? secArr.map(([s,n])=>`
+    <div class="bar-row mh-bar ${mh.sector===s?'on':''}" data-dim="sector" data-val="${esc(s)}" role="button" tabindex="0">
+      <div class="bl">${esc(s)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${n/maxC*100}%"></div></div>
+      <div class="bv">${n}</div></div>`).join('')
+    : `<div class="subtle tiny" style="padding:6px 0">No classified sectors in this view. Sector is disclosed on the SEBI filing — NSE-only listings stay unclassified.</div>`;
+
+  const stRows = mhFiltered('stage');
+  const stCounts = {};
+  stRows.forEach(r=>{ if(r.stage) stCounts[r.stage]=(stCounts[r.stage]||0)+1; });
+  const stArr = Object.keys(stCounts).sort((a,b)=>STAGE_ORDER.indexOf(a)-STAGE_ORDER.indexOf(b));
+  const chips = stArr.map(s=>{
+    const x = STAGE[s]||{cls:'st-filed',label:s};
+    return `<button class="mh-stage ${x.cls} ${mh.stage===s?'on':''}" data-dim="stage" data-val="${esc(s)}">
+      ${esc(x.label)} <b>${stCounts[s]}</b></button>`;
+  }).join('');
+
+  host.innerHTML = `
+    <div class="panel-head"><h3>Activity by Sector</h3></div>
+    <div class="bars">${bars}</div>
+    <div class="panel-divider"></div>
+    <div class="panel-head"><h3>Lifecycle Stages</h3></div>
+    <div class="mh-stage-row">${chips || '<span class="subtle tiny">No lifecycle data.</span>'}</div>`;
+  mhWireFacets(host);
+}
+
+/* right card — recommendation donut + quick insights */
+function mhDonut(){
+  const host = document.getElementById('mh-donut'); if(!host) return;
+  const rows = mhFiltered('reco');
+  const counts = {};
+  ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'].forEach(b=>{
+    const n = rows.filter(r=>r.bucket===b).length; if(n) counts[b]=n;
+  });
   const total = Object.values(counts).reduce((a,b)=>a+b,0);
   const r=52, c=2*Math.PI*r; let off=0, segs='';
   if(total>0){
     for(const [k,v] of Object.entries(counts)){
-      if(!v) continue;
       const len=v/total*c;
       segs += `<circle cx="70" cy="70" r="${r}" fill="none" stroke="${PAL[k]}" stroke-width="18"
         stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;
@@ -286,34 +443,124 @@ function renderDonut(counts){
     }
   } else { segs = `<circle cx="70" cy="70" r="${r}" fill="none" stroke="#EDEFF2" stroke-width="18"/>`; }
   const legend = Object.entries(counts).map(([k,v])=>`
-    <div class="li"><span class="sw" style="background:${PAL[k]}"></span>${BUCKET[k].label} <b>${v}</b></div>`).join('');
-  document.getElementById('donut').innerHTML = `
+    <button class="li mh-leg ${mh.reco===k?'on':''}" data-dim="reco" data-val="${esc(k)}">
+      <span class="sw" style="background:${PAL[k]}"></span>${BUCKET[k].label} <b>${v}</b></button>`).join('')
+    || `<div class="subtle tiny">No scored records in this view — recommendations need disclosed financials.</div>`;
+
+  host.innerHTML = `
+    <div class="panel-head"><h3>Recommendation Mix</h3></div>
     <div class="donut-wrap">
       <svg class="donut" width="140" height="140" viewBox="0 0 140 140">${segs}
         <text x="70" y="66" text-anchor="middle" font-family="Inter, sans-serif" font-size="27" font-weight="700" fill="#064E45">${total}</text>
-        <text x="70" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF">filings</text>
+        <text x="70" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF">scored</text>
       </svg>
       <div class="legend">${legend}</div>
-    </div>`;
+    </div>
+    <div class="panel-divider"></div>
+    <div class="panel-head"><h3>Quick Insights</h3></div>
+    <div class="insights">${mhInsights()}</div>`;
+  mhWireFacets(host);
 }
 
-function renderInsights(sc, f){
+function mhInsights(){
+  const rows = mhFiltered();
   const out = [];
-  if(sc.length) out.push({ico:'flame', t:`<b>${esc(sc[0].sector)}</b> leads this week with <b>${sc[0].count}</b> new filing${sc[0].count>1?'s':''}.`});
-  const issues = f.map(x=>x.issue.total_cr).filter(v=>v!=null);
-  if(issues.length){
-    const avg = issues.reduce((a,b)=>a+b,0)/issues.length;
-    out.push({ico:'chart', t:`Average disclosed issue size: <b>₹${money(avg)} Cr</b> across ${issues.length} filing${issues.length>1?'s':''}.`});
-  } else {
-    out.push({ico:'chart', t:`Issue sizes are <b>not yet disclosed</b> — typical for draft filings before a price band is set.`});
+  const secCounts = {};
+  rows.forEach(r=>{ if(r.sector) secCounts[r.sector]=(secCounts[r.sector]||0)+1; });
+  const topSec = Object.entries(secCounts).sort((a,b)=>b[1]-a[1])[0];
+  if(topSec) out.push({ico:'flame', t:`<b>${esc(topSec[0])}</b> leads this view with <b>${topSec[1]}</b> record${topSec[1]>1?'s':''}.`});
+  const open = rows.filter(r=>r.stage==='IPO Open').length;
+  if(open) out.push({ico:'trend', t:`<b>${open}</b> issue${open>1?'s are':' is'} currently open for subscription.`});
+  const listed = rows.filter(r=>r.stage==='Listed').length;
+  if(listed) out.push({ico:'target', t:`<b>${listed}</b> recent listing${listed>1?'s':''} in view — listing gain/loss is held pending (no live price feed).`});
+  const scored = rows.filter(r=>r.score!=null).length;
+  if(scored){
+    const strong = rows.filter(r=>r.score!=null && r.score>=25).length;
+    out.push({ico:'chart', t:`<b>${strong} of ${scored}</b> scored record${scored>1?'s':''} clear the “Dig Deeper” bar (score ≥ 25).`});
   }
-  const scored = f.filter(x=>x.score.total!=null).length;
-  const strong = f.filter(x=>x.score.total!=null && x.score.total>=25).length;
-  if(scored) out.push({ico:'target', t:`<b>${strong} of ${scored}</b> scored filing${scored>1?'s':''} clear the “Dig Deeper” bar (score ≥ 25).`});
-  const insuf = f.filter(x=>x.score.bucket==='INSUFFICIENT').length;
-  if(insuf) out.push({ico:'spark', t:`<b>${insuf}</b> filing${insuf>1?'s':''} lack disclosed financials and are held as “not enough data”.`});
-  document.getElementById('insights').innerHTML = out.slice(0,4).map(o=>`
-    <div class="insight"><div class="ico">${icon(o.ico,17)}</div><div class="it">${o.t}</div></div>`).join('');
+  if(!out.length) out.push({ico:'spark', t:`No records match the current filters.`});
+  return out.slice(0,4).map(o=>`<div class="insight"><div class="ico">${icon(o.ico,17)}</div><div class="it">${o.t}</div></div>`).join('');
+}
+
+/* shared wiring for clickable bars / stage chips / donut legend */
+function mhWireFacets(host){
+  host.querySelectorAll('[data-dim][data-val]').forEach(el=>{
+    const act = ()=>{ const d=el.dataset.dim, v=el.dataset.val; mh[d]=(mh[d]===v)?'All':v; mhSyncUrl(); renderMarketHeat(); };
+    el.addEventListener('click', act);
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+  });
+}
+
+/* the one unified table; columns with no data anywhere in view are hidden */
+let MH_VIEW = [];   // current filtered rows, for drawer lookup
+function mhTable(){
+  const rows = mhFiltered();
+  MH_VIEW = rows;
+  const blank = '<span class="subtle tiny">—</span>';
+  const pend  = '<span class="pending-cell">Pending</span>';
+  const has = (v)=> v!=null && v!=='';
+  const COLS = [
+    {k:'name',   h:'Company',    always:1, cell:r=>companyCellRec(r)},
+    {k:'board',  h:'Board',      val:r=>r.board,  cell:r=>boardChip(r.board,false)||blank},
+    {k:'sector', h:'Sector',     val:r=>r.sector, cell:r=>r.sector?esc(r.sector):blank, cls:'subtle'},
+    {k:'sub',    h:'Sub-sector', val:r=>r.subSector, cell:r=>r.subSector?esc(r.subSector):blank, cls:'subtle'},
+    {k:'stage',  h:'Current Stage', always:1, cell:r=>stageChip(r.stage)||blank},
+    {k:'fdate',  h:'Filing Date', val:r=>r.filingDate, cell:r=>r.filingDate?dfmt(r.filingDate):blank, cls:'subtle'},
+    {k:'idate',  h:'Issue Date',  val:r=>r.issueOpen, cell:r=>r.issueOpen?dfmt(r.issueOpen):blank, cls:'subtle'},
+    {k:'ldate',  h:'Listing Date',val:r=>r.listingDate, cell:r=>r.listingDate?dfmt(r.listingDate):blank, cls:'subtle'},
+    {k:'size',   h:'Issue (₹ Cr)',num:1, val:r=>r.issueSizeCr, cell:r=>r.issueSizeCr==null?blank:money(r.issueSizeCr)},
+    {k:'sub_x',  h:'Subscription',num:1, val:r=>r.subscriptionX, cell:r=>r.subscriptionX==null?blank:subx(r.subscriptionX)},
+    {k:'iprice', h:'Issue Price', num:1, val:r=>r.issuePrice, cell:r=>r.issuePrice==null?blank:'₹'+money(r.issuePrice)},
+    {k:'cprice', h:'Current Price',num:1, val:r=>r.currentPrice, cell:r=>r.currentPrice==null?pend:'₹'+money(r.currentPrice)},
+    {k:'gain',   h:'Gain / Loss', num:1, val:r=>r.gainPct, cell:r=>r.gainPct==null?pend:pct(r.gainPct)},
+    {k:'score',  h:'Score',       num:1, val:r=>r.score, cell:r=>r.score==null?blank:scoreNum(r.score), cls:'score-cell'},
+    {k:'reco',   h:'Reco.',       val:r=>r.bucket, cell:r=>r.bucket?bucketTag(r.bucket):blank},
+    {k:'ds',     h:'Data Status', always:1, cell:r=>dsRec(r)},
+    {k:'src',    h:'Source',      always:1, cell:r=>srcRec(r)},
+  ];
+  const cols = COLS.filter(c=>c.always || rows.some(r=>has(c.val(r))));
+  const thead = `<thead><tr>${cols.map(c=>`<th class="${c.num?'num':''}">${c.h}</th>`).join('')}</tr></thead>`;
+  const body = rows.map((r,i)=>`<tr class="mh-row" data-idx="${i}">${
+      cols.map(c=>`<td class="${c.cls||''} ${c.num?'num':''}">${c.cell(r)}</td>`).join('')
+    }</tr>`).join('');
+  const table = document.getElementById('mh-table');
+  if(rows.length){
+    table.innerHTML = thead + `<tbody>${body}</tbody>`;
+    document.getElementById('mh-foot').innerHTML =
+      `Current price &amp; listing gain/loss are held pending — NSE’s price feed is unavailable (never estimated). Click any row for the full record.`;
+  } else {
+    table.innerHTML = `<tbody><tr><td class="mh-empty">
+      <div class="mh-empty-box">No records match these filters.
+      <button class="mh-clear-inline">Clear filters</button></div></td></tr></tbody>`;
+    document.getElementById('mh-foot').innerHTML = '';
+    const cl = table.querySelector('.mh-clear-inline');
+    if(cl) cl.addEventListener('click',()=>{ mh={board:'All',stage:'All',sector:'All',reco:'All'}; mhSyncUrl(); renderMarketHeat(); });
+  }
+  document.getElementById('mh-count').textContent = `${rows.length} of ${MARKET.length} records`;
+  table.querySelectorAll('.mh-row').forEach(tr=>tr.addEventListener('click', e=>{
+    if(e.target.closest('a')) return;       // let source links work normally
+    openDrawer(MH_VIEW[+tr.dataset.idx]);
+  }));
+}
+
+/* record-aware versions of the company / source / data-status cells */
+function companyCellRec(r){
+  const url = r.sources && (r.sources.sebi_url || r.sources.drhp_pdf_url);
+  const name = url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(r.name)}</a>` : esc(r.name);
+  return `<div class="company">${name}</div>`;
+}
+function srcRec(r){
+  const s = r.sources || {};
+  const out = [];
+  if(s.drhp_pdf_url) out.push(`<a class="src-link pdf" href="${esc(s.drhp_pdf_url)}" target="_blank" rel="noopener">${PDF_SVG} PDF</a>`);
+  if(s.sebi_url)     out.push(`<a class="src-link" href="${esc(s.sebi_url)}" target="_blank" rel="noopener">${LINK_SVG} SEBI</a>`);
+  if(!out.length && (r.origin==='nse'||r.origin==='both')) return `<span class="src-tag">NSE</span>`;
+  return out.length ? `<div class="src">${out.join('')}</div>` : '<span class="subtle tiny">—</span>';
+}
+function dsRec(r){
+  if(r.bucket && r.bucket!=='INSUFFICIENT') return `<span class="ds-chip ok">Complete</span>`;
+  if(r.origin==='nse') return `<span class="ds-chip mkt">Market data</span>`;
+  return `<span class="ds-chip miss">Awaiting financials</span>`;
 }
 
 /* ---------------- Tab 3: Score Watchlist ---------------- */
@@ -498,11 +745,11 @@ function renderPulse(){
   }
   const p = m.pulse||{};
   const items = [
-    {k:'drhp_filed',  label:'DRHP Filed',   cls:'slate'},
-    {k:'updated',     label:'Updated',      cls:'gold'},
-    {k:'ipo_open',    label:'IPO Open',     cls:'green'},
-    {k:'listing_soon',label:'Listing Soon', cls:'gold'},
-    {k:'listed',      label:'Listed',       cls:'teal'},
+    {k:'drhp_filed',  label:'DRHP Filed',   cls:'slate', stage:'DRHP Filed'},
+    {k:'updated',     label:'Updated',      cls:'gold',  stage:'Updated/Corrected'},
+    {k:'ipo_open',    label:'IPO Open',     cls:'green', stage:'IPO Open'},
+    {k:'listing_soon',label:'Listing Soon', cls:'gold',  stage:'Listing Soon'},
+    {k:'listed',      label:'Listed',       cls:'teal',  stage:'Listed'},
     {k:'positive_listing', label:'Positive', cls:'green'},
     {k:'negative_listing', label:'Negative', cls:'red'},
   ];
@@ -511,115 +758,145 @@ function renderPulse(){
       <span class="muted tiny">Lifecycle · NSE as of ${dfmt(m.as_of)}</span></div>
     <div class="pulse-row">${items.map(it=>{
       const v=p[it.k]; const na=(v==null);
-      return `<div class="pulse-item"><span class="pulse-dot ${it.cls}"></span>
+      const nav = it.stage ? ` clickable" data-pstage="${esc(it.stage)}" role="button" tabindex="0` : '';
+      return `<div class="pulse-item${nav}"><span class="pulse-dot ${it.cls}"></span>
         <span class="pulse-val ${na?'na':''}">${na?'—':v}</span><span class="pulse-lab">${it.label}</span></div>`;
     }).join('<span class="pulse-sep">›</span>')}</div>
     <div class="tiny muted pulse-note">Positive / Negative listing need listing-day price — pending source.</div>
   </div>`;
 }
 
-/* ---------------- Market Heat: IPO Lifecycle Heat + tables ---------------- */
-function renderLifecycleHeat(){
-  const card = document.getElementById('lifecycle-card'); if(!card) return;
-  const m = ipoMarket();
-  if(!m.available){
-    card.innerHTML = `<div class="panel-head"><h3>IPO Lifecycle Heat</h3></div>
-      <div class="pending-tag">Pending source — NSE IPO data not reached this run.</div>`;
-    return;
-  }
-  const {open, listed} = ipoFilteredLists(); const p = m.pulse||{};
-  const stages = [
-    {label:'Filed',        n:p.drhp_filed, cls:'st-filed'},
-    {label:'Updated',      n:p.updated,    cls:'st-upd'},
-    {label:'Upcoming',     n:open.filter(r=>r.stage==='Upcoming').length,     cls:'st-upc'},
-    {label:'IPO Open',     n:open.filter(r=>r.stage==='IPO Open').length,     cls:'st-open'},
-    {label:'Listing Soon', n:open.filter(r=>r.stage==='Listing Soon').length, cls:'st-soon'},
-    {label:'Listed',       n:listed.length,  cls:'st-listed'},
-    {label:'Gain / Loss',  n:null,           cls:'st-gl'},
-  ];
-  const filters = ['All','Mainboard','SME'].map(b=>
-    `<button class="fchip ${boardFilter===b?'active':''}" data-board="${b}">${b}</button>`).join('');
-  card.innerHTML = `
-    <div class="panel-head"><h3>IPO Lifecycle Heat</h3><div class="fchip-row">${filters}</div></div>
-    <div class="lifecycle">${stages.map((s,i)=>
-      `${i?'<div class="lc-arrow">→</div>':''}<div class="lc-stage ${s.cls}"><div class="lc-n">${s.n==null?'—':s.n}</div><div class="lc-l">${s.label}</div></div>`
-    ).join('')}</div>
-    <div class="tiny muted" style="margin-top:10px">Gain/Loss needs listing-day price (NSE quote feed blocked) — held as pending.</div>`;
-  card.querySelectorAll('.fchip').forEach(b=>b.addEventListener('click',()=>{
-    boardFilter=b.dataset.board; renderLifecycleHeat(); renderIpoTables();
-  }));
+/* ---------------- Navigation (sidebar tabs) ---------------- */
+function activateTab(id){
+  document.querySelectorAll('.snav, .pill').forEach(b => b.classList.toggle('active', b.dataset.target===id));
+  document.querySelectorAll('.tab-panel').forEach(p => p.hidden = (p.id!==id));
+  const c = document.querySelector('.content'); if(c) c.scrollIntoView({block:'start', behavior:'smooth'});
 }
-
-function renderIpoTables(){
-  const host = document.getElementById('ipo-tables'); if(!host) return;
-  const m = ipoMarket();
-  if(!m.available){ host.innerHTML=''; return; }
-  const {open, listed} = ipoFilteredLists();
-  const listedTop = listed.slice(0, 12);
-  host.innerHTML = `<div class="cols-2">
-    <div class="card">
-      <div class="panel-head"><h3>Open / Upcoming IPOs</h3><span class="muted tiny">${open.length} shown</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Company</th><th>Board</th><th>Sector</th><th>Issue Dates</th><th class="num">Size (₹ Cr)</th><th class="num">Sub.</th><th>Status</th></tr></thead>
-        <tbody>${open.map(r=>`<tr>
-          <td class="company">${esc(r.company_name)}</td>
-          <td>${boardChip(r.board)}</td>
-          <td class="subtle">${esc(r.sector||'—')}</td>
-          <td class="subtle">${r.issue_open?dfmt(r.issue_open):'—'}${r.issue_close?' – '+dfmt(r.issue_close):''}</td>
-          <td class="num">${r.issue_size_cr==null?'—':money(r.issue_size_cr)}</td>
-          <td class="num">${subx(r.subscription_x)}</td>
-          <td>${stageChip(r.stage)}</td></tr>`).join('')||`<tr><td colspan="7" class="subtle">None in this view.</td></tr>`}</tbody>
-      </table></div>
-    </div>
-    <div class="card">
-      <div class="panel-head"><h3>Recent Listing Performance</h3><span class="muted tiny">${listedTop.length} of ${listed.length}</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Company</th><th>Board</th><th class="num">Issue Price</th><th class="num">Current</th><th class="num">Gain/Loss</th><th>Listed</th></tr></thead>
-        <tbody>${listedTop.map(r=>`<tr>
-          <td class="company">${esc(r.company_name)}</td>
-          <td>${boardChip(r.board)}</td>
-          <td class="num">${r.issue_price==null?'—':'₹'+money(r.issue_price)}</td>
-          <td class="num"><span class="pending-cell">Pending</span></td>
-          <td class="num"><span class="pending-cell">Pending</span></td>
-          <td class="subtle">${dfmt(r.listing_date)}</td></tr>`).join('')||`<tr><td colspan="6" class="subtle">None in this view.</td></tr>`}</tbody>
-      </table></div>
-      <div class="table-foot">Current price &amp; listing gain/loss pending — NSE price feed unavailable (never estimated). Full list in Tracker Appendix.</div>
-    </div>
-  </div>`;
-}
-
-/* ---------------- Navigation (sidebar + pills, synced) ---------------- */
 function wireNav(){
-  const navBtns = [...document.querySelectorAll('.snav, .pill')];
-  const panels = [...document.querySelectorAll('.tab-panel')];
-  function activate(id){
-    navBtns.forEach(b => b.classList.toggle('active', b.dataset.target===id));
-    panels.forEach(p => p.hidden = (p.id!==id));
-    document.querySelector('.content').scrollIntoView({block:'start', behavior:'smooth'});
-  }
-  navBtns.forEach(b => b.addEventListener('click', () => activate(b.dataset.target)));
+  document.querySelectorAll('.snav, .pill').forEach(b => b.addEventListener('click', () => activateTab(b.dataset.target)));
 }
 
-/* ---------------- KPI cards: click to filter the dashboard by bucket/stage ---------------- */
-function applyKpiViews(){
-  renderSnapshot();
+/* ---------------- Connected navigation into Market Heat ---------------- */
+function goMarketHeat(presets){
+  mh = {board:'All', stage:'All', sector:'All', reco:'All', ...presets};
+  activateTab('tab-heat');
+  mhSyncUrl();
   renderMarketHeat();
-  renderWatchlist();
-  renderCompetitor();
-  renderAppendixRows();
 }
+/* keep the URL shareable: ?board=SME&sector=Consumer&stage=IPO_OPEN&reco=DIG_DEEPER */
+function mhSyncUrl(){
+  const p = new URLSearchParams();
+  if(mh.board!=='All')  p.set('board', mh.board);
+  if(mh.stage!=='All')  p.set('stage', STAGE_KEYS[mh.stage]||mh.stage);
+  if(mh.sector!=='All') p.set('sector', mh.sector);
+  if(mh.reco!=='All')   p.set('reco', RECO_KEYS[mh.reco]||mh.reco);
+  const qs = p.toString();
+  history.replaceState(null, '', qs ? ('?'+qs) : location.pathname);
+}
+function mhFromUrl(){
+  const p = new URLSearchParams(location.search);
+  if(![...p.keys()].length) return false;
+  const stageRev = invert(STAGE_KEYS), recoRev = invert(RECO_KEYS);
+  let any = false;
+  if(p.get('board'))  { mh.board  = p.get('board'); any=true; }
+  if(p.get('stage'))  { const v=p.get('stage'); mh.stage = stageRev[v]||v; any=true; }
+  if(p.get('sector')) { mh.sector = p.get('sector'); any=true; }
+  if(p.get('reco'))   { const v=p.get('reco'); mh.reco = recoRev[v]||v; any=true; }
+  return any;
+}
+
+/* KPI cards and landing-page chips funnel into the Market Heat explorer */
 function wireKpiSelect(){
-  const main = document.querySelector('.main');
-  if(!main) return;
-  main.addEventListener('click', e => {
-    if(e.target.closest('.kpi-clear')){ kpiFilter = null; applyKpiViews(); return; }
-    if(e.target.closest('a, button, select, input, label')) return;
-    const k = e.target.closest('.kpi[data-fk]');
-    if(!k) return;
-    const kind = k.dataset.fk, value = k.dataset.fv;
-    kpiFilter = (kpiFilter && kpiFilter.kind===kind && kpiFilter.value===value) ? null : {kind, value};
-    applyKpiViews();
+  const grid = document.getElementById('kpi-grid');
+  if(!grid) return;
+  grid.addEventListener('click', e => {
+    const k = e.target.closest('.kpi[data-fk]'); if(!k) return;
+    const fk = k.dataset.fk, fv = k.dataset.fv;
+    if(fk==='bucket') goMarketHeat({reco: fv});
+    else if(fk==='stage') goMarketHeat({stage: fv==='DRHP' ? 'DRHP Filed' : 'IPO Open'});
   });
+}
+function wireCrossNav(){
+  const sec = document.getElementById('sectors');
+  const onSec = e => { const c = e.target.closest('[data-sector]'); if(c){ e.preventDefault(); goMarketHeat({sector: c.dataset.sector}); } };
+  if(sec){ sec.addEventListener('click', onSec); sec.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') onSec(e); }); }
+  const pulse = document.getElementById('pulse-strip');
+  const onPulse = e => { const it = e.target.closest('[data-pstage]'); if(it){ e.preventDefault(); goMarketHeat({stage: it.dataset.pstage}); } };
+  if(pulse){ pulse.addEventListener('click', onPulse); pulse.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') onPulse(e); }); }
+}
+
+/* ---------------- Row detail drawer ---------------- */
+function wireDrawer(){
+  const ov = document.getElementById('mh-drawer-overlay');
+  if(ov) ov.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
+}
+function closeDrawer(){
+  const d = document.getElementById('mh-drawer'), ov = document.getElementById('mh-drawer-overlay');
+  if(d){ d.hidden = true; d.setAttribute('aria-hidden','true'); }
+  if(ov) ov.hidden = true;
+}
+function openDrawer(r){
+  if(!r) return;
+  const d = document.getElementById('mh-drawer'), ov = document.getElementById('mh-drawer-overlay');
+  const row = (lab, val)=> `<div class="dw-row"><span class="dw-k">${lab}</span><span class="dw-v">${val}</span></div>`;
+  const dates = [
+    r.filingDate && row('Filing date', dfmt(r.filingDate)),
+    (r.issueOpen||r.issueClose) && row('Issue window', `${r.issueOpen?dfmt(r.issueOpen):'—'}${r.issueClose?' – '+dfmt(r.issueClose):''}`),
+    r.listingDate && row('Listing date', dfmt(r.listingDate)),
+  ].filter(Boolean).join('');
+  const market = [
+    r.priceBand && row('Price band', esc(r.priceBand)),
+    r.issueSizeCr!=null && row('Issue size', '₹'+money(r.issueSizeCr)+' Cr'),
+    r.subscriptionX!=null && row('Subscription', subx(r.subscriptionX)),
+    r.issuePrice!=null && row('Issue price', '₹'+money(r.issuePrice)),
+    row('Current price', '<span class="pending-cell">Pending</span>'),
+    row('Listing gain / loss', '<span class="pending-cell">Pending</span>'),
+  ].filter(Boolean).join('');
+  const fin = r.financials || {};
+  const frow = (lab, mv, kind)=> (mv && mv.value!=null) ? row(lab, fcell(mv, kind)) : '';
+  const financials = [
+    frow('Revenue FY25', fin.revenue_fy25, 'money'),
+    frow('Revenue growth', fin.rev_growth_pct, 'pct'),
+    frow('EBITDA margin', fin.ebitda_margin_pct, 'pct'),
+    frow('PAT FY25', fin.pat_fy25, 'money'),
+    frow('PAT margin', fin.pat_margin_pct, 'pct'),
+    frow('ROE', fin.roe_pct, 'pct'),
+    frow('ROCE', fin.roce_pct, 'pct'),
+  ].filter(Boolean).join('');
+  // honest "what's missing" notes
+  const missing = [];
+  missing.push('Current price &amp; listing gain/loss: pending — NSE’s live price feed is unavailable, never estimated.');
+  if(!financials) missing.push('Financials: not disclosed in the filing (or no SEBI document) — shown as awaiting data, never assumed.');
+  if(!r.sector) missing.push('Sector: unclassified — NSE-only listings don’t carry a sector tag.');
+  if(r.issueSizeCr==null) missing.push('Issue size: not yet disclosed (common for draft filings before a price band is set).');
+
+  d.innerHTML = `
+    <div class="dw-head">
+      <div>
+        <div class="dw-title">${esc(r.name)}</div>
+        <div class="dw-chips">${boardChip(r.board,false)}${stageChip(r.stage)}${r.bucket?bucketTag(r.bucket):''}${dsRec(r)}</div>
+      </div>
+      <button class="dw-close" id="dw-close" aria-label="Close">✕</button>
+    </div>
+    <div class="dw-body">
+      <div class="dw-sec">
+        ${row('Sector', r.sector?esc(r.sector):'<span class="subtle">Unclassified</span>')}
+        ${r.subSector?row('Sub-sector', esc(r.subSector)):''}
+        ${r.filingType?row('Document', esc(r.filingType)):''}
+        ${r.symbol?row('NSE symbol', esc(r.symbol)):''}
+        ${r.score!=null?row('Automated score', scoreNum(r.score)):''}
+      </div>
+      ${dates?`<div class="dw-h">Timeline</div><div class="dw-sec">${dates}</div>`:''}
+      ${market?`<div class="dw-h">Issue &amp; market</div><div class="dw-sec">${market}</div>`:''}
+      ${financials?`<div class="dw-h">Financials (from the filing)</div><div class="dw-sec">${financials}</div>`:''}
+      <div class="dw-h">Sources</div><div class="dw-sec dw-src">${srcRec(r)}</div>
+      <div class="dw-h">What’s missing &amp; why</div>
+      <ul class="dw-missing">${missing.map(t=>`<li>${t}</li>`).join('')}</ul>
+    </div>`;
+  d.hidden = false; d.setAttribute('aria-hidden','false');
+  ov.hidden = false;
+  const c = document.getElementById('dw-close'); if(c) c.addEventListener('click', closeDrawer);
 }
 
 document.addEventListener('DOMContentLoaded', main);
