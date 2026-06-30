@@ -134,13 +134,30 @@ function filteredFilings(){ return (DATA.filings || []).filter(passKpi); }
 /* Market Heat — one shared filter state + one merged dataset             */
 /* ====================================================================== */
 let MARKET = [];   // every IPO-lifecycle record, merged from filings + NSE
-let mh = {board:'All', stage:'All', sector:'All', reco:'All'};
+function mhReset(){ return {board:'All', stage:'All', sector:'All', reco:'All', subSector:'All', filingType:'All', issueType:'All'}; }
+let mh = mhReset();
 
 /* canonical lifecycle order (used to sort the Lifecycle selector) */
 const STAGE_ORDER = ['DRHP Filed','Updated/Corrected','Approved','Upcoming','IPO Open','Listing Soon','Listed','Withdrawn'];
 const STAGE_KEYS = {'DRHP Filed':'FILED','Updated/Corrected':'UPDATED','Approved':'APPROVED','Upcoming':'UPCOMING','IPO Open':'IPO_OPEN','Listing Soon':'LISTING_SOON','Listed':'LISTED','Withdrawn':'WITHDRAWN'};
 const RECO_KEYS  = {'DIG DEEPER':'DIG_DEEPER','MONITOR':'MONITOR','WATCH':'WATCH','INSUFFICIENT':'INSUFFICIENT'};
+const RECO_DISP  = {'DIG DEEPER':'Dig Deeper','MONITOR':'Monitor','WATCH':'Watch','INSUFFICIENT':'Not Enough Data'};
+const RECO_ORDER = ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'];
+const stageLabel = (s)=> (STAGE[s]||{label:s}).label;
 const invert = (o) => Object.fromEntries(Object.entries(o).map(([k,v])=>[v,k]));
+
+/* the filter dimensions that drive Market Heat — shared by the ribbon, the
+   facet counts, the summary chips and the URL. Add one here and it works
+   everywhere. */
+const MH_DIMS = [
+  {key:'board',     label:'Board',          urlk:'board',      val:r=>r.board},
+  {key:'stage',     label:'Lifecycle',      urlk:'stage',      val:r=>r.stage,      disp:stageLabel, order:s=>STAGE_ORDER.indexOf(s), keymap:STAGE_KEYS},
+  {key:'reco',      label:'Recommendation', urlk:'reco',       val:r=>r.bucket,     disp:b=>RECO_DISP[b]||b, order:b=>RECO_ORDER.indexOf(b), keymap:RECO_KEYS},
+  {key:'sector',    label:'Sector',         urlk:'sector',     val:r=>r.sector},
+  {key:'subSector', label:'Sub-sector',     urlk:'subsector',  val:r=>r.subSector},
+  {key:'filingType',label:'Filing Type',    urlk:'filingtype', val:r=>r.filingType},
+  {key:'issueType', label:'Issue Type',     urlk:'issuetype',  val:r=>r.issueType},
+];
 
 /* strip legal suffixes the same way the Python pipeline does, so a SEBI filing
    and its NSE row collapse onto one record */
@@ -152,30 +169,44 @@ function normalizeName(s){
     .replace(/\s+/g,' ').trim();
 }
 
+/* one SEBI filing → the shared record shape (carries every tracker field) */
+function filingToRec(f){
+  const iss = f.issue || {};
+  return {
+    norm: f.company_name_normalized || normalizeName(f.company_name),
+    name: f.company_name,
+    board: f.board || null,
+    sector: f.sector || null,
+    subSector: f.sub_sector || null,
+    stage: f.current_stage || null,
+    filingStage: f.stage || null,
+    filingType: f.filing_type || null,
+    filingDate: f.filing_date || null,
+    issueType: iss.type || null,
+    freshCr: iss.fresh_cr ?? null,
+    ofsCr: iss.ofs_cr ?? null,
+    issueSizeCr: iss.total_cr ?? null,
+    marketCapCr: iss.market_cap_cr ?? null,
+    issueToMktcapPct: iss.issue_to_mktcap_pct ?? null,
+    issueOpen: null, issueClose: null, listingDate: null,
+    subscriptionX: null, issuePrice: null, currentPrice: null, gainPct: null,
+    priceBand: null, symbol: null,
+    businessSummary: f.business_summary || null,
+    leadManagers: (f.lead_managers && f.lead_managers.length) ? f.lead_managers : null,
+    score: f.score ? f.score.total : null,
+    bucket: f.score ? f.score.bucket : null,
+    sources: f.sources || null,
+    financials: f.financials || null,
+    origin: 'filing',
+  };
+}
+
 function buildMarket(){
   const m = ipoMarket();
   const fByNorm = new Map();
   const out = [];
   (DATA.filings||[]).forEach(f=>{
-    const rec = {
-      norm: f.company_name_normalized || normalizeName(f.company_name),
-      name: f.company_name,
-      board: f.board || null,
-      sector: f.sector || null,
-      subSector: f.sub_sector || null,
-      stage: f.current_stage || null,
-      filingType: f.filing_type || null,
-      filingDate: f.filing_date || null,
-      issueOpen: null, issueClose: null, listingDate: null,
-      issueSizeCr: (f.issue && f.issue.total_cr != null) ? f.issue.total_cr : null,
-      subscriptionX: null, issuePrice: null, currentPrice: null, gainPct: null,
-      priceBand: null, symbol: null,
-      score: f.score ? f.score.total : null,
-      bucket: f.score ? f.score.bucket : null,
-      sources: f.sources || null,
-      financials: f.financials || null,
-      origin: 'filing',
-    };
+    const rec = filingToRec(f);
     fByNorm.set(rec.norm, rec);
     out.push(rec);
   });
@@ -199,10 +230,13 @@ function buildMarket(){
     }
     out.push({
       norm, name: r.company_name, board: r.board || null, sector: r.sector || null, subSector: null,
-      stage: r.stage || null, filingType: null, filingDate: null,
+      stage: r.stage || null, filingStage: null, filingType: null, filingDate: null,
+      issueType: null, freshCr: null, ofsCr: null,
+      issueSizeCr: r.issue_size_cr, marketCapCr: null, issueToMktcapPct: null,
       issueOpen: r.issue_open || null, issueClose: r.issue_close || null, listingDate: r.listing_date || null,
-      issueSizeCr: r.issue_size_cr, subscriptionX: r.subscription_x, issuePrice: r.issue_price,
+      subscriptionX: r.subscription_x, issuePrice: r.issue_price,
       currentPrice: r.current_price, gainPct: r.gain_pct, priceBand: r.price_band, symbol: r.symbol,
+      businessSummary: null, leadManagers: null,
       score: null, bucket: null, sources: null, financials: null, origin: 'nse',
     });
   };
@@ -216,14 +250,14 @@ function buildMarket(){
 /* one record matches the current filter set, optionally ignoring one dimension
    (so a facet's own chart still shows every still-clickable option) */
 function mhMatch(r, except){
-  if(except!=='board'  && mh.board!=='All'  && r.board!==mh.board)   return false;
-  if(except!=='stage'  && mh.stage!=='All'  && r.stage!==mh.stage)   return false;
-  if(except!=='sector' && mh.sector!=='All' && r.sector!==mh.sector) return false;
-  if(except!=='reco'   && mh.reco!=='All'   && r.bucket!==mh.reco)   return false;
+  for(const d of MH_DIMS){
+    if(d.key===except) continue;
+    if(mh[d.key]!=='All' && d.val(r)!==mh[d.key]) return false;
+  }
   return true;
 }
 function mhFiltered(except){ return MARKET.filter(r=>mhMatch(r, except)); }
-function mhActive(){ return mh.board!=='All' || mh.stage!=='All' || mh.sector!=='All' || mh.reco!=='All'; }
+function mhActive(){ return MH_DIMS.some(d=>mh[d.key]!=='All'); }
 
 /* ====================================================================== */
 let DATA = null;
@@ -352,37 +386,28 @@ function renderMarketHeat(){
   mhTable();
 }
 
-const RECO_DISP = {'DIG DEEPER':'Dig Deeper','MONITOR':'Monitor','WATCH':'Watch','INSUFFICIENT':'Not Enough Data'};
-const stageLabel = (s)=> (STAGE[s]||{label:s}).label;
-
 /* compact control ribbon — one dropdown pill per dimension + Clear all */
 function mhSelectors(){
   const host = document.getElementById('mh-selectors'); if(!host) return;
-  const stages = [...new Set(MARKET.map(r=>r.stage).filter(Boolean))]
-    .sort((a,b)=>(STAGE_ORDER.indexOf(a))-(STAGE_ORDER.indexOf(b)));
-  const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
-  const recos = ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'].filter(b=>MARKET.some(r=>r.bucket===b));
-  const pill = (dim, label, opts, disp)=>{
-    const cur = mh[dim];
+  const pill = (d)=>{
+    let opts = [...new Set(MARKET.map(d.val).filter(Boolean))];
+    opts = d.order ? opts.sort((a,b)=>d.order(a)-d.order(b)) : opts.sort();
+    if(!opts.length) return '';   // hide a dimension that has no values at all
+    const cur = mh[d.key];
     const o = [`<option value="All" ${cur==='All'?'selected':''}>All</option>`]
-      .concat(opts.map(v=>`<option value="${esc(v)}" ${cur===v?'selected':''}>${esc(disp?disp(v):v)}</option>`)).join('');
+      .concat(opts.map(v=>`<option value="${esc(v)}" ${cur===v?'selected':''}>${esc(d.disp?d.disp(v):v)}</option>`)).join('');
     return `<label class="mh-pill ${cur!=='All'?'on':''}">
-      <span class="mh-pill-lbl">${label}</span>
-      <select class="mh-pill-sel" data-dim="${dim}">${o}</select></label>`;
+      <span class="mh-pill-lbl">${d.label}</span>
+      <select class="mh-pill-sel" data-dim="${d.key}">${o}</select></label>`;
   };
   host.innerHTML = `
-    <div class="mh-ribbon-pills">
-      ${pill('board','Board',['Mainboard','SME'])}
-      ${pill('stage','Lifecycle',stages, stageLabel)}
-      ${pill('reco','Recommendation',recos, r=>RECO_DISP[r]||r)}
-      ${pill('sector','Sector',sectors)}
-    </div>
+    <div class="mh-ribbon-pills">${MH_DIMS.map(pill).join('')}</div>
     <button class="mh-ribbon-clear ${mhActive()?'':'hide'}">Clear all</button>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{
     mh[s.dataset.dim] = s.value; mhSyncUrl(); renderMarketHeat();
   }));
   const cl = host.querySelector('.mh-ribbon-clear');
-  if(cl) cl.addEventListener('click',()=>{ mh={board:'All',stage:'All',sector:'All',reco:'All'}; mhSyncUrl(); renderMarketHeat(); });
+  if(cl) cl.addEventListener('click',()=>{ mh = mhReset(); mhSyncUrl(); renderMarketHeat(); });
 }
 
 /* lifecycle guidance strip — compact chips with counts; click to set stage */
@@ -402,10 +427,11 @@ function mhLifecycle(){
 function mhSummary(){
   const host = document.getElementById('mh-summary'); if(!host) return;
   if(!mhActive()){ host.innerHTML = ''; return; }
-  const disp = {board:b=>b, stage:stageLabel, sector:s=>s, reco:r=>RECO_DISP[r]||r};
   const n = mhFiltered().length;
-  const chips = ['board','stage','sector','reco'].filter(k=>mh[k]!=='All').map(k=>
-    `<button class="mh-sum-chip" data-dim="${k}">${esc(disp[k](mh[k]))} <span class="x">✕</span></button>`).join('');
+  const chips = MH_DIMS.filter(d=>mh[d.key]!=='All').map(d=>{
+    const txt = d.disp ? d.disp(mh[d.key]) : mh[d.key];
+    return `<button class="mh-sum-chip" data-dim="${d.key}">${esc(txt)} <span class="x">✕</span></button>`;
+  }).join('');
   host.innerHTML = `<span class="mh-sum-show">Showing:</span>${chips}<span class="mh-sum-n">${n} record${n!==1?'s':''}</span>`;
   host.querySelectorAll('.mh-sum-chip').forEach(b=>b.addEventListener('click',()=>{
     mh[b.dataset.dim]='All'; mhSyncUrl(); renderMarketHeat();
@@ -512,11 +538,15 @@ function mhTable(){
     {k:'board',  h:'Board',      val:r=>r.board,  cell:r=>boardChip(r.board,false)||blank},
     {k:'sector', h:'Sector',     val:r=>r.sector, cell:r=>r.sector?esc(r.sector):blank, cls:'subtle'},
     {k:'sub',    h:'Sub-sector', val:r=>r.subSector, cell:r=>r.subSector?esc(r.subSector):blank, cls:'subtle'},
+    {k:'ftype',  h:'Filing Type', val:r=>r.filingType, cell:r=>r.filingType?esc(r.filingType):blank, cls:'subtle'},
     {k:'stage',  h:'Current Stage', always:1, cell:r=>stageChip(r.stage)||blank},
     {k:'fdate',  h:'Filing Date', val:r=>r.filingDate, cell:r=>r.filingDate?dfmt(r.filingDate):blank, cls:'subtle'},
     {k:'idate',  h:'Issue Date',  val:r=>r.issueOpen, cell:r=>r.issueOpen?dfmt(r.issueOpen):blank, cls:'subtle'},
     {k:'ldate',  h:'Listing Date',val:r=>r.listingDate, cell:r=>r.listingDate?dfmt(r.listingDate):blank, cls:'subtle'},
-    {k:'size',   h:'Issue (₹ Cr)',num:1, val:r=>r.issueSizeCr, cell:r=>r.issueSizeCr==null?blank:money(r.issueSizeCr)},
+    {k:'itype',  h:'Issue Type',  val:r=>r.issueType, cell:r=>r.issueType?esc(r.issueType):blank, cls:'subtle'},
+    {k:'fresh',  h:'Fresh (₹ Cr)',num:1, val:r=>r.freshCr, cell:r=>r.freshCr==null?blank:money(r.freshCr)},
+    {k:'ofs',    h:'OFS (₹ Cr)',  num:1, val:r=>r.ofsCr, cell:r=>r.ofsCr==null?blank:money(r.ofsCr)},
+    {k:'size',   h:'Total Issue (₹ Cr)',num:1, val:r=>r.issueSizeCr, cell:r=>r.issueSizeCr==null?blank:money(r.issueSizeCr)},
     {k:'sub_x',  h:'Subscription',num:1, val:r=>r.subscriptionX, cell:r=>r.subscriptionX==null?blank:subx(r.subscriptionX)},
     {k:'iprice', h:'Issue Price', num:1, val:r=>r.issuePrice, cell:r=>r.issuePrice==null?blank:'₹'+money(r.issuePrice)},
     {k:'cprice', h:'Current Price',num:1, val:r=>r.currentPrice, cell:r=>r.currentPrice==null?pend:'₹'+money(r.currentPrice)},
@@ -542,7 +572,7 @@ function mhTable(){
       <button class="mh-clear-inline">Clear filters</button></div></td></tr></tbody>`;
     document.getElementById('mh-foot').innerHTML = '';
     const cl = table.querySelector('.mh-clear-inline');
-    if(cl) cl.addEventListener('click',()=>{ mh={board:'All',stage:'All',sector:'All',reco:'All'}; mhSyncUrl(); renderMarketHeat(); });
+    if(cl) cl.addEventListener('click',()=>{ mh = mhReset(); mhSyncUrl(); renderMarketHeat(); });
   }
   document.getElementById('mh-count').textContent = `${rows.length} of ${MARKET.length} records`;
   table.querySelectorAll('.mh-row').forEach(tr=>tr.addEventListener('click', e=>{
@@ -572,22 +602,33 @@ function dsRec(r){
 }
 
 /* ---------------- Tab 3: Score Watchlist ---------------- */
+let WATCH_VIEW = [];
 function renderWatchlist(){
   const f = filteredFilings().sort((a,b)=>(b.score.total??-1)-(a.score.total??-1));
+  WATCH_VIEW = f;
   document.getElementById('watchlist').innerHTML = f.map((x,i)=>{
     const fin=x.financials;
-    return `<tr>
+    const bm = x.business_summary
+      ? `<span class="bizclamp" title="${esc(x.business_summary)}">${esc(x.business_summary)}</span>`
+      : '<span class="subtle tiny">—</span>';
+    return `<tr class="wl-row" data-idx="${i}">
       <td class="num subtle">${i+1}</td>
       <td>${companyCell(x)}<div class="row-chips">${boardChip(x.board,false)}${stageChip(x.current_stage)}${dataStatusChip(x)}${stamps(x.stamps)}</div></td>
       <td class="subtle">${esc(x.sector||'—')}${x.sub_sector?` · ${esc(x.sub_sector)}`:''}</td>
-      <td class="num">${fcell(fin.revenue_fy25,'money')}</td>
+      <td>${bm}</td>
+      <td class="num">${money(x.issue.total_cr)}</td>
       <td class="num">${fcell(fin.rev_growth_pct,'pct')}</td>
+      <td class="num">${fcell(fin.ebitda_margin_pct,'pct')}</td>
+      <td class="num">${fcell(fin.pat_growth_pct,'pct')}</td>
       <td class="num">${fcell(fin.pat_margin_pct,'pct')}</td>
-      <td class="num">${fcell(fin.roe_pct,'pct')}</td>
       <td class="num score-cell">${scoreNum(x.score.total)}</td>
       <td>${bucketTag(x.score.bucket)}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="9" class="subtle">No filings this week.</td></tr>`;
+  }).join('') || `<tr><td colspan="11" class="subtle">No filings this week.</td></tr>`;
+  document.querySelectorAll('#watchlist .wl-row').forEach(tr=>tr.addEventListener('click', e=>{
+    if(e.target.closest('a')) return;
+    openDrawer(filingToRec(WATCH_VIEW[+tr.dataset.idx]));
+  }));
 }
 
 /* ---------------- Tab 4: Competitor Watch ---------------- */
@@ -611,35 +652,42 @@ function renderCompetitor(){
   if(openPeers.length) ins.push(`${openPeers.length} same-sector IPO${openPeers.length>1?'s are':' is'} currently open on NSE.`);
   if(!ins.length) ins.push('No same-sector clustering detected in this week’s filings.');
 
-  const rows = filteredFilings().map(x => {
-    const same = (bySector[x.sector||'Unclassified']||[]).length - 1;
-    return `<tr>
-      <td class="company">${esc(x.company_name)}</td>
-      <td class="subtle">${esc(x.sector||'—')}</td>
-      <td>${boardChip(x.board)}</td>
-      <td>${stageChip(x.current_stage)}</td>
-      <td class="num">${x.issue&&x.issue.total_cr!=null?money(x.issue.total_cr):'—'}</td>
-      <td>${x.listing_outcome?`<span class="pending-cell">${esc(x.listing_outcome)}</span>`:'<span class="subtle tiny">—</span>'}</td>
-      <td class="subtle">${same>0?`${same} same-sector peer${same>1?'s':''} this week`:'—'}</td></tr>`;
-  }).join('');
+  // same-sector comparison: business model + financials + issue structure,
+  // with entirely-empty columns (e.g. Market Cap) hidden automatically
+  const dash = '<span class="subtle tiny">—</span>';
+  const peers = filteredFilings();
+  const fv = (x,k)=> x.financials && x.financials[k] ? x.financials[k] : null;
+  const CC = [
+    {h:'Company', always:1, cell:x=>`<span class="company">${esc(x.company_name)}</span>`},
+    {h:'Sector', always:1, cls:'subtle', cell:x=>esc(x.sector||'—')},
+    {h:'Sub-sector', cls:'subtle', get:x=>x.sub_sector, cell:x=>x.sub_sector?esc(x.sub_sector):dash},
+    {h:'Business Model', get:x=>x.business_summary, cell:x=>x.business_summary?`<span class="bizclamp" title="${esc(x.business_summary)}">${esc(x.business_summary)}</span>`:dash},
+    {h:'Revenue FY25', num:1, get:x=>fv(x,'revenue_fy25')&&fv(x,'revenue_fy25').value, cell:x=>fcell(fv(x,'revenue_fy25'),'money')},
+    {h:'Rev Growth', num:1, get:x=>fv(x,'rev_growth_pct')&&fv(x,'rev_growth_pct').value, cell:x=>fcell(fv(x,'rev_growth_pct'),'pct')},
+    {h:'EBITDA Margin', num:1, get:x=>fv(x,'ebitda_margin_pct')&&fv(x,'ebitda_margin_pct').value, cell:x=>fcell(fv(x,'ebitda_margin_pct'),'pct')},
+    {h:'PAT Margin', num:1, get:x=>fv(x,'pat_margin_pct')&&fv(x,'pat_margin_pct').value, cell:x=>fcell(fv(x,'pat_margin_pct'),'pct')},
+    {h:'Issue (₹ Cr)', num:1, get:x=>x.issue.total_cr, cell:x=>x.issue.total_cr!=null?money(x.issue.total_cr):dash},
+    {h:'Market Cap (₹ Cr)', num:1, get:x=>x.issue.market_cap_cr, cell:x=>x.issue.market_cap_cr!=null?money(x.issue.market_cap_cr):dash},
+    {h:'Issue/MktCap', num:1, get:x=>x.issue.issue_to_mktcap_pct, cell:x=>x.issue.issue_to_mktcap_pct!=null?pct(x.issue.issue_to_mktcap_pct):dash},
+  ];
+  const has = g => peers.some(x=>{ const v=g(x); return v!=null && v!==''; });
+  const cc = CC.filter(c=>c.always || (c.get && has(c.get)));
+  const cthead = `<thead><tr>${cc.map(c=>`<th class="${c.num?'num':''}">${c.h}</th>`).join('')}</tr></thead>`;
+  const crows = peers.map(x=>`<tr>${cc.map(c=>`<td class="${c.cls||''} ${c.num?'num':''}">${c.cell(x)}</td>`).join('')}</tr>`).join('')
+    || `<tr><td colspan="${cc.length}" class="subtle">No filings this week.</td></tr>`;
 
   host.innerHTML = `
     <div class="kpi-grid block" style="grid-template-columns:repeat(3,1fr)">
       ${cards.map(c=>`<div class="kpi"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.n}</div><div class="tiny muted" style="margin-top:6px">${c.sub}</div></div>`).join('')}
     </div>
-    <div class="cols-2 block">
-      <div class="card">
-        <div class="panel-head"><h3>Same-Sector Primary Market Activity</h3></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Company</th><th>Sector</th><th>Board</th><th>Stage</th><th class="num">Issue (₹ Cr)</th><th>Listing</th><th>Relevance</th></tr></thead>
-          <tbody>${rows||`<tr><td colspan="7" class="subtle">No filings this week.</td></tr>`}</tbody>
-        </table></div>
-      </div>
-      <div class="card">
-        <div class="panel-head"><h3>Why this matters</h3></div>
-        <ul class="alert-list">${ins.map(t=>`<li><span class="alert-dot green"></span><div>${t}</div></li>`).join('')}</ul>
-        <div class="stage2-note">Portfolio-specific competitor mapping (your holdings vs each filing) activates in Stage 2 once your portfolio list is connected.</div>
-      </div>
+    <div class="card block">
+      <div class="panel-head"><h3>Same-Sector Comparison</h3><span class="muted tiny">Compare business model, growth and margins within a sector</span></div>
+      <div class="table-wrap"><table>${cthead}<tbody>${crows}</tbody></table></div>
+    </div>
+    <div class="card block">
+      <div class="panel-head"><h3>Why this matters</h3></div>
+      <ul class="alert-list">${ins.map(t=>`<li><span class="alert-dot green"></span><div>${t}</div></li>`).join('')}</ul>
+      <div class="stage2-note">Portfolio-specific competitor mapping (your holdings vs each filing) activates in Stage 2 once your portfolio list is connected.</div>
     </div>`;
 }
 
@@ -665,38 +713,127 @@ function renderAppendix(){
     });
   }
   renderAppendixRows();
+  renderCoverage();
   renderIpoPipeline();
 }
 
+let APX_VIEW = [];
 function renderAppendixRows(){
-  const f = (DATA.filings||[]).filter(x=> passKpi(x) &&
-    (apxFilter.board==='All'  || x.board===apxFilter.board) &&
-    (apxFilter.stage==='All'  || x.current_stage===apxFilter.stage) &&
-    (apxFilter.sector==='All' || x.sector===apxFilter.sector) &&
-    (apxFilter.bucket==='All' || (x.score&&x.score.bucket)===apxFilter.bucket));
-  document.getElementById('appendix').innerHTML = f.map(x=>{
-    const fin=x.financials;
-    const lm = (x.lead_managers&&x.lead_managers.length)?esc(x.lead_managers.join(', ')):'—';
+  const dash = '<span class="subtle tiny">—</span>';
+  const recs = (DATA.filings||[]).map(filingToRec).filter(r=>
+    (apxFilter.board==='All'  || r.board===apxFilter.board) &&
+    (apxFilter.stage==='All'  || r.stage===apxFilter.stage) &&
+    (apxFilter.sector==='All' || r.sector===apxFilter.sector) &&
+    (apxFilter.bucket==='All' || r.bucket===apxFilter.bucket));
+  APX_VIEW = recs;
+  const fin  = (r,k)=> r.financials && r.financials[k] ? r.financials[k] : null;
+  const fval = (r,k)=> { const mv=fin(r,k); return mv?mv.value:null; };
+  const biz  = (s)=> `<span class="bizclamp" title="${esc(s)}">${esc(s)}</span>`;
+  const COLS = [
+    {h:'Company', always:1, cell:r=>companyCellRec(r)},
+    {h:'Board', val:r=>r.board, cell:r=>boardChip(r.board,false)||dash},
+    {h:'Stage', always:1, cell:r=>stageChip(r.stage)||dash},
+    {h:'SEBI Filing Date', cls:'subtle', val:r=>r.filingDate, cell:r=>r.filingDate?dfmt(r.filingDate):dash},
+    {h:'Filing Type', cls:'subtle', val:r=>r.filingType, cell:r=>r.filingType?esc(r.filingType):dash},
+    {h:'Sector', cls:'subtle', val:r=>r.sector, cell:r=>r.sector?esc(r.sector):dash},
+    {h:'Sub-sector', cls:'subtle', val:r=>r.subSector, cell:r=>r.subSector?esc(r.subSector):dash},
+    {h:'Business Model', val:r=>r.businessSummary, cell:r=>r.businessSummary?biz(r.businessSummary):dash},
+    {h:'Issue Type', cls:'subtle', val:r=>r.issueType, cell:r=>r.issueType?esc(r.issueType):dash},
+    {h:'Fresh (₹ Cr)', num:1, val:r=>r.freshCr, cell:r=>r.freshCr==null?dash:money(r.freshCr)},
+    {h:'OFS (₹ Cr)', num:1, val:r=>r.ofsCr, cell:r=>r.ofsCr==null?dash:money(r.ofsCr)},
+    {h:'Total Issue (₹ Cr)', num:1, val:r=>r.issueSizeCr, cell:r=>r.issueSizeCr==null?dash:money(r.issueSizeCr)},
+    {h:'Market Cap (₹ Cr)', num:1, val:r=>r.marketCapCr, cell:r=>r.marketCapCr==null?dash:money(r.marketCapCr)},
+    {h:'Issue/MktCap', num:1, val:r=>r.issueToMktcapPct, cell:r=>r.issueToMktcapPct==null?dash:pct(r.issueToMktcapPct)},
+    {h:'Revenue FY25', num:1, val:r=>fval(r,'revenue_fy25'), cell:r=>fcell(fin(r,'revenue_fy25'),'money')},
+    {h:'Revenue FY24', num:1, val:r=>fval(r,'revenue_fy24'), cell:r=>fcell(fin(r,'revenue_fy24'),'money')},
+    {h:'Rev Growth', num:1, val:r=>fval(r,'rev_growth_pct'), cell:r=>fcell(fin(r,'rev_growth_pct'),'pct')},
+    {h:'EBITDA FY25', num:1, val:r=>fval(r,'ebitda_fy25'), cell:r=>fcell(fin(r,'ebitda_fy25'),'money')},
+    {h:'EBITDA Margin', num:1, val:r=>fval(r,'ebitda_margin_pct'), cell:r=>fcell(fin(r,'ebitda_margin_pct'),'pct')},
+    {h:'PAT FY25', num:1, val:r=>fval(r,'pat_fy25'), cell:r=>fcell(fin(r,'pat_fy25'),'money')},
+    {h:'PAT FY24', num:1, val:r=>fval(r,'pat_fy24'), cell:r=>fcell(fin(r,'pat_fy24'),'money')},
+    {h:'PAT Growth', num:1, val:r=>fval(r,'pat_growth_pct'), cell:r=>fcell(fin(r,'pat_growth_pct'),'pct')},
+    {h:'PAT Margin', num:1, val:r=>fval(r,'pat_margin_pct'), cell:r=>fcell(fin(r,'pat_margin_pct'),'pct')},
+    {h:'ROE', num:1, val:r=>fval(r,'roe_pct'), cell:r=>fcell(fin(r,'roe_pct'),'pct')},
+    {h:'ROCE', num:1, val:r=>fval(r,'roce_pct'), cell:r=>fcell(fin(r,'roce_pct'),'pct')},
+    {h:'Debt/Equity', num:1, val:r=>fval(r,'debt_equity'), cell:r=>fcell(fin(r,'debt_equity'),'ratio')},
+    {h:'Asset Base (₹ Cr)', num:1, val:r=>fval(r,'asset_base_cr'), cell:r=>fcell(fin(r,'asset_base_cr'),'money')},
+    {h:'Promoter Hold', num:1, val:r=>fval(r,'promoter_hold_pct'), cell:r=>fcell(fin(r,'promoter_hold_pct'),'pct')},
+    {h:'Lead Managers', cls:'subtle', val:r=>r.leadManagers, cell:r=>r.leadManagers?esc(r.leadManagers.join(', ')):dash},
+    {h:'Score', num:1, cls:'score-cell', always:1, cell:r=>scoreNum(r.score)},
+    {h:'Reco.', always:1, cell:r=>r.bucket?bucketTag(r.bucket):dash},
+    {h:'Source', always:1, cell:r=>srcRec(r)},
+  ];
+  const cols = COLS.filter(c=>c.always || recs.some(r=>{ const v=c.val(r); return v!=null && v!==''; }));
+  const table = document.getElementById('appendix-table');
+  if(!recs.length){
+    table.innerHTML = `<tbody><tr><td class="subtle" style="padding:14px">No DRHP filings match these filters — see the IPO Pipeline (NSE) below for board/stage data.</td></tr></tbody>`;
+    return;
+  }
+  const thead = `<thead><tr>${cols.map(c=>`<th class="${c.num?'num':''}">${esc(c.h)}</th>`).join('')}</tr></thead>`;
+  const body = recs.map((r,i)=>`<tr class="apx-row" data-idx="${i}">${
+      cols.map(c=>`<td class="${c.cls||''} ${c.num?'num':''}">${c.cell(r)}</td>`).join('')}</tr>`).join('');
+  table.innerHTML = thead + `<tbody>${body}</tbody>`;
+  table.querySelectorAll('.apx-row').forEach(tr=>tr.addEventListener('click', e=>{
+    if(e.target.closest('a')) return;
+    openDrawer(APX_VIEW[+tr.dataset.idx]);
+  }));
+}
+
+/* Field Coverage audit — confirms nothing in the tracker is silently dropped */
+function renderCoverage(){
+  const host = document.getElementById('coverage'); if(!host) return;
+  const fl = DATA.filings || [], N = fl.length;
+  const present = (v)=> v!=null && v!=='';
+  const fv = (f,k)=> f.financials[k] ? f.financials[k].value : null;
+  const fields = [
+    {name:'SEBI Filing Date', get:f=>f.filing_date},
+    {name:'Filing Type', get:f=>f.filing_type},
+    {name:'Sector', get:f=>f.sector},
+    {name:'Sub-sector / Industry Tag', get:f=>f.sub_sector},
+    {name:'Business Model Summary', get:f=>f.business_summary},
+    {name:'Issue Type', get:f=>f.issue.type},
+    {name:'Fresh Issue (₹ Cr)', get:f=>f.issue.fresh_cr},
+    {name:'OFS (₹ Cr)', get:f=>f.issue.ofs_cr},
+    {name:'Total Issue Size (₹ Cr)', get:f=>f.issue.total_cr},
+    {name:'Market Cap (₹ Cr)', get:f=>f.issue.market_cap_cr},
+    {name:'Issue / Market Cap', get:f=>f.issue.issue_to_mktcap_pct},
+    {name:'Revenue FY25', get:f=>fv(f,'revenue_fy25'), score:1},
+    {name:'Revenue FY24', get:f=>fv(f,'revenue_fy24')},
+    {name:'Revenue Growth', get:f=>fv(f,'rev_growth_pct'), score:1},
+    {name:'EBITDA FY25', get:f=>fv(f,'ebitda_fy25')},
+    {name:'EBITDA Margin', get:f=>fv(f,'ebitda_margin_pct')},
+    {name:'PAT FY25', get:f=>fv(f,'pat_fy25')},
+    {name:'PAT FY24', get:f=>fv(f,'pat_fy24')},
+    {name:'PAT Growth', get:f=>fv(f,'pat_growth_pct'), score:1},
+    {name:'PAT Margin', get:f=>fv(f,'pat_margin_pct'), score:1},
+    {name:'ROE', get:f=>fv(f,'roe_pct'), score:1},
+    {name:'ROCE', get:f=>fv(f,'roce_pct'), score:1},
+    {name:'Debt / Equity', get:f=>fv(f,'debt_equity')},
+    {name:'Asset Base (₹ Cr)', get:f=>fv(f,'asset_base_cr')},
+    {name:'Promoter Holding', get:f=>fv(f,'promoter_hold_pct')},
+    {name:'Lead Managers', get:f=>(f.lead_managers&&f.lead_managers.length)?'y':null},
+    {name:'Score', get:f=>f.score.total, score:1},
+    {name:'Recommendation', get:f=>f.score.bucket},
+    {name:'Source (SEBI / PDF)', get:f=>f.sources&&(f.sources.sebi_url||f.sources.drhp_pdf_url)},
+  ];
+  const rows = fields.map(fd=>{
+    const avail = fl.filter(f=>present(fd.get(f))).length;
+    const inDash = avail>0 ? '<span class="cov-yes">Yes</span>' : '<span class="cov-no">Hidden — no data</span>';
     return `<tr>
-      <td>${companyCell(x)}</td>
-      <td>${boardChip(x.board)}</td>
-      <td>${stageChip(x.current_stage)}</td>
-      <td class="subtle">${esc(x.filing_type)}</td>
-      <td class="subtle">${dfmt(x.filing_date)}</td>
-      <td class="subtle">${esc(x.sector||'—')}</td>
-      <td class="subtle">${esc(x.sub_sector||'—')}</td>
-      <td>${esc(x.issue.type||'—')}</td>
-      <td class="num">${money(x.issue.total_cr)}</td>
-      <td class="num">${fcell(fin.revenue_fy25,'money')}</td>
-      <td class="num">${fcell(fin.pat_fy25,'money')}</td>
-      <td class="num">${fcell(fin.ebitda_margin_pct,'pct')}</td>
-      <td class="num">${fcell(fin.roe_pct,'pct')}</td>
-      <td class="num">${fcell(fin.roce_pct,'pct')}</td>
-      <td class="subtle">${lm}</td>
-      <td class="num score-cell">${scoreNum(x.score.total)}</td>
-      <td>${bucketTag(x.score.bucket)}</td>
+      <td>${esc(fd.name)}</td>
+      <td class="num">${avail}/${N}</td>
+      <td class="num">${N-avail}</td>
+      <td>${inDash}</td>
+      <td>${fd.score?'<span class="cov-yes">Yes</span>':'<span class="subtle">—</span>'}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="17" class="subtle">No DRHP filings match these filters — see the IPO Pipeline (NSE) below for board/stage-level data.</td></tr>`;
+  }).join('');
+  host.innerHTML = `<div class="card">
+    <div class="panel-head"><h3>Field Coverage</h3><span class="muted tiny">Audit across ${N} filing${N!==1?'s':''} this week</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Field</th><th class="num">Available</th><th class="num">Missing</th><th>In Dashboard</th><th>In Score</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <div class="table-foot">“Available” counts filings where the field is disclosed. A column with 0 available is hidden in the tables above but tracked here, so no tracker field is silently dropped.</div>
+  </div>`;
 }
 
 /* Turn one NSE pipeline row into the shared drawer record, folding in a matched
@@ -837,7 +974,7 @@ function wireNav(){
 
 /* ---------------- Connected navigation into Market Heat ---------------- */
 function goMarketHeat(presets){
-  mh = {board:'All', stage:'All', sector:'All', reco:'All', ...presets};
+  mh = {...mhReset(), ...presets};
   activateTab('tab-heat');
   mhSyncUrl();
   renderMarketHeat();
@@ -845,22 +982,20 @@ function goMarketHeat(presets){
 /* keep the URL shareable: ?board=SME&sector=Consumer&stage=IPO_OPEN&reco=DIG_DEEPER */
 function mhSyncUrl(){
   const p = new URLSearchParams();
-  if(mh.board!=='All')  p.set('board', mh.board);
-  if(mh.stage!=='All')  p.set('stage', STAGE_KEYS[mh.stage]||mh.stage);
-  if(mh.sector!=='All') p.set('sector', mh.sector);
-  if(mh.reco!=='All')   p.set('reco', RECO_KEYS[mh.reco]||mh.reco);
+  MH_DIMS.forEach(d=>{
+    if(mh[d.key]!=='All') p.set(d.urlk, d.keymap ? (d.keymap[mh[d.key]]||mh[d.key]) : mh[d.key]);
+  });
   const qs = p.toString();
   history.replaceState(null, '', qs ? ('?'+qs) : location.pathname);
 }
 function mhFromUrl(){
   const p = new URLSearchParams(location.search);
   if(![...p.keys()].length) return false;
-  const stageRev = invert(STAGE_KEYS), recoRev = invert(RECO_KEYS);
   let any = false;
-  if(p.get('board'))  { mh.board  = p.get('board'); any=true; }
-  if(p.get('stage'))  { const v=p.get('stage'); mh.stage = stageRev[v]||v; any=true; }
-  if(p.get('sector')) { mh.sector = p.get('sector'); any=true; }
-  if(p.get('reco'))   { const v=p.get('reco'); mh.reco = recoRev[v]||v; any=true; }
+  MH_DIMS.forEach(d=>{
+    const raw = p.get(d.urlk);
+    if(raw){ mh[d.key] = d.keymap ? (invert(d.keymap)[raw]||raw) : raw; any=true; }
+  });
   return any;
 }
 
@@ -904,24 +1039,38 @@ function openDrawer(r){
     (r.issueOpen||r.issueClose) && row('Issue window', `${r.issueOpen?dfmt(r.issueOpen):'—'}${r.issueClose?' – '+dfmt(r.issueClose):''}`),
     r.listingDate && row('Listing date', dfmt(r.listingDate)),
   ].filter(Boolean).join('');
-  const market = [
+  const issue = [
+    r.issueType && row('Issue type', esc(r.issueType)),
+    r.freshCr!=null && row('Fresh issue', '₹'+money(r.freshCr)+' Cr'),
+    r.ofsCr!=null && row('Offer for sale', '₹'+money(r.ofsCr)+' Cr'),
+    r.issueSizeCr!=null && row('Total issue size', '₹'+money(r.issueSizeCr)+' Cr'),
+    r.marketCapCr!=null && row('Market cap', '₹'+money(r.marketCapCr)+' Cr'),
+    r.issueToMktcapPct!=null && row('Issue / market cap', pct(r.issueToMktcapPct)),
     r.priceBand && row('Price band', esc(r.priceBand)),
-    r.issueSizeCr!=null && row('Issue size', '₹'+money(r.issueSizeCr)+' Cr'),
     r.subscriptionX!=null && row('Subscription', subx(r.subscriptionX)),
     r.issuePrice!=null && row('Issue price', '₹'+money(r.issuePrice)),
+  ].filter(Boolean).join('');
+  const market = [
     row('Current price', '<span class="pending-cell">Pending</span>'),
     row('Listing gain / loss', '<span class="pending-cell">Pending</span>'),
-  ].filter(Boolean).join('');
+  ].join('');
   const fin = r.financials || {};
   const frow = (lab, mv, kind)=> (mv && mv.value!=null) ? row(lab, fcell(mv, kind)) : '';
   const financials = [
     frow('Revenue FY25', fin.revenue_fy25, 'money'),
+    frow('Revenue FY24', fin.revenue_fy24, 'money'),
     frow('Revenue growth', fin.rev_growth_pct, 'pct'),
+    frow('EBITDA FY25', fin.ebitda_fy25, 'money'),
     frow('EBITDA margin', fin.ebitda_margin_pct, 'pct'),
     frow('PAT FY25', fin.pat_fy25, 'money'),
+    frow('PAT FY24', fin.pat_fy24, 'money'),
+    frow('PAT growth', fin.pat_growth_pct, 'pct'),
     frow('PAT margin', fin.pat_margin_pct, 'pct'),
     frow('ROE', fin.roe_pct, 'pct'),
     frow('ROCE', fin.roce_pct, 'pct'),
+    frow('Debt / equity', fin.debt_equity, 'ratio'),
+    frow('Asset base', fin.asset_base_cr, 'money'),
+    frow('Promoter holding', fin.promoter_hold_pct, 'pct'),
   ].filter(Boolean).join('');
   // honest "what's missing" notes
   const missing = [];
@@ -944,10 +1093,13 @@ function openDrawer(r){
         ${r.subSector?row('Sub-sector', esc(r.subSector)):''}
         ${r.filingType?row('Document', esc(r.filingType)):''}
         ${r.symbol?row('NSE symbol', esc(r.symbol)):''}
+        ${r.leadManagers?row('Lead managers', esc(r.leadManagers.join(', '))):''}
         ${r.score!=null?row('Automated score', scoreNum(r.score)):''}
       </div>
+      ${r.businessSummary?`<div class="dw-h">Business model</div><div class="dw-biz">${esc(r.businessSummary)}</div>`:''}
       ${dates?`<div class="dw-h">Timeline</div><div class="dw-sec">${dates}</div>`:''}
-      ${market?`<div class="dw-h">Issue &amp; market</div><div class="dw-sec">${market}</div>`:''}
+      ${issue?`<div class="dw-h">Issue structure</div><div class="dw-sec">${issue}</div>`:''}
+      <div class="dw-h">Market &amp; listing</div><div class="dw-sec">${market}</div>
       ${financials?`<div class="dw-h">Financials (from the filing)</div><div class="dw-sec">${financials}</div>`:''}
       <div class="dw-h">Sources</div><div class="dw-sec dw-src">${srcRec(r)}</div>
       <div class="dw-h">What’s missing &amp; why</div>

@@ -160,9 +160,9 @@
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th class="num">#</th><th>Company</th><th>Sector</th>
-                <th class="num">Revenue FY25 (₹ Cr)</th><th class="num">Rev Growth</th>
-                <th class="num">PAT Margin</th><th class="num">ROE</th><th class="num">Score</th><th>Reco.</th>
+                <th class="num">#</th><th>Company</th><th>Sector / Sub-sector</th><th>Business Model</th>
+                <th class="num">Total Issue (₹ Cr)</th><th class="num">Rev Growth</th><th class="num">EBITDA Margin</th>
+                <th class="num">PAT Growth</th><th class="num">PAT Margin</th><th class="num">Score</th><th>Reco.</th>
               </tr></thead>
               <tbody id="watchlist"></tbody>
             </table>
@@ -195,18 +195,12 @@
         <div class="card block">
           <div class="appendix-toolbar" id="appendix-filters"></div>
           <div class="table-wrap">
-            <table id="appendix-table">
-              <thead><tr>
-                <th>Company</th><th>Board</th><th>Stage</th><th>Type</th><th>Filing Date</th><th>Sector</th><th>Sub-sector</th>
-                <th>Issue</th><th class="num">Issue (₹ Cr)</th><th class="num">Revenue FY25</th>
-                <th class="num">PAT FY25</th><th class="num">EBITDA Mgn</th><th class="num">ROE</th><th class="num">ROCE</th>
-                <th>Lead Managers</th><th class="num">Score</th><th>Reco.</th>
-              </tr></thead>
-              <tbody id="appendix"></tbody>
-            </table>
+            <table id="appendix-table"></table>
           </div>
-          <div class="table-foot">Figures sourced from the official filing PDF where available. A dot flags values to verify; “—” is undisclosed.</div>
+          <div class="table-foot">Full Excel-equivalent view. Empty columns are hidden and listed in Field Coverage below. Click any row for the complete record. A dot flags a value to verify (web-sourced / low confidence); “—” is not disclosed.</div>
         </div>
+
+        <div class="block" id="coverage"></div>
 
         <div class="block" id="ipo-pipeline"></div>
       </section>
