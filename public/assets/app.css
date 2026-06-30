@@ -62,7 +62,7 @@ a:hover { text-decoration: underline; }
 }
 .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; position: relative; z-index: 2; }
 .brand { display: flex; align-items: center; gap: 14px; }
-.brand img { width: 46px; height: 46px; }
+.brand img { width: auto; height: 50px; display: block; }
 .brand h1 { font-size: 27px; line-height: 1.1; }
 .brand .subtitle { font-family: var(--sans); font-size: 12.5px; color: var(--ink-soft); font-weight: 500; letter-spacing: 0.02em; margin-top: 3px; }
 .meta-block { text-align: right; font-size: 13px; color: var(--ink-soft); padding-top: 4px; }
