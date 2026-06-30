@@ -37,18 +37,49 @@ Monitor* → **Run workflow**.
 
 You only do this once. (It needs a Cloudflare account — free tier is fine.)
 
-1. Push this repository to GitHub (the dashboard code lives here too, once Phase 1 is built).
+1. Push this repository to GitHub (the dashboard and the pipeline live in the same repo).
 2. In **Cloudflare → Workers & Pages → Create → Pages → Connect to Git**, choose this repo.
-3. Set the build settings the Phase 1 dashboard needs (for a plain static build, the
-   output/publish directory is **`public`**; the data lives at `public/data/latest.json`).
+3. Build settings — it's a plain static site, so:
+   - **Framework preset:** None
+   - **Build command:** *(leave empty)*
+   - **Build output directory:** `public`
+   - **Production branch:** `main`
 4. Click **Save and Deploy**. Cloudflare now watches the `main` branch.
-5. Done. From now on, every weekly data commit to `main` makes Cloudflare rebuild and
-   redeploy the dashboard automatically.
+5. Done. From now on, every weekly data commit to `main` makes Cloudflare redeploy the
+   dashboard automatically.
+
+The dashboard is at `public/index.html`; it reads `public/data/latest.json` at load
+time, so a new data commit is all it takes to refresh the live site.
 
 Nothing else to wire up — the weekly Action already commits to `main`, and Cloudflare
 takes it from there.
 
 ---
+
+## The dashboard (Phase 1)
+
+A print-ready, static dashboard at `public/index.html` (`public/assets/` holds the
+styles and logic). It's deliberately framework-free — plain HTML/CSS/JS — so there's
+no build step and Cloudflare serves the `public/` folder as-is. It reads
+`public/data/latest.json` and renders five tabs: **Weekly Snapshot, Market Heat, Score
+Watchlist, Competitor Watch, Tracker Appendix**. A **Print / Save PDF** button (and the
+print stylesheet) lay every tab out in order across A4 pages, with the wide appendix on
+its own landscape page.
+
+### What's driven by live data vs. waiting on Stage 2
+
+| Live now (from `latest.json`) | Waiting on Stage 2 |
+|---|---|
+| KPI counts, buckets, sector concentration | Week-over-week delta pills *(light up automatically once a 2nd snapshot exists)* |
+| Top-3 by score, full Score Watchlist | **Competitor Watch** tab → shown as a clean "coming in Stage 2" state |
+| Market Heat charts + recommendation donut | `PORTFOLIO WATCH` stamp *(hidden while `competitor_impact` is null)* |
+| This week's filings, Tracker Appendix | Industry KPIs like ARPOB (`sector_kpis`) |
+| Filing stamps, source/confidence verify dots | Extracted risk factors (`risk_factors`) |
+
+Honest-data handling, as required: a `null` financial shows **"—"** (never `0`); an
+`INSUFFICIENT` score shows a calm **"not enough data"** tag; `low`-confidence or
+web-sourced figures get a small verify dot; and delta pills stay hidden until there's a
+prior snapshot to compare against.
 
 ## What it produces
 
