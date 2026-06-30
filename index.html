@@ -102,7 +102,7 @@
         </div>
       </section>
 
-      <!-- ===== Tab 2: Market Heat ===== -->
+      <!-- ===== Tab 2: Market Heat (unified explorer) ===== -->
       <section class="tab-panel" id="tab-heat" hidden>
         <div class="print-title">02 — Market Heat</div>
         <div class="section-head">
@@ -112,35 +112,27 @@
           </div>
         </div>
 
-        <div class="card block" id="lifecycle-card"></div>
+        <!-- one shared filter state, driven by these capsule selectors -->
+        <div class="mh-selectors block" id="mh-selectors"></div>
 
+        <!-- active-filter summary -->
+        <div class="mh-summary block no-print" id="mh-summary"></div>
+
+        <!-- visual guidance: left benchmark + right donut, both filter-aware -->
         <div class="cols-2 block">
-          <div class="card">
-            <div class="panel-head"><h3>New Filings by Sector</h3></div>
-            <div class="bars" id="bars-count"></div>
-            <div class="panel-divider"></div>
-            <div class="panel-head"><h3>Total Issue (₹ Cr) by Sector</h3></div>
-            <div class="bars" id="bars-issue"></div>
-          </div>
-          <div class="card">
-            <div class="panel-head"><h3>Recommendation Mix</h3></div>
-            <div id="donut"></div>
-            <div class="panel-divider"></div>
-            <div class="panel-head"><h3>Quick Insights</h3></div>
-            <div class="insights" id="insights"></div>
-          </div>
+          <div class="card" id="mh-benchmark"></div>
+          <div class="card" id="mh-donut"></div>
         </div>
 
-        <div class="card block">
-          <div class="panel-head"><h3>This Week's New DRHPs &amp; Prospectuses</h3></div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Company</th><th>Sector</th><th>Filing Date</th><th>Issue Type</th><th class="num">Issue (₹ Cr)</th><th class="num">Score</th><th>Reco.</th></tr></thead>
-              <tbody id="week-filings"></tbody>
-            </table>
+        <!-- one unified table for the whole IPO lifecycle -->
+        <div class="card block" id="mh-table-card">
+          <div class="panel-head">
+            <h3>Filtered Market Heat Data</h3>
+            <span class="muted tiny" id="mh-count"></span>
           </div>
+          <div class="table-wrap"><table id="mh-table"></table></div>
+          <div class="table-foot" id="mh-foot"></div>
         </div>
-        <div class="block" id="ipo-tables"></div>
       </section>
 
       <!-- ===== Tab 3: Score Watchlist ===== -->
@@ -217,6 +209,10 @@
       </footer>
     </main>
   </div>
+
+  <!-- ===== Row detail drawer (Market Heat) ===== -->
+  <div class="mh-drawer-overlay no-print" id="mh-drawer-overlay" hidden></div>
+  <aside class="mh-drawer no-print" id="mh-drawer" hidden aria-hidden="true"></aside>
 
   <script src="./assets/app.js"></script>
 </body>
