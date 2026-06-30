@@ -438,8 +438,9 @@ function renderIpoPipeline(){
   const total = all.length;
   if(apxFilter.board !== 'All') all = all.filter(r => r.board === apxFilter.board);
   if(apxFilter.stage !== 'All') all = all.filter(r => r.stage === apxFilter.stage);
-  const filtered = (apxFilter.board !== 'All' || apxFilter.stage !== 'All');
-  const note = filtered ? `${all.length} of ${total} · Board/Stage filtered` : `${total} issues`;
+  if(apxFilter.sector !== 'All') all = all.filter(r => r.sector === apxFilter.sector);
+  const filtered = (apxFilter.board !== 'All' || apxFilter.stage !== 'All' || apxFilter.sector !== 'All');
+  const note = filtered ? `${all.length} of ${total} · filtered` : `${total} issues`;
   host.innerHTML = `<div class="card">
     <div class="panel-head"><h3>IPO Pipeline — Full Tracker (NSE)</h3><span class="muted tiny">${note} · as of ${dfmt(m.as_of)}</span></div>
     <div class="table-wrap"><table>
