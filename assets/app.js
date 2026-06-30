@@ -241,7 +241,7 @@ function renderDonut(counts){
   document.getElementById('donut').innerHTML = `
     <div class="donut-wrap">
       <svg class="donut" width="140" height="140" viewBox="0 0 140 140">${segs}
-        <text x="70" y="66" text-anchor="middle" font-family="Inter, sans-serif" font-size="27" font-weight="700" fill="#0F2D52">${total}</text>
+        <text x="70" y="66" text-anchor="middle" font-family="Inter, sans-serif" font-size="27" font-weight="700" fill="#064E45">${total}</text>
         <text x="70" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF">filings</text>
       </svg>
       <div class="legend">${legend}</div>
