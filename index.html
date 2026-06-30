@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/app.css?v=20260630b">
+  <link rel="stylesheet" href="./assets/app.css?v=20260630c">
 </head>
 <body>
   <!-- ===================== Sidebar ===================== -->
@@ -98,7 +98,6 @@
               <h3>Key Alerts</h3>
             </div>
             <ul class="alert-list" id="alerts"></ul>
-            <div class="stage2-note">Portfolio &amp; competitor alerts activate in Stage 2.</div>
           </div>
           <div class="card card-emerald snap-card">
             <div class="panel-head snap-head">
@@ -167,7 +166,7 @@
               <tbody id="watchlist"></tbody>
             </table>
           </div>
-          <div class="table-foot">A small dot marks a figure to double-check (web-sourced or low confidence). “—” means the number wasn't disclosed — never assumed.</div>
+          <div class="table-foot">Source: SEBI filing financials. “—” indicates a figure not disclosed in the filing.</div>
         </div>
       </section>
 
@@ -197,10 +196,8 @@
           <div class="table-wrap">
             <table id="appendix-table"></table>
           </div>
-          <div class="table-foot">Full Excel-equivalent view. Empty columns are hidden and listed in Field Coverage below. Click any row for the complete record. A dot flags a value to verify (web-sourced / low confidence); “—” is not disclosed.</div>
+          <div class="table-foot">Source: SEBI public filings. “—” indicates a figure not disclosed in the filing.</div>
         </div>
-
-        <div class="block" id="coverage"></div>
 
         <div class="block" id="ipo-pipeline"></div>
       </section>
@@ -208,8 +205,7 @@
       <footer class="foot">
         <div id="foot-meta"></div>
         <div class="legend-inline">
-          <span><span class="cdot low"></span> verify (low confidence)</span>
-          <span><span class="cdot web"></span> web-sourced</span>
+          <span>Source: SEBI public filings &amp; NSE</span>
           <span>“—” = not disclosed</span>
         </div>
       </footer>
@@ -220,6 +216,6 @@
   <div class="mh-drawer-overlay no-print" id="mh-drawer-overlay" hidden></div>
   <aside class="mh-drawer no-print" id="mh-drawer" hidden aria-hidden="true"></aside>
 
-  <script src="./assets/app.js?v=20260630b"></script>
+  <script src="./assets/app.js?v=20260630c"></script>
 </body>
 </html>
