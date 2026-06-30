@@ -142,6 +142,7 @@ async function main(){
   renderAppendix();
   renderFooter();
   wireNav();
+  wireKpiSelect();
 }
 
 function renderHeader(){
@@ -578,6 +579,17 @@ function wireNav(){
     document.querySelector('.content').scrollIntoView({block:'start', behavior:'smooth'});
   }
   navBtns.forEach(b => b.addEventListener('click', () => activate(b.dataset.target)));
+}
+
+/* ---------------- KPI cards: click to select (green border) ---------------- */
+function wireKpiSelect(){
+  const main = document.querySelector('.main');
+  if(!main) return;
+  main.addEventListener('click', e => {
+    if(e.target.closest('a, button, select, input, label')) return;
+    const k = e.target.closest('.kpi');
+    if(k) k.classList.toggle('selected');
+  });
 }
 
 document.addEventListener('DOMContentLoaded', main);
