@@ -330,67 +330,74 @@ function renderMarketHeat(){
     return;
   }
   mhSelectors();
+  mhLifecycle();
   mhSummary();
   mhBenchmark();
   mhDonut();
   mhTable();
 }
 
-/* capsule selectors — one row per dimension, counts are facet-aware */
+const RECO_DISP = {'DIG DEEPER':'Dig Deeper','MONITOR':'Monitor','WATCH':'Watch','INSUFFICIENT':'Not Enough Data'};
+const stageLabel = (s)=> (STAGE[s]||{label:s}).label;
+
+/* compact control ribbon — one dropdown pill per dimension + Clear all */
 function mhSelectors(){
   const host = document.getElementById('mh-selectors'); if(!host) return;
   const stages = [...new Set(MARKET.map(r=>r.stage).filter(Boolean))]
     .sort((a,b)=>(STAGE_ORDER.indexOf(a))-(STAGE_ORDER.indexOf(b)));
   const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
   const recos = ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'].filter(b=>MARKET.some(r=>r.bucket===b));
-  const groups = [
-    {dim:'board',  label:'Board',          opts:['Mainboard','SME']},
-    {dim:'stage',  label:'Lifecycle',      opts:stages},
-    {dim:'reco',   label:'Recommendation', opts:recos, lab:b=>BUCKET[b].label},
-    {dim:'sector', label:'Sector',         opts:sectors},
-  ];
-  const valOf = (r,dim)=> dim==='reco' ? r.bucket : dim==='board' ? r.board : dim==='stage' ? r.stage : r.sector;
-  host.innerHTML = groups.map(g=>{
-    const facet = mhFiltered(g.dim);
-    const cap = (val, text)=>{
-      const on = mh[g.dim]===val;
-      const n = val==='All' ? facet.length : facet.filter(r=>valOf(r,g.dim)===val).length;
-      return `<button class="mh-cap ${on?'on':''}" data-dim="${g.dim}" data-val="${esc(val)}">
-        ${esc(text)} <span class="mh-cap-n">${n}</span></button>`;
-    };
-    return `<div class="mh-sel-group">
-      <span class="mh-sel-label">${g.label}</span>
-      <div class="mh-caps">
-        ${cap('All','All')}
-        ${g.opts.map(o=>cap(o, g.lab?g.lab(o):o)).join('')}
-      </div></div>`;
-  }).join('');
-  host.querySelectorAll('.mh-cap').forEach(b=>b.addEventListener('click',()=>{
-    const dim=b.dataset.dim, val=b.dataset.val;
-    mh[dim] = (mh[dim]===val) ? 'All' : val;   // click an active capsule to clear it
-    mhSyncUrl(); renderMarketHeat();
+  const pill = (dim, label, opts, disp)=>{
+    const cur = mh[dim];
+    const o = [`<option value="All" ${cur==='All'?'selected':''}>All</option>`]
+      .concat(opts.map(v=>`<option value="${esc(v)}" ${cur===v?'selected':''}>${esc(disp?disp(v):v)}</option>`)).join('');
+    return `<label class="mh-pill ${cur!=='All'?'on':''}">
+      <span class="mh-pill-lbl">${label}</span>
+      <select class="mh-pill-sel" data-dim="${dim}">${o}</select></label>`;
+  };
+  host.innerHTML = `
+    <div class="mh-ribbon-pills">
+      ${pill('board','Board',['Mainboard','SME'])}
+      ${pill('stage','Lifecycle',stages, stageLabel)}
+      ${pill('reco','Recommendation',recos, r=>RECO_DISP[r]||r)}
+      ${pill('sector','Sector',sectors)}
+    </div>
+    <button class="mh-ribbon-clear ${mhActive()?'':'hide'}">Clear all</button>`;
+  host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{
+    mh[s.dataset.dim] = s.value; mhSyncUrl(); renderMarketHeat();
   }));
+  const cl = host.querySelector('.mh-ribbon-clear');
+  if(cl) cl.addEventListener('click',()=>{ mh={board:'All',stage:'All',sector:'All',reco:'All'}; mhSyncUrl(); renderMarketHeat(); });
 }
 
-/* active-filter summary with removable chips */
+/* lifecycle guidance strip — compact chips with counts; click to set stage */
+function mhLifecycle(){
+  const host = document.getElementById('mh-lifecycle'); if(!host) return;
+  const rows = mhFiltered('stage');
+  const counts = {};
+  rows.forEach(r=>{ if(r.stage) counts[r.stage]=(counts[r.stage]||0)+1; });
+  const stages = Object.keys(counts).sort((a,b)=>STAGE_ORDER.indexOf(a)-STAGE_ORDER.indexOf(b));
+  if(!stages.length){ host.innerHTML=''; return; }
+  const chips = stages.map((s,i)=>`${i?'<span class="mh-lc-arrow">→</span>':''}<button class="mh-lc-chip ${mh.stage===s?'on':''}" data-dim="stage" data-val="${esc(s)}">${esc(stageLabel(s))} <b>${counts[s]}</b></button>`).join('');
+  host.innerHTML = `<span class="mh-lc-lab">Lifecycle</span><div class="mh-lc-track">${chips}</div>`;
+  mhWireFacets(host);
+}
+
+/* small active-filter summary, shown only when filters are applied */
 function mhSummary(){
   const host = document.getElementById('mh-summary'); if(!host) return;
-  if(!mhActive()){ host.innerHTML = `<span class="mh-show-all">Showing: <b>All Market Heat Data</b></span>`; return; }
-  const labels = {board:'Board', stage:'Stage', sector:'Sector', reco:'Reco.'};
-  const chips = Object.keys(labels).filter(k=>mh[k]!=='All').map(k=>{
-    const txt = k==='reco' ? BUCKET[mh[k]].label : mh[k];
-    return `<button class="mh-fchip" data-dim="${k}">${labels[k]}: <b>${esc(txt)}</b> <span class="x">✕</span></button>`;
-  }).join('');
-  host.innerHTML = `<span class="mh-sum-lab">Filters</span>${chips}<button class="mh-clear-all">Clear all</button>`;
-  host.querySelectorAll('.mh-fchip').forEach(b=>b.addEventListener('click',()=>{
+  if(!mhActive()){ host.innerHTML = ''; return; }
+  const disp = {board:b=>b, stage:stageLabel, sector:s=>s, reco:r=>RECO_DISP[r]||r};
+  const n = mhFiltered().length;
+  const chips = ['board','stage','sector','reco'].filter(k=>mh[k]!=='All').map(k=>
+    `<button class="mh-sum-chip" data-dim="${k}">${esc(disp[k](mh[k]))} <span class="x">✕</span></button>`).join('');
+  host.innerHTML = `<span class="mh-sum-show">Showing:</span>${chips}<span class="mh-sum-n">${n} record${n!==1?'s':''}</span>`;
+  host.querySelectorAll('.mh-sum-chip').forEach(b=>b.addEventListener('click',()=>{
     mh[b.dataset.dim]='All'; mhSyncUrl(); renderMarketHeat();
   }));
-  host.querySelector('.mh-clear-all').addEventListener('click',()=>{
-    mh={board:'All',stage:'All',sector:'All',reco:'All'}; mhSyncUrl(); renderMarketHeat();
-  });
 }
 
-/* left card — sector bars + lifecycle chips, both act as filters */
+/* left card — sector activity bars, which also act as a sector filter */
 function mhBenchmark(){
   const host = document.getElementById('mh-benchmark'); if(!host) return;
   const secRows = mhFiltered('sector');
@@ -404,23 +411,9 @@ function mhBenchmark(){
       <div class="bar-track"><div class="bar-fill" style="width:${n/maxC*100}%"></div></div>
       <div class="bv">${n}</div></div>`).join('')
     : `<div class="subtle tiny" style="padding:6px 0">No classified sectors in this view. Sector is disclosed on the SEBI filing — NSE-only listings stay unclassified.</div>`;
-
-  const stRows = mhFiltered('stage');
-  const stCounts = {};
-  stRows.forEach(r=>{ if(r.stage) stCounts[r.stage]=(stCounts[r.stage]||0)+1; });
-  const stArr = Object.keys(stCounts).sort((a,b)=>STAGE_ORDER.indexOf(a)-STAGE_ORDER.indexOf(b));
-  const chips = stArr.map(s=>{
-    const x = STAGE[s]||{cls:'st-filed',label:s};
-    return `<button class="mh-stage ${x.cls} ${mh.stage===s?'on':''}" data-dim="stage" data-val="${esc(s)}">
-      ${esc(x.label)} <b>${stCounts[s]}</b></button>`;
-  }).join('');
-
   host.innerHTML = `
     <div class="panel-head"><h3>Activity by Sector</h3></div>
-    <div class="bars">${bars}</div>
-    <div class="panel-divider"></div>
-    <div class="panel-head"><h3>Lifecycle Stages</h3></div>
-    <div class="mh-stage-row">${chips || '<span class="subtle tiny">No lifecycle data.</span>'}</div>`;
+    <div class="bars">${bars}</div>`;
   mhWireFacets(host);
 }
 
