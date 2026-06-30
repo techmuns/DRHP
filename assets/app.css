@@ -118,19 +118,18 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
 /* ---------- Main ---------- */
 .main { margin-left: var(--sidebar-w); min-height: 100vh; }
 .topbar {
-  position: relative; overflow: hidden;
+  position: relative; background: transparent; border: none; box-shadow: none;
+  min-height: 176px;
+  padding: 24px 32px 44px; display: flex; align-items: center; justify-content: space-between; gap: 22px;
+}
+/* Header image lives on its own masked layer: it fades to transparent at the bottom
+   so the SAME page surface continues underneath — no hard line, no colour seam. */
+.topbar::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background-image: url("./header-bg.jpg");
   background-size: cover; background-position: center right; background-repeat: no-repeat;
-  border-bottom: none; box-shadow: none;
-  min-height: 168px;
-  padding: 24px 32px 38px; display: flex; align-items: center; justify-content: space-between; gap: 22px;
-}
-/* soft fade so the header image dissolves into the page (no hard line) */
-.topbar::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 72px; pointer-events: none;
-  background: linear-gradient(to bottom,
-    rgba(248,247,240,0) 0%, rgba(248,247,240,0.45) 42%,
-    rgba(248,247,240,0.85) 76%, #F8F7F0 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, rgba(0,0,0,0) 100%);
 }
 .topbar-flourish { display: none; }   /* the header image already carries the wave */
 .title-wrap { position: relative; z-index: 2; }
@@ -425,6 +424,7 @@ a:hover { text-decoration: underline; }
   .no-print, .sidebar, .pill-tabs, .appendix-toolbar, .fchip-row { display: none !important; }
   .main { margin-left: 0; }
   .topbar { border: none; padding: 0 0 12px; background: none !important; min-height: 0; }
+  .topbar::before { display: none; }
   .title-wrap h1 { font-size: 26px; }
   .topbar-flourish { display: none; }
   .content { padding: 0; }
