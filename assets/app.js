@@ -848,6 +848,18 @@ function renderCoverage(){
   </div>`;
 }
 
+/* Company cell for the IPO Pipeline: a direct link to the SEBI document we
+   hold (exact PDF preferred, else the SEBI filing page) with a matching badge;
+   plain text and NO redirect when we hold nothing for that company. */
+function pipelineName(rec){
+  const s = rec.sources || {};
+  const href = s.drhp_pdf_url || s.sebi_url || null;
+  if(!href) return esc(rec.name);
+  const isPdf = !!s.drhp_pdf_url;
+  const badge = `<span class="ipo-doc ${isPdf?'pdf':'sebi'}">${isPdf?'PDF':'SEBI'}</span>`;
+  return `<a class="ipo-co" href="${esc(href)}" target="_blank" rel="noopener" title="Open the SEBI ${isPdf?'prospectus PDF':'filing page'}">${esc(rec.name)}</a>${badge}`;
+}
+
 /* Turn one NSE pipeline row into the shared drawer record, folding in a matched
    SEBI filing's sources/financials/score when we happen to hold them. */
 function nseToRec(r){
@@ -921,10 +933,8 @@ function renderIpoPipeline(){
       <thead><tr><th>Company</th><th>Board</th><th>Stage</th><th>Open</th><th>Close</th><th>Listed</th><th>Price Band</th><th class="num">Size (₹ Cr)</th><th class="num">Sub.</th><th class="num">Gain/Loss</th></tr></thead>
       <tbody>${all.map((r,i)=>{
         const rec = IPO_VIEW[i];
-        const badge = rec.sources && rec.sources.drhp_pdf_url ? `<span class="ipo-doc pdf" title="Exact prospectus PDF on file">PDF</span>`
-                    : rec.sources && rec.sources.sebi_url ? `<span class="ipo-doc sebi" title="SEBI filing page on file">SEBI</span>` : '';
         return `<tr class="ipo-row" data-idx="${i}">
-        <td class="company">${esc(r.company_name)}${badge}</td>
+        <td class="company">${pipelineName(rec)}</td>
         <td>${boardChip(r.board)}</td>
         <td>${stageChip(r.stage)}</td>
         <td class="subtle">${r.issue_open?dfmt(r.issue_open):'—'}</td>
@@ -936,7 +946,7 @@ function renderIpoPipeline(){
         <td class="num"><span class="pending-cell">Pending</span></td></tr>`;}).join('')
         || `<tr><td colspan="10" class="subtle">No IPO issues match these filters — <button class="mh-clear-inline" id="ipo-clear-inline">Clear filters</button></td></tr>`}</tbody>
     </table></div>
-    <div class="table-foot">Click any row for the full record we hold — dates, price band, issue size, subscription and source. Where we’ve scraped the SEBI filing, the panel links to the exact document (PDF/SEBI badge). Current price &amp; listing gain/loss aren’t in NSE’s feed — shown as pending, never estimated.</div>
+    <div class="table-foot">A company name links straight to its <b>SEBI document</b> where we hold it (PDF / SEBI badge); rows with no SEBI filing on record aren’t linked — never sent to a search. Click anywhere else on a row for the full record we hold. Current price &amp; listing gain/loss aren’t in NSE’s feed — shown as pending, never estimated.</div>
   </div>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{ ipoFilter[s.dataset.f]=s.value; renderIpoPipeline(); }));
   const reset = ()=>{ ipoFilter={board:'All',stage:'All'}; renderIpoPipeline(); };
