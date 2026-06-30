@@ -219,6 +219,79 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
   border: 1px solid rgba(8,122,90,0.16);
 }
 
+/* ============================================================================
+   Weekly Snapshot trio — premium green-glass cards, one balanced family
+   ========================================================================== */
+.cols-3.snap-trio { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+.snap-card { display: flex; flex-direction: column; padding: 17px 17px 18px; border-radius: 18px; }
+
+/* header: circular dark-emerald icon badge + title (grouped left) */
+.panel-head.snap-head { justify-content: flex-start; align-items: center; gap: 11px; margin-bottom: 15px; }
+.ph-badge {
+  width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; color: #CFE9DD;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #0C5E50 0%, #08382F 100%);
+  box-shadow: 0 4px 10px rgba(8,60,45,0.18), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.ph-badge svg { width: 17px; height: 17px; }
+.snap-head h3 { font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #0B3D33; }
+/* subtle butter accent under Key Alerts only */
+.alerts-head h3 { position: relative; }
+.alerts-head h3::after { content: ""; position: absolute; left: 0; bottom: -5px; width: 22px; height: 2px; border-radius: 2px; background: var(--accent-butter); }
+
+/* Top 3 — ranked list */
+.rank-list { display: flex; flex-direction: column; }
+.rank-row { display: flex; gap: 11px; align-items: flex-start; padding: 9px 6px; }
+.rank-row.lead { padding: 11px 12px; margin-bottom: 5px; border-radius: 13px;
+  background: rgba(255,255,255,0.6); border: 1px solid rgba(8,122,90,0.12); box-shadow: 0 3px 12px rgba(8,60,45,0.05); }
+.rank-row:not(.lead) + .rank-row:not(.lead) { border-top: 1px solid rgba(8,122,90,0.10); }
+.rank-no {
+  width: 24px; height: 24px; flex: 0 0 auto; border-radius: 50%; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #0C5E50, #08382F); color: #EAF6F1;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.rank-body { flex: 1; min-width: 0; }
+.rank-name .company { font-weight: 600; font-size: 13px; color: var(--navy); line-height: 1.25; }
+.rank-name .company a { color: var(--navy); }
+.rank-name .company a:hover { color: var(--emerald); }
+.rank-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 3px; }
+.rank-sec { font-size: 11.5px; color: var(--ink-faint); }
+.rank-stats { display: inline-flex; align-items: center; gap: 9px; flex: 0 0 auto; }
+.rank-score { font-size: 15px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+.rank-stats .tag { font-size: 9px; padding: 2px 8px; }
+
+/* Key Alerts — push the footnote to the bottom for an even baseline */
+.snap-card .stage2-note { margin-top: auto; padding-top: 14px; }
+
+/* Sector Concentration — icon tile + name + number pill, then a richer insight box */
+.snap-card .sector-chips { display: flex; flex-direction: column; gap: 7px; }
+.snap-card .sector-chip {
+  display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 12px; border-bottom: none;
+  background: rgba(255,255,255,0.5); border: 1px solid rgba(8,122,90,0.10); cursor: pointer; transition: all .14s;
+}
+.snap-card .sector-chip:hover { background: rgba(255,255,255,0.72); border-color: rgba(8,122,90,0.22); }
+.snap-card .sector-chip .sc-ico { width: 30px; height: 30px; border-radius: 9px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; background: var(--emerald-soft); color: var(--emerald); }
+.snap-card .sector-chip .sc-ico svg { width: 16px; height: 16px; }
+.snap-card .sector-chip .sc-name { flex: 1; font-weight: 600; font-size: 12.5px; color: var(--ink); }
+.snap-card .sector-chip .sc-count {
+  min-width: 30px; height: 26px; padding: 0 9px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--emerald-soft); border: 1px solid rgba(8,122,90,0.14);
+  color: var(--emerald); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.snap-card .concentration-note {
+  margin-top: auto; display: flex; align-items: flex-start; gap: 11px; margin-bottom: 0;
+  padding: 13px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(145deg, #0C5E50 0%, #0A4A40 100%);
+  box-shadow: 0 8px 20px rgba(8,60,45,0.18); color: #E7F4EE; font-size: 12px; line-height: 1.45;
+}
+.snap-card .concentration-note b { color: #F2D99A; }
+.snap-card .concentration-note .cn-ico { width: 30px; height: 30px; border-radius: 9px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; background: rgba(232,201,94,0.16); color: #F2D99A; }
+.snap-card .concentration-note .cn-ico svg { width: 16px; height: 16px; }
+
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .panel-head h3 { font-size: 12.5px; font-weight: 600; color: var(--navy); letter-spacing: 0.02em; text-transform: uppercase; }
 .panel-divider { height: 1px; background: var(--border-soft); margin: 22px 0; }
