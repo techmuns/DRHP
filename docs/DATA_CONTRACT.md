@@ -93,6 +93,36 @@ reject unknown fields). Stage-2 fields are present but always `null` for now.
 | `score.bucket` | `DIG DEEPER` · `MONITOR` · `WATCH` · `INSUFFICIENT` |
 | `stamps[]` | `FILED_THIS_WEEK` · `UPDATED` · `IPO_STAGE` · `PORTFOLIO_WATCH` |
 
+## IPO market layer (additive, from NSE)
+
+These fields were added on top of the frozen core. They are **nullable / best-effort**:
+NSE blocks datacenter IPs, so `ipo_market.available` may be `false` (UI shows a
+"pending source" state). Listing **gain/loss is always null** for now — NSE's quote API
+is blocked, so there is no current price to compute it from (never fabricated).
+
+Per-filing additions:
+```jsonc
+"board": "Mainboard",                 // Mainboard | SME | null
+"current_stage": "Listed",            // DRHP Filed | Updated/Corrected | IPO Open | Listing Soon | Listed | Withdrawn
+"listing_outcome": "Pending"          // Positive | Negative | Pending | null
+```
+
+Top-level `ipo_market`:
+```jsonc
+"ipo_market": {
+  "available": true,                  // false -> show "pending source"
+  "as_of": "2026-06-30", "source": "NSE",
+  "pulse": { "drhp_filed": 3, "updated": 1, "ipo_open": 3, "listing_soon": 1,
+             "listed": 22, "positive_listing": null, "negative_listing": null },
+  "by_board": { "mainboard": 3, "sme": 3 },
+  "open_upcoming": [ { "company_name": "...", "board": "SME", "symbol": "...",
+      "issue_open": "...", "issue_close": "...", "price_band": "Rs.125 to Rs.136",
+      "issue_size_cr": 184.96, "subscription_x": 1.11, "status": "Active", "stage": "IPO Open" } ],
+  "recent_listings": [ { "company_name": "...", "board": "Mainboard", "listing_date": "...",
+      "issue_price": null, "current_price": null, "gain_pct": null, "stage": "Listed" } ]
+}
+```
+
 ## UI rules the contract implies
 
 - Where a financial `value` is `null`, show **"—"**, not `0`.
