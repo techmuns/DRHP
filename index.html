@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/app.css?v=20260630h">
+  <link rel="stylesheet" href="./assets/app.css?v=20260630i">
 </head>
 <body>
   <!-- ===================== Sidebar ===================== -->
@@ -131,13 +131,11 @@
         <!-- active-filter summary (only when filters are applied) -->
         <div class="mh-summary block no-print" id="mh-summary"></div>
 
-        <!-- two-column grid: left Activity by Sector (60%) · right Rec Mix + Insights (40%) -->
+        <!-- three equal columns: Sector · Recommendation Mix · Quick Insights -->
         <div class="mh-grid block">
-          <div class="card mh-col-left" id="mh-benchmark"></div>
-          <div class="mh-col-right">
-            <div class="card" id="mh-donut"></div>
-            <div class="card" id="mh-insights"></div>
-          </div>
+          <div class="card mh-col" id="mh-benchmark"></div>
+          <div class="card mh-col" id="mh-donut"></div>
+          <div class="card mh-col" id="mh-insights"></div>
         </div>
 
         <!-- one unified table for the whole IPO lifecycle -->
@@ -221,6 +219,6 @@
   <div class="mh-drawer-overlay no-print" id="mh-drawer-overlay" hidden></div>
   <aside class="mh-drawer no-print" id="mh-drawer" hidden aria-hidden="true"></aside>
 
-  <script src="./assets/app.js?v=20260630h"></script>
+  <script src="./assets/app.js?v=20260630i"></script>
 </body>
 </html>
