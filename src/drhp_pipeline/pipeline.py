@@ -31,7 +31,8 @@ from .scoring import score_financials
 from .scraper import ScrapedFiling, scrape_all
 from .sectors import classify
 from .snapshot import compute_deltas, find_previous_snapshot_id, load_snapshot, save_snapshot
-from . import emit
+from . import emit, ipo_market
+from .contract import IpoMarket
 from .weeklogic import compute_window, select_this_week
 
 log = logging.getLogger("drhp.pipeline")
@@ -90,6 +91,32 @@ def build_summary(filings: List[Filing]) -> Summary:
     )
 
 
+def apply_lifecycle(filings: List[Filing], market: IpoMarket) -> None:
+    """Set board / current_stage / listing_outcome on each filing.
+
+    Stage defaults from the SEBI filing itself; if NSE lists the company in its
+    open/upcoming/listed feed (matched by normalized name), that more-advanced stage
+    and the board (Mainboard/SME) override it. Listing outcome stays 'Pending' because
+    listing price (hence gain/loss) is not available.
+    """
+    idx = ipo_market.index_by_name(market) if market and market.available else {}
+    for f in filings:
+        stamps = set(f.stamps)
+        if f.stage == "IPO" or "IPO_STAGE" in stamps:
+            stage = "Listed"
+        elif "UPDATED" in stamps:
+            stage = "Updated/Corrected"
+        else:
+            stage = "DRHP Filed"
+        row = idx.get(f.company_name_normalized)
+        if row is not None:
+            stage = row.stage or stage
+            f.board = row.board
+            if row.stage == "Listed":
+                f.listing_outcome = "Pending"
+        f.current_stage = stage
+
+
 def run(
     run_date: date,
     snapshots_dir: str = DEFAULT_SNAPSHOTS_DIR,
@@ -97,6 +124,8 @@ def run(
     appendix_path: Optional[str] = emit.APPENDIX_PATH,
     scratch_dir: str = "/tmp",
     prescraped: Optional[List[ScrapedFiling]] = None,
+    fetch_ipo: bool = True,
+    nse_raw: Optional[dict] = None,
 ) -> Dashboard:
     """Execute the full pipeline and return the emitted Dashboard."""
     window = compute_window(run_date)
@@ -115,10 +144,27 @@ def run(
 
     snapshot_id = run_date.isoformat()
     prev_id = find_previous_snapshot_id(snapshots_dir, snapshot_id)
-    if prev_id:
-        prev = load_snapshot(snapshots_dir, prev_id)
-        if prev and prev.get("summary"):
-            summary.deltas = compute_deltas(summary, prev["summary"])
+    prev = load_snapshot(snapshots_dir, prev_id) if prev_id else None
+    if prev and prev.get("summary"):
+        summary.deltas = compute_deltas(summary, prev["summary"])
+
+    # IPO market layer (NSE) — best-effort. If NSE is unreachable (e.g. it blocks the
+    # CI host), carry forward the last good data (clearly dated by its own as_of)
+    # instead of blanking the IPO modules.
+    sector_by_norm = {f.company_name_normalized: f.sector for f in filings if f.sector}
+    if nse_raw is not None:
+        raw = nse_raw
+    elif fetch_ipo:
+        raw = ipo_market.fetch_raw()
+    else:
+        raw = None
+    market = ipo_market.build_market(raw, run_date, sector_by_norm)
+    if not market.available and prev and (prev.get("ipo_market") or {}).get("available"):
+        market = IpoMarket(**prev["ipo_market"])
+        log.info("NSE unreachable — carried forward IPO data as of %s.", market.as_of)
+    apply_lifecycle(filings, market)
+    market.pulse.drhp_filed = sum(1 for f in filings if f.stage == "DRHP")
+    market.pulse.updated = sum(1 for f in filings if "UPDATED" in f.stamps)
 
     meta = Meta(
         run_date=run_date.isoformat(),
@@ -129,7 +175,7 @@ def run(
         previous_snapshot_id=prev_id,
     )
 
-    dashboard = Dashboard(meta=meta, summary=summary, filings=filings)
+    dashboard = Dashboard(meta=meta, summary=summary, filings=filings, ipo_market=market)
 
     save_snapshot(dashboard, snapshots_dir)
     emit.write_latest(dashboard, output_path)
@@ -166,6 +212,12 @@ def _log_run_summary(dashboard: Dashboard) -> None:
     else:
         log.info("Deltas vs last week — DRHP %s, IPO %s, DIG DEEPER %s",
                  s.deltas.new_drhp, s.deltas.new_ipo, s.deltas.dig_deeper)
+    mk = dashboard.ipo_market
+    if mk and mk.available:
+        log.info("NSE IPO data: OK — %d open/upcoming, %d recent listings (gain/loss pending: no price feed).",
+                 len(mk.open_upcoming), len(mk.recent_listings))
+    else:
+        log.info("NSE IPO data: unavailable this run (blocked/unreachable) — IPO modules show 'pending source'.")
     log.info("─────────────────────────────")
 
 

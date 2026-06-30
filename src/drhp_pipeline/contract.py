@@ -123,6 +123,11 @@ class Filing(_Model):
     stamps: List[Stamp] = Field(default_factory=list)
     sources: Sources = Field(default_factory=Sources)
 
+    # ----- IPO lifecycle (from NSE; null when not matched / not available) -----
+    board: Optional[str] = None          # Mainboard | SME
+    current_stage: Optional[str] = None  # DRHP Filed | Updated/Corrected | IPO Open | Listing Soon | Listed | Withdrawn
+    listing_outcome: Optional[str] = None  # Positive | Negative | Pending | null
+
     # ----- STAGE 2 (always null in Stage 1; UI must tolerate null) -----
     competitor_impact: Optional[dict] = None
     risk_factors: Optional[List[str]] = None
@@ -173,10 +178,52 @@ class Meta(_Model):
 # ---------------------------------------------------------------------------
 # Root document
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# IPO market layer (from NSE) — additive; null/empty when the source is unreachable
+# ---------------------------------------------------------------------------
+class IpoRow(_Model):
+    company_name: str
+    board: Optional[str] = None          # Mainboard | SME
+    sector: Optional[str] = None
+    symbol: Optional[str] = None
+    issue_open: Optional[str] = None
+    issue_close: Optional[str] = None
+    listing_date: Optional[str] = None
+    price_band: Optional[str] = None
+    issue_size_cr: Optional[float] = None
+    subscription_x: Optional[float] = None
+    issue_price: Optional[float] = None
+    current_price: Optional[float] = None   # NSE quote blocked -> always null for now
+    gain_pct: Optional[float] = None        # listing gain/loss -> null until price exists
+    status: Optional[str] = None
+    stage: Optional[str] = None             # Upcoming | IPO Open | Listing Soon | Listed | Withdrawn
+
+
+class IpoPulse(_Model):
+    drhp_filed: Optional[int] = None
+    updated: Optional[int] = None
+    ipo_open: Optional[int] = None
+    listing_soon: Optional[int] = None
+    listed: Optional[int] = None
+    positive_listing: Optional[int] = None   # needs listing price -> null
+    negative_listing: Optional[int] = None
+
+
+class IpoMarket(_Model):
+    available: bool = False                  # false -> UI shows "pending source"
+    as_of: Optional[str] = None
+    source: Optional[str] = None
+    pulse: IpoPulse = Field(default_factory=IpoPulse)
+    by_board: dict = Field(default_factory=dict)
+    open_upcoming: List[IpoRow] = Field(default_factory=list)
+    recent_listings: List[IpoRow] = Field(default_factory=list)
+
+
 class Dashboard(_Model):
     meta: Meta
     summary: Summary
     filings: List[Filing] = Field(default_factory=list)
+    ipo_market: Optional[IpoMarket] = None
 
     def to_json(self, indent: int = 2) -> str:
         """Serialize to the exact contract JSON (nulls preserved, key order stable)."""

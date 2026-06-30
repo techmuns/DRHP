@@ -34,7 +34,7 @@ def test_end_to_end_offline(tmp_path):
         snapshots_dir=str(tmp_path / "snaps"),
         output_path=str(tmp_path / "latest.json"),
         appendix_path=str(tmp_path / "appendix.xlsx"),
-        prescraped=week_one(),
+        prescraped=week_one(), fetch_ipo=False,
     )
     assert d.summary.new_drhp_count == 2
     assert d.summary.new_ipo_count == 1
@@ -54,13 +54,13 @@ def test_deltas_appear_on_second_run(tmp_path):
     run(run_date=date(2026, 6, 23), snapshots_dir=snaps,
         output_path=str(tmp_path / "a.json"), appendix_path=None,
         prescraped=[sf("Acme Steel Limited", date(2026, 6, 20), "DRHP", "DRHP"),
-                    sf("Beta Pharma Limited", date(2026, 6, 21), "DRHP", "DRHP")])
+                    sf("Beta Pharma Limited", date(2026, 6, 21), "DRHP", "DRHP")], fetch_ipo=False)
     # Week 2: 3 DRHPs -> delta +1
     d2 = run(run_date=date(2026, 6, 30), snapshots_dir=snaps,
              output_path=str(tmp_path / "b.json"), appendix_path=None,
              prescraped=[sf("C One Limited", date(2026, 6, 25), "DRHP", "DRHP"),
                          sf("C Two Limited", date(2026, 6, 26), "DRHP", "DRHP"),
-                         sf("C Three Limited", date(2026, 6, 27), "DRHP", "DRHP")])
+                         sf("C Three Limited", date(2026, 6, 27), "DRHP", "DRHP")], fetch_ipo=False)
     assert d2.meta.previous_snapshot_id == "2026-06-23"
     assert d2.summary.deltas is not None
     assert d2.summary.deltas.new_drhp == "+1"
@@ -70,7 +70,7 @@ def test_idempotent_same_date(tmp_path):
     snaps = str(tmp_path / "snaps")
     out = str(tmp_path / "latest.json")
     kw = dict(run_date=date(2026, 6, 30), snapshots_dir=snaps, output_path=out,
-              appendix_path=None, prescraped=week_one())
+              appendix_path=None, prescraped=week_one(), fetch_ipo=False)
     run(**kw)
     first = open(out).read()
     run(**kw)
