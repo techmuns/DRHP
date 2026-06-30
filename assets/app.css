@@ -45,7 +45,7 @@
   --r:    12px;
   --r-lg: 16px;
 
-  --sidebar-w: 204px;
+  --sidebar-w: 196px;
 }
 
 * { box-sizing: border-box; }
@@ -68,37 +68,37 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
   background:
     linear-gradient(180deg, rgba(255,224,130,0.06), rgba(0,0,0,0) 22%),
     linear-gradient(180deg, #014C4C 0%, #013638 100%);
-  color: #EAF6F1; display: flex; flex-direction: column; padding: 18px 12px; z-index: 20;
+  color: #EAF6F1; display: flex; flex-direction: column; padding: 24px 14px 16px; z-index: 20;
 }
-.side-brand { display: flex; align-items: center; gap: 9px; padding: 2px 4px 16px; }
+.side-brand { display: flex; align-items: center; gap: 9px; padding: 0 4px; margin-bottom: 14px; }
 .side-logo-box {
   flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
   background: transparent; box-shadow: none; border-radius: 0;
 }
-.side-logo-box img { height: 34px; width: auto; display: block; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.30)); }
+.side-logo-box img { height: 31px; width: auto; display: block; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.30)); }
 .side-brand-txt { display: flex; flex-direction: column; line-height: 1.1; }
-.side-brand-txt strong { font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif; color: #fff; font-size: 18px; font-weight: 600; letter-spacing: 0.01em; }
+.side-brand-txt strong { font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif; color: #fff; font-size: 17px; font-weight: 600; letter-spacing: 0.01em; }
 .side-brand-txt span { color: #E2B964; font-size: 9.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
 
 /* small Munshot branding capsule under the logo */
 .brand-capsule {
   display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
-  margin: 0 4px 14px; padding: 3px 10px 3px 4px; border-radius: 999px;
+  margin: 0 4px 18px; padding: 2px 9px 2px 3px; border-radius: 999px;
   background: rgba(214,166,75,0.10); border: 1px solid rgba(214,166,75,0.30);
   color: #E2B964; font-size: 9.5px; font-weight: 600; letter-spacing: 0.03em;
 }
 .brand-capsule strong { color: #F2D99A; font-weight: 700; }
 .bc-mark { width: 17px; height: 17px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
 .bc-mark img { height: 11px; width: auto; display: block; }
-.side-label { font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #7FB0A4; padding: 4px 10px; }
-.side-nav { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
+.side-label { font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #7FB0A4; padding: 0 10px; margin-bottom: 8px; }
+.side-nav { display: flex; flex-direction: column; gap: 2px; margin-top: 0; }
 .snav {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 8px 10px; border: 0; border-radius: 8px; background: transparent;
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 7px 10px; border: 0; border-radius: 8px; background: transparent;
   color: #A8C8BE; font-family: var(--font); font-size: 12px; font-weight: 500; cursor: pointer;
   text-align: left; transition: background .15s, color .15s;
 }
-.snav .ic { width: 17px; height: 17px; opacity: 0.9; }
+.snav .ic { width: 16px; height: 16px; opacity: 0.9; }
 .snav:hover { background: rgba(255,255,255,0.06); color: #fff; }
 .snav.active {
   background: linear-gradient(180deg, rgba(15,139,116,0.34), rgba(11,111,99,0.30));
@@ -119,8 +119,8 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
 .main { margin-left: var(--sidebar-w); min-height: 100vh; }
 .topbar {
   position: relative; background: transparent; border: none; box-shadow: none;
-  min-height: 176px;
-  padding: 24px 32px 44px; display: flex; align-items: center; justify-content: space-between; gap: 22px;
+  min-height: 144px;
+  padding: 20px 32px 28px; display: flex; align-items: center; justify-content: space-between; gap: 22px;
 }
 /* Header image lives on its own masked layer: it fades to transparent at the bottom
    so the SAME page surface continues underneath — no hard line, no colour seam. */
@@ -135,9 +135,9 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
 .title-wrap { position: relative; z-index: 2; }
 .title-wrap h1 {
   font-family: "Cormorant Garamond", "Playfair Display", "Didot", Georgia, serif;
-  font-size: 44px; line-height: 1.04; font-weight: 600; letter-spacing: -0.02em; color: #083D35;
+  font-size: 38px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: #083D35;
 }
-.title-wrap p { margin: 8px 0 0; color: #5F6673; font-size: 14px; font-weight: 400; letter-spacing: 0.01em; }
+.title-wrap p { margin: 6px 0 0; color: #5F6673; font-size: 13.5px; font-weight: 400; letter-spacing: 0.01em; }
 .head-right { position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; }
 .week-selector {
   display: flex; align-items: center; gap: 11px;
@@ -172,9 +172,9 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
 .pill.active .pn { background: rgba(255,255,255,0.22); color: #fff; }
 
 /* ---------- Content & sections ---------- */
-.content { padding: 18px 26px 56px; }
+.content { padding: 12px 26px 48px; }
 .tab-panel[hidden] { display: none; }
-.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 13px; }
 .eyebrow {
   display: inline-flex; align-items: center;
   font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #087A5A;
@@ -182,7 +182,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
   border-radius: 999px; padding: 5px 12px; margin-bottom: 4px;
 }
 .section-title { font-size: 18px; font-weight: 700; margin-top: 5px; letter-spacing: -0.02em; }
-.block { margin-bottom: 18px; }
+.block { margin-bottom: 15px; }
 
 /* ---------- Cards ---------- */
 .card {
@@ -193,29 +193,30 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
   box-shadow: 0 6px 20px rgba(8,45,38,0.06), inset 0 1px 0 rgba(232,201,94,0.14); padding: 18px;
 }
 /* Emerald glass-wash cards — light, high-transparency, themed (used as a family
-   on the Weekly Snapshot trio). Soft green atmosphere over an ivory base. */
+   on the Weekly Snapshot trio). Soft green atmosphere over an ivory base —
+   clearly mint-green, but still light and airy, never opaque or dark. */
 .card-emerald {
   background:
-    radial-gradient(circle at 100% 0%, rgba(11,111,99,0.06), transparent 38%),
-    linear-gradient(180deg, rgba(244,250,246,0.92) 0%, rgba(232,244,237,0.88) 100%);
-  border: 1px solid rgba(8,122,90,0.12);
-  box-shadow: 0 8px 24px rgba(8,60,45,0.05), inset 0 1px 0 rgba(255,255,255,0.55);
+    radial-gradient(120% 100% at 100% 0%, rgba(11,111,99,0.12), transparent 46%),
+    linear-gradient(180deg, rgba(230,244,237,0.95) 0%, rgba(208,233,221,0.93) 100%);
+  border: 1px solid rgba(8,122,90,0.18);
+  box-shadow: 0 8px 24px rgba(8,60,45,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
 }
 /* slight, family-consistent variation in where the green glow sits */
 .cols-3 .card-emerald:nth-child(2) {
   background:
-    radial-gradient(circle at 0% 0%, rgba(11,111,99,0.055), transparent 36%),
-    linear-gradient(180deg, rgba(245,251,247,0.93) 0%, rgba(231,243,236,0.88) 100%);
+    radial-gradient(120% 100% at 0% 0%, rgba(11,111,99,0.11), transparent 46%),
+    linear-gradient(180deg, rgba(232,245,238,0.95) 0%, rgba(206,232,220,0.93) 100%);
 }
 .cols-3 .card-emerald:nth-child(3) {
   background:
-    radial-gradient(circle at 100% 100%, rgba(14,143,114,0.06), transparent 40%),
-    linear-gradient(135deg, rgba(244,250,246,0.94) 0%, rgba(228,242,234,0.89) 100%);
+    radial-gradient(120% 100% at 100% 100%, rgba(14,143,114,0.13), transparent 50%),
+    linear-gradient(135deg, rgba(230,244,237,0.96) 0%, rgba(204,231,218,0.93) 100%);
 }
 /* the small inset note inside Sector Concentration picks up the same wash */
 .card-emerald .concentration-note {
-  background: rgba(226,241,233,0.65);
-  border: 1px solid rgba(8,122,90,0.10);
+  background: rgba(203,230,217,0.72);
+  border: 1px solid rgba(8,122,90,0.16);
 }
 
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
