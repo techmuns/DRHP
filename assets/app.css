@@ -85,7 +85,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
 /* small Munshot branding capsule under the logo */
 .brand-capsule {
   display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
-  margin: 0 4px 28px; padding: 3px 10px 3px 3px; border-radius: 999px;
+  margin: 0 4px 52px; padding: 3px 10px 3px 3px; border-radius: 999px;
   background: rgba(214,166,75,0.10); border: 1px solid rgba(214,166,75,0.30);
   color: #E2B964; font-size: 9.5px; font-weight: 600; letter-spacing: 0.03em;
 }
@@ -107,7 +107,15 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
   color: #fff; box-shadow: inset 3px 0 0 var(--accent-butter), 0 0 0 1px rgba(232,201,94,0.12), 0 6px 16px rgba(232,201,94,0.10);
 }
 .snav.active .ic { color: #6FE0C0; opacity: 1; }
-.side-foot { margin-top: auto; padding-top: 16px; }
+
+/* Source Centre — Tracker Appendix lives by the export button, faded so it
+   reads as a secondary reference area, not a primary workspace view. */
+.side-foot { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); }
+.side-label-faint { color: #5E8A80; opacity: 0.8; margin-bottom: 6px; }
+.snav-source { opacity: 0.5; font-size: 11.5px; margin-bottom: 12px; }
+.snav-source .ic { opacity: 0.7; }
+.snav-source:hover { opacity: 0.9; }
+.snav-source.active { opacity: 1; }
 .export-btn {
   display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
   padding: 11px; border: 1px solid rgba(255,255,255,0.16); border-radius: 10px;

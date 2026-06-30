@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/app.css?v=20260630c">
+  <link rel="stylesheet" href="./assets/app.css?v=20260630d">
 </head>
 <body>
   <!-- ===================== Sidebar ===================== -->
@@ -34,12 +34,13 @@
       <button class="snav" data-target="tab-competitor" aria-label="Competitor Watch">
         <svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
         <span>Competitor Watch</span></button>
-      <button class="snav" data-target="tab-appendix" aria-label="Tracker Appendix">
-        <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
-        <span>Tracker Appendix</span></button>
     </nav>
 
     <div class="side-foot">
+      <div class="side-label side-label-faint">Source Centre</div>
+      <button class="snav snav-source" data-target="tab-appendix" aria-label="Tracker Appendix">
+        <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+        <span>Tracker Appendix</span></button>
       <button class="export-btn" onclick="window.print()">
         <svg viewBox="0 0 24 24" class="ic"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M5 21h14"/></svg>
         Export / Print
@@ -216,6 +217,6 @@
   <div class="mh-drawer-overlay no-print" id="mh-drawer-overlay" hidden></div>
   <aside class="mh-drawer no-print" id="mh-drawer" hidden aria-hidden="true"></aside>
 
-  <script src="./assets/app.js?v=20260630c"></script>
+  <script src="./assets/app.js?v=20260630d"></script>
 </body>
 </html>
