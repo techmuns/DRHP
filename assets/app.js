@@ -371,8 +371,10 @@ function renderCompetitor(){
 /* ---------------- Tab 5: Tracker Appendix ---------------- */
 function renderAppendix(){
   const f = DATA.filings || [];
+  const m = ipoMarket();
+  const ipoRows = [...(m.open_upcoming||[]), ...(m.recent_listings||[])];
   const sectors = [...new Set(f.map(x=>x.sector).filter(Boolean))].sort();
-  const stages = [...new Set(f.map(x=>x.current_stage).filter(Boolean))];
+  const stages = [...new Set([...f.map(x=>x.current_stage), ...ipoRows.map(r=>r.stage)].filter(Boolean))];
   const buckets = ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'];
   const sel = (id,label,opts) => `<label class="apx-f"><span>${label}</span><select data-f="${id}">
     <option value="All">All</option>${opts.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select></label>`;
@@ -383,10 +385,10 @@ function renderAppendix(){
       ${sel('sector','Sector',sectors)}${sel('bucket','Reco.',buckets)}
       <button class="fchip" id="apx-reset">Reset</button>`;
     tb.dataset.wired = '1';
-    tb.querySelectorAll('select').forEach(s=>s.addEventListener('change',()=>{apxFilter[s.dataset.f]=s.value; renderAppendixRows();}));
+    tb.querySelectorAll('select').forEach(s=>s.addEventListener('change',()=>{apxFilter[s.dataset.f]=s.value; renderAppendixRows(); renderIpoPipeline();}));
     tb.querySelector('#apx-reset').addEventListener('click',()=>{
       apxFilter={board:'All',stage:'All',sector:'All',bucket:'All'};
-      tb.querySelectorAll('select').forEach(s=>s.value='All'); renderAppendixRows();
+      tb.querySelectorAll('select').forEach(s=>s.value='All'); renderAppendixRows(); renderIpoPipeline();
     });
   }
   renderAppendixRows();
@@ -421,7 +423,7 @@ function renderAppendixRows(){
       <td class="num score-cell">${scoreNum(x.score.total)}</td>
       <td>${bucketTag(x.score.bucket)}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="17" class="subtle">No filings match these filters.</td></tr>`;
+  }).join('') || `<tr><td colspan="17" class="subtle">No DRHP filings match these filters — see the IPO Pipeline (NSE) below for board/stage-level data.</td></tr>`;
 }
 
 function renderIpoPipeline(){
@@ -432,9 +434,14 @@ function renderIpoPipeline(){
       <div class="pending-tag">Pending source — NSE IPO data not reached this run.</div></div>`;
     return;
   }
-  const all = [...(m.open_upcoming||[]), ...(m.recent_listings||[])];
+  let all = [...(m.open_upcoming||[]), ...(m.recent_listings||[])];
+  const total = all.length;
+  if(apxFilter.board !== 'All') all = all.filter(r => r.board === apxFilter.board);
+  if(apxFilter.stage !== 'All') all = all.filter(r => r.stage === apxFilter.stage);
+  const filtered = (apxFilter.board !== 'All' || apxFilter.stage !== 'All');
+  const note = filtered ? `${all.length} of ${total} · Board/Stage filtered` : `${total} issues`;
   host.innerHTML = `<div class="card">
-    <div class="panel-head"><h3>IPO Pipeline — Full Tracker (NSE)</h3><span class="muted tiny">${all.length} issues · as of ${dfmt(m.as_of)}</span></div>
+    <div class="panel-head"><h3>IPO Pipeline — Full Tracker (NSE)</h3><span class="muted tiny">${note} · as of ${dfmt(m.as_of)}</span></div>
     <div class="table-wrap"><table>
       <thead><tr><th>Company</th><th>Board</th><th>Stage</th><th>Open</th><th>Close</th><th>Listed</th><th>Price Band</th><th class="num">Size (₹ Cr)</th><th class="num">Sub.</th><th class="num">Gain/Loss</th></tr></thead>
       <tbody>${all.map(r=>`<tr>
@@ -447,7 +454,8 @@ function renderIpoPipeline(){
         <td class="subtle">${r.price_band?esc(r.price_band):'—'}</td>
         <td class="num">${r.issue_size_cr==null?'—':money(r.issue_size_cr)}</td>
         <td class="num">${subx(r.subscription_x)}</td>
-        <td class="num"><span class="pending-cell">Pending</span></td></tr>`).join('')}</tbody>
+        <td class="num"><span class="pending-cell">Pending</span></td></tr>`).join('')
+        || `<tr><td colspan="10" class="subtle">No IPO issues match these filters.</td></tr>`}</tbody>
     </table></div>
     <div class="table-foot">Source: NSE public IPO data. Merchant banker, city, current price and listing gain/loss are not in NSE's feed — shown as pending, never estimated.</div>
   </div>`;
