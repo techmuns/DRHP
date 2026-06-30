@@ -84,8 +84,9 @@ function companyCell(f, withSources=true){
   return `<div class="company">${name}</div>${withSources ? srcRow(f) : ''}`;
 }
 
-function deltaPill(d){
-  if(d==null) return `<div class="delta none">— first snapshot</div>`;
+function deltaPill(d, action){
+  // No prior week to compare: the card is clickable, so label it by its action.
+  if(d==null) return `<div class="delta action">${esc(action||'View')} <span class="da-arrow">→</span></div>`;
   if(d==='flat') return `<div class="delta flat">● flat vs last week</div>`;
   const up = d.startsWith('+');
   return `<div class="delta ${up?'up':'down'}">${up?'▲':'▼'} ${esc(d)} vs last week</div>`;
@@ -299,20 +300,23 @@ function renderSnapshot(){
   const s = DATA.summary, f = DATA.filings, d = s.deltas;
 
   const kpis = [
-    {k:'doc',     cls:'kv1', label:'New DRHPs',        val:s.new_drhp_count, dl:d&&d.new_drhp, fk:'stage',  fv:'DRHP'},
-    {k:'trend',   cls:'kv2', label:'IPOs / Prospects', val:s.new_ipo_count,  dl:d&&d.new_ipo,  fk:'stage',  fv:'IPO'},
-    {k:'target',  cls:'kv3', label:'Dig Deeper',       val:s.buckets.dig_deeper, dl:d&&d.dig_deeper, fk:'bucket', fv:'DIG DEEPER'},
-    {k:'eye',     cls:'kv4', label:'Monitor',          val:s.buckets.monitor,    dl:d&&d.monitor,    fk:'bucket', fv:'MONITOR'},
-    {k:'bookmark',cls:'kv5', label:'Watch',            val:s.buckets.watch,      dl:d&&d.watch,      fk:'bucket', fv:'WATCH'},
+    {k:'doc',     cls:'kv1', label:'New DRHPs',        action:'View New DRHPs', val:s.new_drhp_count, dl:d&&d.new_drhp, fk:'stage',  fv:'DRHP'},
+    {k:'trend',   cls:'kv2', label:'IPOs / Prospects', action:'View IPOs',      val:s.new_ipo_count,  dl:d&&d.new_ipo,  fk:'stage',  fv:'IPO'},
+    {k:'target',  cls:'kv3', label:'Dig Deeper',       action:'View Dig Deeper',val:s.buckets.dig_deeper, dl:d&&d.dig_deeper, fk:'bucket', fv:'DIG DEEPER'},
+    {k:'eye',     cls:'kv4', label:'Monitor',          action:'View Monitor',   val:s.buckets.monitor,    dl:d&&d.monitor,    fk:'bucket', fv:'MONITOR'},
+    {k:'bookmark',cls:'kv5', label:'Watch',            action:'View Watch',     val:s.buckets.watch,      dl:d&&d.watch,      fk:'bucket', fv:'WATCH'},
   ];
   const isSel = c => kpiFilter && kpiFilter.kind===c.fk && kpiFilter.value===c.fv;
   document.getElementById('kpi-grid').innerHTML = kpis.map(c => `
-    <div class="kpi ${c.cls} ${isSel(c)?'selected':''}" data-fk="${c.fk}" data-fv="${esc(c.fv)}" title="Filter to ${esc(c.label)}">
+    <div class="kpi ${c.cls} ${isSel(c)?'selected':''}" data-fk="${c.fk}" data-fv="${esc(c.fv)}" title="View ${esc(c.label)} in Market Heat">
       <div class="kpi-icon">${icon(c.k,20)}</div>
       <div class="kpi-label">${c.label}</div>
       <div class="kpi-value">${c.val}</div>
-      ${deltaPill(c.dl===undefined?null:c.dl)}
+      ${deltaPill(c.dl===undefined?null:c.dl, c.action)}
     </div>`).join('');
+
+  const st = document.getElementById('snapshot-status');
+  if(st) st.innerHTML = s.deltas ? '' : `<span class="baseline-chip">Baseline week · no prior week to compare</span>`;
 
   const fbar = document.getElementById('kpi-filter-bar');
   if(fbar){

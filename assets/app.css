@@ -335,6 +335,16 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
 .kpi .delta { margin-top: 9px; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px;
   background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.12); color: rgba(244,250,247,0.74); }
 .kpi .delta.up { color: #BFEAD7; } .kpi .delta.down { color: #F4CDC4; }
+/* no prior week → the pill becomes a subtle "view" affordance (card is clickable) */
+.kpi .delta.action { color: rgba(244,250,247,0.82); background: rgba(255,255,255,0.12); }
+.kpi:hover .delta.action { color: #fff; background: rgba(255,255,255,0.18); }
+.kpi .delta.action .da-arrow { font-weight: 700; transition: transform .15s; }
+.kpi:hover .delta.action .da-arrow { transform: translateX(2px); }
+
+/* baseline-week status — small muted note, only when there's no prior week */
+.snapshot-status:empty { display: none; }
+.baseline-chip { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: 0.01em;
+  color: var(--ink-faint); background: var(--grey-soft); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; }
 
 /* ---------- Column layouts ---------- */
 .cols-3 { display: grid; grid-template-columns: 1.12fr 1fr 0.95fr; gap: 16px; align-items: start; }
