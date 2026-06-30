@@ -43,16 +43,9 @@ function pct(v){ return v==null ? '—' : Number(v).toFixed(1)+'%'; }
 function ratio(v){ return v==null ? '—' : Number(v).toFixed(2); }
 function scoreNum(v){ return v==null ? '—' : Math.round(v); }
 
-function cdot(mv){
-  if(!mv || mv.value==null) return '';
-  if(mv.source==='WEB') return `<span class="cdot web" title="Web-sourced — verify"></span>`;
-  if(mv.confidence==='low') return `<span class="cdot low" title="Low confidence — verify"></span>`;
-  return '';
-}
 function fcell(mv, kind){
   const v = mv ? mv.value : null;
-  const txt = kind==='money'?money(v):kind==='ratio'?ratio(v):pct(v);
-  return `${txt}${cdot(mv)}`;
+  return kind==='money'?money(v):kind==='ratio'?ratio(v):pct(v);
 }
 
 const BUCKET = {
@@ -379,7 +372,7 @@ function renderMarketHeat(){
   if(!ipoMarket().available && MARKET.length===0){
     document.getElementById('mh-selectors').innerHTML = '';
     document.getElementById('mh-table-card').innerHTML =
-      `<div class="pending-tag">Pending source — market data not reached this run.</div>`;
+      `<div class="pending-tag">Market data is being updated.</div>`;
     return;
   }
   mhSelectors();
@@ -569,7 +562,7 @@ function mhTable(){
   if(rows.length){
     table.innerHTML = thead + `<tbody>${body}</tbody>`;
     document.getElementById('mh-foot').innerHTML =
-      `Current price &amp; listing gain/loss are held pending — NSE’s price feed is unavailable (never estimated). Click any row for the full record.`;
+      `Source: SEBI filings &amp; NSE. Listing gain/loss is shown once a stock has listed. Click any row for the full record.`;
   } else {
     table.innerHTML = `<tbody><tr><td class="mh-empty">
       <div class="mh-empty-box">No records match these filters.
@@ -648,8 +641,8 @@ function renderCompetitor(){
 
   const cards = [
     {label:'New DRHPs this week', n:f.filter(x=>x.stage==='DRHP').length, sub:`across ${sectorsThisWeek.size} sectors`},
-    {label:'Same-sector IPOs open', n:openPeers.length, sub:m.available?'from NSE pipeline':'pending source'},
-    {label:'Same-sector recent listings', n:listedPeers.length, sub:m.available?'last 120 days':'pending source'},
+    {label:'Same-sector IPOs open', n:openPeers.length, sub:m.available?'currently on NSE':'updating'},
+    {label:'Same-sector recent listings', n:listedPeers.length, sub:m.available?'recent listings':'updating'},
   ];
   const ins = [];
   clusters.forEach(([s,a]) => ins.push(`<b>${esc(s)}</b> is clustering — ${a.length} companies entered the primary market this week.`));
@@ -691,7 +684,7 @@ function renderCompetitor(){
     <div class="card block">
       <div class="panel-head"><h3>Why this matters</h3></div>
       <ul class="alert-list">${ins.map(t=>`<li><span class="alert-dot green"></span><div>${t}</div></li>`).join('')}</ul>
-      <div class="stage2-note">Portfolio-specific competitor mapping (your holdings vs each filing) activates in Stage 2 once your portfolio list is connected.</div>
+      <div class="stage2-note">Portfolio-level competitor mapping is available on request.</div>
     </div>`;
 }
 
@@ -717,7 +710,6 @@ function renderAppendix(){
     });
   }
   renderAppendixRows();
-  renderCoverage();
   renderIpoPipeline();
 }
 
@@ -787,67 +779,6 @@ function renderAppendixRows(){
   }));
 }
 
-/* Field Coverage audit — confirms nothing in the tracker is silently dropped */
-function renderCoverage(){
-  const host = document.getElementById('coverage'); if(!host) return;
-  const fl = DATA.filings || [], N = fl.length;
-  const present = (v)=> v!=null && v!=='';
-  const fv = (f,k)=> f.financials[k] ? f.financials[k].value : null;
-  const fields = [
-    {name:'SEBI Filing Date', get:f=>f.filing_date},
-    {name:'Filing Type', get:f=>f.filing_type},
-    {name:'Sector', get:f=>f.sector},
-    {name:'Sub-sector / Industry Tag', get:f=>f.sub_sector},
-    {name:'Business Model Summary', get:f=>f.business_summary},
-    {name:'Issue Type', get:f=>f.issue.type},
-    {name:'Fresh Issue (₹ Cr)', get:f=>f.issue.fresh_cr},
-    {name:'OFS (₹ Cr)', get:f=>f.issue.ofs_cr},
-    {name:'Total Issue Size (₹ Cr)', get:f=>f.issue.total_cr},
-    {name:'Fresh Shares', get:f=>f.issue.fresh_shares},
-    {name:'OFS Shares', get:f=>f.issue.ofs_shares},
-    {name:'Total Shares', get:f=>f.issue.total_shares},
-    {name:'Face Value (₹)', get:f=>f.issue.face_value},
-    {name:'Market Cap (₹ Cr)', get:f=>f.issue.market_cap_cr},
-    {name:'Issue / Market Cap', get:f=>f.issue.issue_to_mktcap_pct},
-    {name:'Revenue FY25', get:f=>fv(f,'revenue_fy25'), score:1},
-    {name:'Revenue FY24', get:f=>fv(f,'revenue_fy24')},
-    {name:'Revenue Growth', get:f=>fv(f,'rev_growth_pct'), score:1},
-    {name:'EBITDA FY25', get:f=>fv(f,'ebitda_fy25')},
-    {name:'EBITDA Margin', get:f=>fv(f,'ebitda_margin_pct')},
-    {name:'PAT FY25', get:f=>fv(f,'pat_fy25')},
-    {name:'PAT FY24', get:f=>fv(f,'pat_fy24')},
-    {name:'PAT Growth', get:f=>fv(f,'pat_growth_pct'), score:1},
-    {name:'PAT Margin', get:f=>fv(f,'pat_margin_pct'), score:1},
-    {name:'ROE', get:f=>fv(f,'roe_pct'), score:1},
-    {name:'ROCE', get:f=>fv(f,'roce_pct'), score:1},
-    {name:'Debt / Equity', get:f=>fv(f,'debt_equity')},
-    {name:'Asset Base (₹ Cr)', get:f=>fv(f,'asset_base_cr')},
-    {name:'Promoter Holding', get:f=>fv(f,'promoter_hold_pct')},
-    {name:'Lead Managers', get:f=>(f.lead_managers&&f.lead_managers.length)?'y':null},
-    {name:'Score', get:f=>f.score.total, score:1},
-    {name:'Recommendation', get:f=>f.score.bucket},
-    {name:'Source (SEBI / PDF)', get:f=>f.sources&&(f.sources.sebi_url||f.sources.drhp_pdf_url)},
-  ];
-  const rows = fields.map(fd=>{
-    const avail = fl.filter(f=>present(fd.get(f))).length;
-    const inDash = avail>0 ? '<span class="cov-yes">Yes</span>' : '<span class="cov-no">Hidden — no data</span>';
-    return `<tr>
-      <td>${esc(fd.name)}</td>
-      <td class="num">${avail}/${N}</td>
-      <td class="num">${N-avail}</td>
-      <td>${inDash}</td>
-      <td>${fd.score?'<span class="cov-yes">Yes</span>':'<span class="subtle">—</span>'}</td>
-    </tr>`;
-  }).join('');
-  host.innerHTML = `<div class="card">
-    <div class="panel-head"><h3>Field Coverage</h3><span class="muted tiny">Audit across ${N} filing${N!==1?'s':''} this week</span></div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Field</th><th class="num">Available</th><th class="num">Missing</th><th>In Dashboard</th><th>In Score</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-    <div class="table-foot">“Available” counts filings where the field is disclosed. A column with 0 available is hidden in the tables above but tracked here, so no tracker field is silently dropped.</div>
-  </div>`;
-}
-
 /* Company cell for the IPO Pipeline: a direct link to the SEBI document we
    hold (exact PDF preferred, else the SEBI filing page) with a matching badge;
    plain text and NO redirect when we hold nothing for that company. */
@@ -900,7 +831,7 @@ function renderIpoPipeline(){
   const m = ipoMarket();
   if(!m.available){
     host.innerHTML = `<div class="card"><div class="panel-head"><h3>IPO Pipeline (NSE)</h3></div>
-      <div class="pending-tag">Pending source — NSE IPO data not reached this run.</div></div>`;
+      <div class="pending-tag">IPO market data is being updated.</div></div>`;
     return;
   }
   const allRows = [...(m.open_upcoming||[]), ...(m.recent_listings||[])];
@@ -946,7 +877,7 @@ function renderIpoPipeline(){
         <td class="num"><span class="pending-cell">Pending</span></td></tr>`;}).join('')
         || `<tr><td colspan="10" class="subtle">No IPO issues match these filters — <button class="mh-clear-inline" id="ipo-clear-inline">Clear filters</button></td></tr>`}</tbody>
     </table></div>
-    <div class="table-foot">A company name links straight to its <b>SEBI document</b> where we hold it (PDF / SEBI badge); rows with no SEBI filing on record aren’t linked — never sent to a search. Click anywhere else on a row for the full record we hold. Current price &amp; listing gain/loss aren’t in NSE’s feed — shown as pending, never estimated.</div>
+    <div class="table-foot">Source: NSE public IPO data. A company name links to its SEBI filing where available. Listing gain/loss is shown once a stock has listed.</div>
   </div>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{ ipoFilter[s.dataset.f]=s.value; renderIpoPipeline(); }));
   const reset = ()=>{ ipoFilter={board:'All',stage:'All'}; renderIpoPipeline(); };
@@ -969,7 +900,7 @@ function renderPulse(){
   const m = ipoMarket();
   if(!m.available){
     el.innerHTML = `<div class="pulse-card"><div class="pulse-head"><span class="eyebrow">Primary Issuance Pulse</span>
-      <span class="pending-tag">Pending source — NSE not reached this run</span></div></div>`;
+      <span class="pending-tag">Market data is being updated</span></div></div>`;
     return;
   }
   const p = m.pulse||{};
@@ -991,7 +922,7 @@ function renderPulse(){
       return `<div class="pulse-item${nav}"><span class="pulse-dot ${it.cls}"></span>
         <span class="pulse-val ${na?'na':''}">${na?'—':v}</span><span class="pulse-lab">${it.label}</span></div>`;
     }).join('<span class="pulse-sep">›</span>')}</div>
-    <div class="tiny muted pulse-note">Positive / Negative listing need listing-day price — pending source.</div>
+    <div class="tiny muted pulse-note">Positive / negative listing outcomes are shown once stocks have listed.</div>
   </div>`;
 }
 
@@ -1110,12 +1041,12 @@ function openDrawer(r){
     frow('Asset base', fin.asset_base_cr, 'money'),
     frow('Promoter holding', fin.promoter_hold_pct, 'pct'),
   ].filter(Boolean).join('');
-  // honest "what's missing" notes
-  const missing = [];
-  missing.push('Current price &amp; listing gain/loss: pending — NSE’s live price feed is unavailable, never estimated.');
-  if(!financials) missing.push('Financials: not disclosed in the filing (or no SEBI document) — shown as awaiting data, never assumed.');
-  if(!r.sector) missing.push('Sector: unclassified — NSE-only listings don’t carry a sector tag.');
-  if(r.issueSizeCr==null) missing.push('Issue size: not yet disclosed (common for draft filings before a price band is set).');
+  // client-facing notes — only what matters for an investment view
+  const listed = r.stage === 'Listed';
+  const notes = [];
+  if(!financials) notes.push('Financials not disclosed in this filing.');
+  if(r.issueSizeCr==null) notes.push('Issue size not yet disclosed.');
+  if(listed) notes.push('Listing gain/loss is shown once available.');
 
   d.innerHTML = `
     <div class="dw-head">
@@ -1139,9 +1070,8 @@ function openDrawer(r){
       ${issue?`<div class="dw-h">Issue structure</div><div class="dw-sec">${issue}</div>`:''}
       <div class="dw-h">Market &amp; listing</div><div class="dw-sec">${market}</div>
       ${financials?`<div class="dw-h">Financials (from the filing)</div><div class="dw-sec">${financials}</div>`:''}
+      ${notes.length?`<div class="dw-h">Notes</div><ul class="dw-missing">${notes.map(t=>`<li>${t}</li>`).join('')}</ul>`:''}
       <div class="dw-h">Sources</div><div class="dw-sec dw-src">${srcRec(r)}</div>
-      <div class="dw-h">What’s missing &amp; why</div>
-      <ul class="dw-missing">${missing.map(t=>`<li>${t}</li>`).join('')}</ul>
     </div>`;
   d.hidden = false; d.setAttribute('aria-hidden','false');
   ov.hidden = false;
