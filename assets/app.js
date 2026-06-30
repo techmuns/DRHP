@@ -92,6 +92,32 @@ function deltaPill(d){
 /* palette for charts (matches CSS) */
 const PAL = {'DIG DEEPER':'#0E7A5F','MONITOR':'#D6A64B','WATCH':'#51607A','INSUFFICIENT':'#C7CDD6'};
 
+/* ---- IPO lifecycle helpers ---- */
+const STAGE = {
+  'DRHP Filed':       {cls:'st-filed',  label:'Filed'},
+  'Updated/Corrected':{cls:'st-upd',    label:'Updated'},
+  'Approved':         {cls:'st-appr',   label:'Approved'},
+  'Upcoming':         {cls:'st-upc',    label:'Upcoming'},
+  'IPO Open':         {cls:'st-open',   label:'IPO Open'},
+  'Listing Soon':     {cls:'st-soon',   label:'Listing Soon'},
+  'Listed':           {cls:'st-listed', label:'Listed'},
+  'Withdrawn':        {cls:'st-wd',     label:'Withdrawn'},
+};
+function stageChip(s){ if(!s) return ''; const x=STAGE[s]||{cls:'st-filed',label:s}; return `<span class="lc-chip ${x.cls}">${esc(x.label)}</span>`; }
+function boardChip(b, dash=true){ if(!b) return dash?'<span class="subtle tiny">—</span>':''; return `<span class="board-chip ${b==='SME'?'sme':'mb'}">${esc(b)}</span>`; }
+function dataStatusChip(f){ const ok = f.score && f.score.bucket!=='INSUFFICIENT'; return `<span class="ds-chip ${ok?'ok':'miss'}">${ok?'Complete':'Missing financials'}</span>`; }
+function subx(v){ return v==null ? '—' : Number(v).toFixed(2)+'×'; }
+function ipoMarket(){ return DATA.ipo_market || {available:false}; }
+
+let boardFilter = 'All';
+let apxFilter = {board:'All', stage:'All', sector:'All', bucket:'All'};
+
+function ipoFilteredLists(){
+  const m = ipoMarket();
+  const keep = r => boardFilter==='All' || r.board===boardFilter;
+  return { open:(m.open_upcoming||[]).filter(keep), listed:(m.recent_listings||[]).filter(keep) };
+}
+
 /* ====================================================================== */
 let DATA = null;
 
@@ -107,7 +133,10 @@ async function main(){
   }
   renderHeader();
   renderSnapshot();
+  renderPulse();
   renderMarketHeat();
+  renderLifecycleHeat();
+  renderIpoTables();
   renderWatchlist();
   renderCompetitor();
   renderAppendix();
@@ -274,7 +303,7 @@ function renderWatchlist(){
     const fin=x.financials;
     return `<tr>
       <td class="num subtle">${i+1}</td>
-      <td>${companyCell(x)}<div>${stamps(x.stamps)}</div></td>
+      <td>${companyCell(x)}<div class="row-chips">${boardChip(x.board,false)}${stageChip(x.current_stage)}${dataStatusChip(x)}${stamps(x.stamps)}</div></td>
       <td class="subtle">${esc(x.sector||'—')}${x.sub_sector?` · ${esc(x.sub_sector)}`:''}</td>
       <td class="num">${fcell(fin.revenue_fy25,'money')}</td>
       <td class="num">${fcell(fin.rev_growth_pct,'pct')}</td>
@@ -288,23 +317,95 @@ function renderWatchlist(){
 
 /* ---------------- Tab 4: Competitor Watch ---------------- */
 function renderCompetitor(){
-  const hasData = DATA.filings.some(x=>x.competitor_impact);
-  document.getElementById('competitor').innerHTML = hasData ? '' : `
-    <div class="empty-state">
-      <div class="es-ico">${icon('handshake',28)}</div>
-      <h3>Competitor &amp; portfolio-impact mapping</h3>
-      <p>This view links each new filing to companies in your portfolio — direct competitors, sector overlaps, and notes on potential impact. It activates once your portfolio list is connected.</p>
-      <span class="es-badge">COMING IN STAGE 2</span>
+  const host = document.getElementById('competitor');
+  const f = DATA.filings || [], m = ipoMarket();
+  const bySector = {};
+  f.forEach(x => { const s = x.sector || 'Unclassified'; (bySector[s] = bySector[s] || []).push(x); });
+  const clusters = Object.entries(bySector).filter(([, a]) => a.length >= 2);
+  const sectorsThisWeek = new Set(f.map(x => x.sector).filter(Boolean));
+  const openPeers = (m.open_upcoming || []).filter(r => r.sector && sectorsThisWeek.has(r.sector));
+  const listedPeers = (m.recent_listings || []).filter(r => r.sector && sectorsThisWeek.has(r.sector));
+
+  const cards = [
+    {label:'New DRHPs this week', n:f.filter(x=>x.stage==='DRHP').length, sub:`across ${sectorsThisWeek.size} sectors`},
+    {label:'Same-sector IPOs open', n:openPeers.length, sub:m.available?'from NSE pipeline':'pending source'},
+    {label:'Same-sector recent listings', n:listedPeers.length, sub:m.available?'last 120 days':'pending source'},
+  ];
+  const ins = [];
+  clusters.forEach(([s,a]) => ins.push(`<b>${esc(s)}</b> is clustering — ${a.length} companies entered the primary market this week.`));
+  if(openPeers.length) ins.push(`${openPeers.length} same-sector IPO${openPeers.length>1?'s are':' is'} currently open on NSE.`);
+  if(!ins.length) ins.push('No same-sector clustering detected in this week’s filings.');
+
+  const rows = f.map(x => {
+    const same = (bySector[x.sector||'Unclassified']||[]).length - 1;
+    return `<tr>
+      <td class="company">${esc(x.company_name)}</td>
+      <td class="subtle">${esc(x.sector||'—')}</td>
+      <td>${boardChip(x.board)}</td>
+      <td>${stageChip(x.current_stage)}</td>
+      <td class="num">${x.issue&&x.issue.total_cr!=null?money(x.issue.total_cr):'—'}</td>
+      <td>${x.listing_outcome?`<span class="pending-cell">${esc(x.listing_outcome)}</span>`:'<span class="subtle tiny">—</span>'}</td>
+      <td class="subtle">${same>0?`${same} same-sector peer${same>1?'s':''} this week`:'—'}</td></tr>`;
+  }).join('');
+
+  host.innerHTML = `
+    <div class="kpi-grid block" style="grid-template-columns:repeat(3,1fr)">
+      ${cards.map(c=>`<div class="kpi"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.n}</div><div class="tiny muted" style="margin-top:6px">${c.sub}</div></div>`).join('')}
+    </div>
+    <div class="cols-2 block">
+      <div class="card">
+        <div class="panel-head"><h3>Same-Sector Primary Market Activity</h3></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Company</th><th>Sector</th><th>Board</th><th>Stage</th><th class="num">Issue (₹ Cr)</th><th>Listing</th><th>Relevance</th></tr></thead>
+          <tbody>${rows||`<tr><td colspan="7" class="subtle">No filings this week.</td></tr>`}</tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="panel-head"><h3>Why this matters</h3></div>
+        <ul class="alert-list">${ins.map(t=>`<li><span class="alert-dot green"></span><div>${t}</div></li>`).join('')}</ul>
+        <div class="stage2-note">Portfolio-specific competitor mapping (your holdings vs each filing) activates in Stage 2 once your portfolio list is connected.</div>
+      </div>
     </div>`;
 }
 
 /* ---------------- Tab 5: Tracker Appendix ---------------- */
 function renderAppendix(){
-  document.getElementById('appendix').innerHTML = DATA.filings.map(x=>{
+  const f = DATA.filings || [];
+  const sectors = [...new Set(f.map(x=>x.sector).filter(Boolean))].sort();
+  const stages = [...new Set(f.map(x=>x.current_stage).filter(Boolean))];
+  const buckets = ['DIG DEEPER','MONITOR','WATCH','INSUFFICIENT'];
+  const sel = (id,label,opts) => `<label class="apx-f"><span>${label}</span><select data-f="${id}">
+    <option value="All">All</option>${opts.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select></label>`;
+  const tb = document.getElementById('appendix-filters');
+  if(tb && !tb.dataset.wired){
+    tb.innerHTML = `<span class="apx-title">Filters</span>
+      ${sel('board','Board',['Mainboard','SME'])}${sel('stage','Stage',stages)}
+      ${sel('sector','Sector',sectors)}${sel('bucket','Reco.',buckets)}
+      <button class="fchip" id="apx-reset">Reset</button>`;
+    tb.dataset.wired = '1';
+    tb.querySelectorAll('select').forEach(s=>s.addEventListener('change',()=>{apxFilter[s.dataset.f]=s.value; renderAppendixRows();}));
+    tb.querySelector('#apx-reset').addEventListener('click',()=>{
+      apxFilter={board:'All',stage:'All',sector:'All',bucket:'All'};
+      tb.querySelectorAll('select').forEach(s=>s.value='All'); renderAppendixRows();
+    });
+  }
+  renderAppendixRows();
+  renderIpoPipeline();
+}
+
+function renderAppendixRows(){
+  const f = (DATA.filings||[]).filter(x=>
+    (apxFilter.board==='All'  || x.board===apxFilter.board) &&
+    (apxFilter.stage==='All'  || x.current_stage===apxFilter.stage) &&
+    (apxFilter.sector==='All' || x.sector===apxFilter.sector) &&
+    (apxFilter.bucket==='All' || (x.score&&x.score.bucket)===apxFilter.bucket));
+  document.getElementById('appendix').innerHTML = f.map(x=>{
     const fin=x.financials;
     const lm = (x.lead_managers&&x.lead_managers.length)?esc(x.lead_managers.join(', ')):'—';
     return `<tr>
       <td>${companyCell(x)}</td>
+      <td>${boardChip(x.board)}</td>
+      <td>${stageChip(x.current_stage)}</td>
       <td class="subtle">${esc(x.filing_type)}</td>
       <td class="subtle">${dfmt(x.filing_date)}</td>
       <td class="subtle">${esc(x.sector||'—')}</td>
@@ -320,12 +421,142 @@ function renderAppendix(){
       <td class="num score-cell">${scoreNum(x.score.total)}</td>
       <td>${bucketTag(x.score.bucket)}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="15" class="subtle">No filings this week.</td></tr>`;
+  }).join('') || `<tr><td colspan="17" class="subtle">No filings match these filters.</td></tr>`;
+}
+
+function renderIpoPipeline(){
+  const host = document.getElementById('ipo-pipeline'); if(!host) return;
+  const m = ipoMarket();
+  if(!m.available){
+    host.innerHTML = `<div class="card"><div class="panel-head"><h3>IPO Pipeline (NSE)</h3></div>
+      <div class="pending-tag">Pending source — NSE IPO data not reached this run.</div></div>`;
+    return;
+  }
+  const all = [...(m.open_upcoming||[]), ...(m.recent_listings||[])];
+  host.innerHTML = `<div class="card">
+    <div class="panel-head"><h3>IPO Pipeline — Full Tracker (NSE)</h3><span class="muted tiny">${all.length} issues · as of ${dfmt(m.as_of)}</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Company</th><th>Board</th><th>Stage</th><th>Open</th><th>Close</th><th>Listed</th><th>Price Band</th><th class="num">Size (₹ Cr)</th><th class="num">Sub.</th><th class="num">Gain/Loss</th></tr></thead>
+      <tbody>${all.map(r=>`<tr>
+        <td class="company">${esc(r.company_name)}</td>
+        <td>${boardChip(r.board)}</td>
+        <td>${stageChip(r.stage)}</td>
+        <td class="subtle">${r.issue_open?dfmt(r.issue_open):'—'}</td>
+        <td class="subtle">${r.issue_close?dfmt(r.issue_close):'—'}</td>
+        <td class="subtle">${r.listing_date?dfmt(r.listing_date):'—'}</td>
+        <td class="subtle">${r.price_band?esc(r.price_band):'—'}</td>
+        <td class="num">${r.issue_size_cr==null?'—':money(r.issue_size_cr)}</td>
+        <td class="num">${subx(r.subscription_x)}</td>
+        <td class="num"><span class="pending-cell">Pending</span></td></tr>`).join('')}</tbody>
+    </table></div>
+    <div class="table-foot">Source: NSE public IPO data. Merchant banker, city, current price and listing gain/loss are not in NSE's feed — shown as pending, never estimated.</div>
+  </div>`;
 }
 
 function renderFooter(){
   document.getElementById('foot-meta').textContent =
     `Generated ${dfmt(DATA.meta.run_date)} · snapshot ${DATA.meta.snapshot_id} · source: SEBI public filings`;
+}
+
+/* ---------------- Weekly Snapshot: Primary Issuance Pulse ---------------- */
+function renderPulse(){
+  const el = document.getElementById('pulse-strip'); if(!el) return;
+  const m = ipoMarket();
+  if(!m.available){
+    el.innerHTML = `<div class="pulse-card"><div class="pulse-head"><span class="eyebrow">Primary Issuance Pulse</span>
+      <span class="pending-tag">Pending source — NSE not reached this run</span></div></div>`;
+    return;
+  }
+  const p = m.pulse||{};
+  const items = [
+    {k:'drhp_filed',  label:'DRHP Filed',   cls:'slate'},
+    {k:'updated',     label:'Updated',      cls:'gold'},
+    {k:'ipo_open',    label:'IPO Open',     cls:'green'},
+    {k:'listing_soon',label:'Listing Soon', cls:'gold'},
+    {k:'listed',      label:'Listed',       cls:'teal'},
+    {k:'positive_listing', label:'Positive', cls:'green'},
+    {k:'negative_listing', label:'Negative', cls:'red'},
+  ];
+  el.innerHTML = `<div class="pulse-card">
+    <div class="pulse-head"><span class="eyebrow">Primary Issuance Pulse</span>
+      <span class="muted tiny">Lifecycle · NSE as of ${dfmt(m.as_of)}</span></div>
+    <div class="pulse-row">${items.map(it=>{
+      const v=p[it.k]; const na=(v==null);
+      return `<div class="pulse-item"><span class="pulse-dot ${it.cls}"></span>
+        <span class="pulse-val ${na?'na':''}">${na?'—':v}</span><span class="pulse-lab">${it.label}</span></div>`;
+    }).join('<span class="pulse-sep">›</span>')}</div>
+    <div class="tiny muted pulse-note">Positive / Negative listing need listing-day price — pending source.</div>
+  </div>`;
+}
+
+/* ---------------- Market Heat: IPO Lifecycle Heat + tables ---------------- */
+function renderLifecycleHeat(){
+  const card = document.getElementById('lifecycle-card'); if(!card) return;
+  const m = ipoMarket();
+  if(!m.available){
+    card.innerHTML = `<div class="panel-head"><h3>IPO Lifecycle Heat</h3></div>
+      <div class="pending-tag">Pending source — NSE IPO data not reached this run.</div>`;
+    return;
+  }
+  const {open, listed} = ipoFilteredLists(); const p = m.pulse||{};
+  const stages = [
+    {label:'Filed',        n:p.drhp_filed, cls:'st-filed'},
+    {label:'Updated',      n:p.updated,    cls:'st-upd'},
+    {label:'Upcoming',     n:open.filter(r=>r.stage==='Upcoming').length,     cls:'st-upc'},
+    {label:'IPO Open',     n:open.filter(r=>r.stage==='IPO Open').length,     cls:'st-open'},
+    {label:'Listing Soon', n:open.filter(r=>r.stage==='Listing Soon').length, cls:'st-soon'},
+    {label:'Listed',       n:listed.length,  cls:'st-listed'},
+    {label:'Gain / Loss',  n:null,           cls:'st-gl'},
+  ];
+  const filters = ['All','Mainboard','SME'].map(b=>
+    `<button class="fchip ${boardFilter===b?'active':''}" data-board="${b}">${b}</button>`).join('');
+  card.innerHTML = `
+    <div class="panel-head"><h3>IPO Lifecycle Heat</h3><div class="fchip-row">${filters}</div></div>
+    <div class="lifecycle">${stages.map((s,i)=>
+      `${i?'<div class="lc-arrow">→</div>':''}<div class="lc-stage ${s.cls}"><div class="lc-n">${s.n==null?'—':s.n}</div><div class="lc-l">${s.label}</div></div>`
+    ).join('')}</div>
+    <div class="tiny muted" style="margin-top:10px">Gain/Loss needs listing-day price (NSE quote feed blocked) — held as pending.</div>`;
+  card.querySelectorAll('.fchip').forEach(b=>b.addEventListener('click',()=>{
+    boardFilter=b.dataset.board; renderLifecycleHeat(); renderIpoTables();
+  }));
+}
+
+function renderIpoTables(){
+  const host = document.getElementById('ipo-tables'); if(!host) return;
+  const m = ipoMarket();
+  if(!m.available){ host.innerHTML=''; return; }
+  const {open, listed} = ipoFilteredLists();
+  const listedTop = listed.slice(0, 12);
+  host.innerHTML = `<div class="cols-2">
+    <div class="card">
+      <div class="panel-head"><h3>Open / Upcoming IPOs</h3><span class="muted tiny">${open.length} shown</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Company</th><th>Board</th><th>Sector</th><th>Issue Dates</th><th class="num">Size (₹ Cr)</th><th class="num">Sub.</th><th>Status</th></tr></thead>
+        <tbody>${open.map(r=>`<tr>
+          <td class="company">${esc(r.company_name)}</td>
+          <td>${boardChip(r.board)}</td>
+          <td class="subtle">${esc(r.sector||'—')}</td>
+          <td class="subtle">${r.issue_open?dfmt(r.issue_open):'—'}${r.issue_close?' – '+dfmt(r.issue_close):''}</td>
+          <td class="num">${r.issue_size_cr==null?'—':money(r.issue_size_cr)}</td>
+          <td class="num">${subx(r.subscription_x)}</td>
+          <td>${stageChip(r.stage)}</td></tr>`).join('')||`<tr><td colspan="7" class="subtle">None in this view.</td></tr>`}</tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="panel-head"><h3>Recent Listing Performance</h3><span class="muted tiny">${listedTop.length} of ${listed.length}</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Company</th><th>Board</th><th class="num">Issue Price</th><th class="num">Current</th><th class="num">Gain/Loss</th><th>Listed</th></tr></thead>
+        <tbody>${listedTop.map(r=>`<tr>
+          <td class="company">${esc(r.company_name)}</td>
+          <td>${boardChip(r.board)}</td>
+          <td class="num">${r.issue_price==null?'—':'₹'+money(r.issue_price)}</td>
+          <td class="num"><span class="pending-cell">Pending</span></td>
+          <td class="num"><span class="pending-cell">Pending</span></td>
+          <td class="subtle">${dfmt(r.listing_date)}</td></tr>`).join('')||`<tr><td colspan="6" class="subtle">None in this view.</td></tr>`}</tbody>
+      </table></div>
+      <div class="table-foot">Current price &amp; listing gain/loss pending — NSE price feed unavailable (never estimated). Full list in Tracker Appendix.</div>
+    </div>
+  </div>`;
 }
 
 /* ---------------- Navigation (sidebar + pills, synced) ---------------- */
