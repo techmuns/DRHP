@@ -56,7 +56,11 @@
         "ofs_cr": null,
         "total_cr": null,
         "market_cap_cr": null,
-        "issue_to_mktcap_pct": null
+        "issue_to_mktcap_pct": null,
+        "fresh_shares": 16084000,
+        "ofs_shares": 1807000,
+        "total_shares": 17891000,
+        "face_value": 10.0
       },
       "financials": {
         "revenue_fy25": {
@@ -173,7 +177,11 @@
         "ofs_cr": null,
         "total_cr": null,
         "market_cap_cr": null,
-        "issue_to_mktcap_pct": null
+        "issue_to_mktcap_pct": null,
+        "fresh_shares": null,
+        "ofs_shares": null,
+        "total_shares": null,
+        "face_value": 1.0
       },
       "financials": {
         "revenue_fy25": {
@@ -291,7 +299,11 @@
         "ofs_cr": null,
         "total_cr": null,
         "market_cap_cr": null,
-        "issue_to_mktcap_pct": null
+        "issue_to_mktcap_pct": null,
+        "fresh_shares": null,
+        "ofs_shares": 7282300,
+        "total_shares": null,
+        "face_value": 10.0
       },
       "financials": {
         "revenue_fy25": {
@@ -408,7 +420,11 @@
         "ofs_cr": null,
         "total_cr": null,
         "market_cap_cr": null,
-        "issue_to_mktcap_pct": null
+        "issue_to_mktcap_pct": null,
+        "fresh_shares": null,
+        "ofs_shares": null,
+        "total_shares": null,
+        "face_value": null
       },
       "financials": {
         "revenue_fy25": {
@@ -525,7 +541,11 @@
         "ofs_cr": null,
         "total_cr": null,
         "market_cap_cr": null,
-        "issue_to_mktcap_pct": null
+        "issue_to_mktcap_pct": null,
+        "fresh_shares": null,
+        "ofs_shares": null,
+        "total_shares": null,
+        "face_value": null
       },
       "financials": {
         "revenue_fy25": {

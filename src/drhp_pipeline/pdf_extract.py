@@ -224,37 +224,103 @@ def extract_business_summary(lines: List[str], max_len: int = 240) -> Optional[s
     return None
 
 
-_FRESH_RE = re.compile(
-    r"fresh issue[^₹]{0,80}?₹?\s*([\d,]+(?:\.\d+)?)\s*(million|millions|crores?|lakhs?)", re.I)
-_OFS_RE = re.compile(
-    r"offer for sale[^₹]{0,80}?₹?\s*([\d,]+(?:\.\d+)?)\s*(million|millions|crores?|lakhs?)", re.I)
+@dataclass
+class IssueInfo:
+    type: Optional[str] = None
+    fresh_cr: Optional[float] = None
+    ofs_cr: Optional[float] = None
+    total_cr: Optional[float] = None
+    market_cap_cr: Optional[float] = None
+    fresh_shares: Optional[int] = None
+    ofs_shares: Optional[int] = None
+    total_shares: Optional[int] = None
+    face_value: Optional[float] = None
 
 
-def extract_issue(lines: List[str]) -> tuple[Optional[str], Optional[float], Optional[float]]:
-    """Return (issue_type, fresh_cr, ofs_cr). Amounts are often masked in a DRHP."""
+# A ₹ amount with a declared unit. The `[^₹]{0,N}` window means a *masked* amount
+# ("₹ [●] million") can't be reached past its own ₹, so placeholders never match
+# and we never invent a number that isn't in the document.
+_UNIT_GRP = r"(million|millions|crores?|lakhs?|lacs?|thousand)"
+_AMT_NUM = r"₹\s*([\d][\d,]*(?:\.\d+)?)\s*" + _UNIT_GRP
+
+
+def _amount_after(label: str, text: str, window: int = 160) -> Optional[float]:
+    rx = re.compile(label + r"[^₹]{0," + str(window) + r"}" + _AMT_NUM, re.I)
+    m = rx.search(text)
+    if not m:
+        return None
+    val = float(m.group(1).replace(",", ""))
+    return round(val * _UNIT_TO_CR.get(m.group(2).lower(), 0.1), 2)
+
+
+def _shares_after(patterns: List[str], text: str) -> Optional[int]:
+    for pat in patterns:
+        m = re.search(pat, text, re.I)
+        if m:
+            try:
+                return int(m.group(1).replace(",", ""))
+            except ValueError:
+                continue
+    return None
+
+
+def extract_issue(lines: List[str]) -> IssueInfo:
+    """Parse the offer structure from a DRHP.
+
+    ₹ amounts are usually masked with [●] in a draft prospectus (the size is only
+    fixed at the RHP/pricing stage), so those stay None — never guessed. The share
+    counts and face value, however, are disclosed and are captured here.
+    """
     text = "\n".join(lines)
     low = text.lower()
     has_fresh = "fresh issue" in low
     has_ofs = "offer for sale" in low
 
-    def amt(m):
-        if not m:
-            return None
-        val = float(m.group(1).replace(",", ""))
-        return round(val * _UNIT_TO_CR.get(m.group(2).lower(), 0.1), 2)
-
-    fresh_cr = amt(_FRESH_RE.search(text))
-    ofs_cr = amt(_OFS_RE.search(text))
-
+    info = IssueInfo()
     if has_fresh and has_ofs:
-        itype = "Both"
+        info.type = "Both"
     elif has_fresh:
-        itype = "Fresh"
+        info.type = "Fresh"
     elif has_ofs:
-        itype = "OFS"
-    else:
-        itype = None
-    return itype, fresh_cr, ofs_cr
+        info.type = "OFS"
+
+    info.fresh_cr = _amount_after(r"fresh issue", text)
+    info.ofs_cr = _amount_after(r"offer for sale", text)
+    info.market_cap_cr = _amount_after(r"market capitali[sz]", text)
+
+    info.fresh_shares = _shares_after(
+        [r"fresh issue of\s+(?:up to\s+)?([\d,]+)\s+equity shares"], text)
+    info.ofs_shares = _shares_after(
+        [r"offer for sale of\s+(?:up to\s+)?([\d,]+)\s+equity shares",
+         r"offer for sale comprises\s+(?:of\s+)?(?:up to\s+)?([\d,]+)\s+equity shares"], text)
+    if info.fresh_shares is not None and info.ofs_shares is not None:
+        info.total_shares = info.fresh_shares + info.ofs_shares
+    elif info.fresh_shares is not None and not has_ofs:
+        info.total_shares = info.fresh_shares
+    elif info.ofs_shares is not None and not has_fresh:
+        info.total_shares = info.ofs_shares
+
+    fm = re.search(r"face value (?:of\s+)?₹\s*([\d.]+)", text, re.I) \
+        or re.search(r"value\s+₹\s*([\d.]+)\s*each", text, re.I)
+    if fm:
+        try:
+            info.face_value = float(fm.group(1))
+        except ValueError:
+            pass
+
+    # Total issue ₹ — sum the two legs when both are disclosed, else a single leg,
+    # else a directly-stated total. Stays None when the document masks the amount.
+    direct_total = _amount_after(r"(?:total offer|the offer)", text)
+    if info.fresh_cr is not None and info.ofs_cr is not None:
+        info.total_cr = round(info.fresh_cr + info.ofs_cr, 2)
+    elif direct_total is not None:
+        info.total_cr = direct_total
+    elif info.fresh_cr is not None and not has_ofs:
+        info.total_cr = info.fresh_cr
+    elif info.ofs_cr is not None and not has_fresh:
+        info.total_cr = info.ofs_cr
+
+    return info
 
 
 # ---------------------------------------------------------------------------

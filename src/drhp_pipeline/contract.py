@@ -78,6 +78,12 @@ class Issue(_Model):
     total_cr: Optional[float] = None
     market_cap_cr: Optional[float] = None
     issue_to_mktcap_pct: Optional[float] = None
+    # Offer share structure — disclosed in the DRHP even when the ₹ amount is
+    # masked with [●] until the price band is set at the RHP stage.
+    fresh_shares: Optional[int] = None
+    ofs_shares: Optional[int] = None
+    total_shares: Optional[int] = None
+    face_value: Optional[float] = None
 
 
 # ---------------------------------------------------------------------------

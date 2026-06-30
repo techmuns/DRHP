@@ -68,3 +68,35 @@ def test_extract_handles_no_financials():
     raw = extract_from_lines(["Just some prose with no table.", "Nothing here."])
     assert raw.ok is False
     assert raw.revenue_fy25 is None
+
+
+# --- issue structure extraction -------------------------------------------
+from drhp_pipeline.pdf_extract import extract_issue
+
+
+def test_extract_issue_masked_amount_stays_none_but_shares_captured():
+    lines = [
+        "The Offer comprises of a Fresh Issue of up to 16,084,000 Equity Shares,",
+        "aggregating up to ₹ [●] million by our Company and an Offer for Sale of",
+        "up to 1,807,000 Equity Shares, aggregating up to ₹ [●] million by the",
+        "Promoter Selling Shareholders of face value ₹ 10 each.",
+    ]
+    info = extract_issue(lines)
+    assert info.type == "Both"
+    assert info.fresh_cr is None and info.ofs_cr is None  # masked, never guessed
+    assert info.fresh_shares == 16_084_000
+    assert info.ofs_shares == 1_807_000
+    assert info.total_shares == 17_891_000
+    assert info.face_value == 10.0
+
+
+def test_extract_issue_priced_amount_is_captured():
+    lines = [
+        "The Offer comprises of a Fresh Issue of up to 10,000,000 Equity Shares,",
+        "aggregating up to ₹ 1,500.00 million by our Company and an Offer for Sale",
+        "aggregating up to ₹ 500.00 million by the Selling Shareholders.",
+    ]
+    info = extract_issue(lines)
+    assert info.fresh_cr == 150.0   # 1500 million = 150 Cr
+    assert info.ofs_cr == 50.0
+    assert info.total_cr == 200.0
