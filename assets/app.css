@@ -192,6 +192,32 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; color: var(--navy); letter-spacing
   border: 1px solid #DDE7DF; border-radius: var(--r-lg);
   box-shadow: 0 6px 20px rgba(8,45,38,0.06), inset 0 1px 0 rgba(232,201,94,0.14); padding: 18px;
 }
+/* Emerald glass-wash cards — light, high-transparency, themed (used as a family
+   on the Weekly Snapshot trio). Soft green atmosphere over an ivory base. */
+.card-emerald {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(11,111,99,0.06), transparent 38%),
+    linear-gradient(180deg, rgba(244,250,246,0.92) 0%, rgba(232,244,237,0.88) 100%);
+  border: 1px solid rgba(8,122,90,0.12);
+  box-shadow: 0 8px 24px rgba(8,60,45,0.05), inset 0 1px 0 rgba(255,255,255,0.55);
+}
+/* slight, family-consistent variation in where the green glow sits */
+.cols-3 .card-emerald:nth-child(2) {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(11,111,99,0.055), transparent 36%),
+    linear-gradient(180deg, rgba(245,251,247,0.93) 0%, rgba(231,243,236,0.88) 100%);
+}
+.cols-3 .card-emerald:nth-child(3) {
+  background:
+    radial-gradient(circle at 100% 100%, rgba(14,143,114,0.06), transparent 40%),
+    linear-gradient(135deg, rgba(244,250,246,0.94) 0%, rgba(228,242,234,0.89) 100%);
+}
+/* the small inset note inside Sector Concentration picks up the same wash */
+.card-emerald .concentration-note {
+  background: rgba(226,241,233,0.65);
+  border: 1px solid rgba(8,122,90,0.10);
+}
+
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .panel-head h3 { font-size: 12.5px; font-weight: 600; color: var(--navy); letter-spacing: 0.02em; text-transform: uppercase; }
 .panel-divider { height: 1px; background: var(--border-soft); margin: 22px 0; }
