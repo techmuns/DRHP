@@ -19,6 +19,15 @@ const I = {
   handshake:'<path d="M3 12l4-4 5 5 5-5 4 4"/><path d="M7 8l5 5 5-5"/>',
   spark:'<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>',
   chart:'<path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="7"/><rect x="13" y="7" width="3" height="11"/>',
+  people:'<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0111 0"/><path d="M16 5.5a3 3 0 010 5.6M20.5 20a5.5 5.5 0 00-3.5-5.1"/>',
+  bank:'<path d="M3 9l9-5 9 5"/><path d="M4 9h16"/><path d="M6 9v8M10 9v8M14 9v8M18 9v8"/><path d="M3 20h18"/>',
+  cross:'<path d="M10 3.5h4a1 1 0 011 1V9h4.5a1 1 0 011 1v4a1 1 0 01-1 1H15v4.5a1 1 0 01-1 1h-4a1 1 0 01-1-1V15H4.5a1 1 0 01-1-1v-4a1 1 0 011-1H9V4.5a1 1 0 011-1z"/>',
+  cube:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
+};
+/* sector → tile icon (falls back to a generic building) */
+const SECTOR_ICON = {
+  Consumer:'people', Financials:'bank', Healthcare:'cross', Materials:'cube',
+  Industrials:'chart', Technology:'spark', Energy:'flame',
 };
 const icon = (k, sz=18) =>
   `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${I[k]||''}</svg>`;
@@ -284,13 +293,17 @@ function renderSnapshot(){
   }
 
   const ranked = filteredFilings().sort((a,b)=>(b.score.total??-1)-(a.score.total??-1)).slice(0,3);
-  document.getElementById('top3').innerHTML = ranked.map(x=>`
-    <tr>
-      <td>${companyCell(x, false)}</td>
-      <td class="subtle">${esc(x.sector||'—')}</td>
-      <td class="num score-cell">${scoreNum(x.score.total)}</td>
-      <td>${bucketTag(x.score.bucket)}</td>
-    </tr>`).join('') || `<tr><td colspan="4" class="subtle">No filings this week.</td></tr>`;
+  document.getElementById('top3').innerHTML = ranked.map((x,i)=>`
+    <div class="rank-row ${i===0?'lead':''}">
+      <span class="rank-no">${i+1}</span>
+      <div class="rank-body">
+        <div class="rank-name">${companyCell(x, false)}</div>
+        <div class="rank-meta">
+          <span class="rank-sec">${esc(x.sector||'—')}</span>
+          <span class="rank-stats"><span class="rank-score">${scoreNum(x.score.total)}</span>${bucketTag(x.score.bucket)}</span>
+        </div>
+      </div>
+    </div>`).join('') || `<div class="subtle tiny" style="padding:10px 2px">No filings this week.</div>`;
 
   const alerts = [];
   f.filter(x=>(x.stamps||[]).includes('IPO_STAGE')).forEach(x=>
@@ -308,16 +321,17 @@ function renderSnapshot(){
   const sc = [...(s.sector_concentration||[])].sort((a,b)=>b.count-a.count);
   document.getElementById('sectors').innerHTML = sc.map(x=>`
     <div class="sector-chip clickable" data-sector="${esc(x.sector)}" role="button" tabindex="0" title="Explore ${esc(x.sector)} in Market Heat">
-      <div class="sc-ico">${icon('building',17)}</div>
-      <div class="sc-name">${esc(x.sector)}</div>
-      <div class="sc-count">${x.count}</div>
+      <span class="sc-ico">${icon(SECTOR_ICON[x.sector]||'building',16)}</span>
+      <span class="sc-name">${esc(x.sector)}</span>
+      <span class="sc-count">${x.count}</span>
     </div>`).join('') || `<div class="subtle">No sector data.</div>`;
 
   const total = sc.reduce((a,x)=>a+x.count,0), top2 = sc.slice(0,2);
   const note = document.getElementById('sector-note');
   if(total && top2.length){
     const share = Math.round(top2.reduce((a,x)=>a+x.count,0)/total*100);
-    note.innerHTML = `${esc(top2.map(x=>x.sector).join(' and '))} together account for <b>${share}%</b> of new filing activity this week.`;
+    note.style.display='';
+    note.innerHTML = `<span class="cn-ico">${icon('chart',16)}</span><span class="cn-tx">${esc(top2.map(x=>x.sector).join(' and '))} together account for <b>${share}%</b> of new filing activity this week.</span>`;
   } else { note.style.display='none'; }
 }
 
