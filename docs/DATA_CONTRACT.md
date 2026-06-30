@@ -1,6 +1,6 @@
 # Data Contract (frozen)
 
-`public/data/latest.json` is the **only** interface between this pipeline and the
+`data/latest.json` is the **only** interface between this pipeline and the
 dashboard. Field names and shape are frozen — the UI is built to expect exactly this.
 The authoritative implementation is `src/drhp_pipeline/contract.py` (typed models that
 reject unknown fields). Stage-2 fields are present but always `null` for now.

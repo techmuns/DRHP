@@ -16,8 +16,8 @@ from .contract import Dashboard, Filing
 
 log = logging.getLogger("drhp.emit")
 
-LATEST_PATH = "public/data/latest.json"
-APPENDIX_PATH = "public/data/tracker_appendix.xlsx"
+LATEST_PATH = "data/latest.json"
+APPENDIX_PATH = "data/tracker_appendix.xlsx"
 
 # Fixed appendix column order (label, extractor).
 _COLUMNS = [
