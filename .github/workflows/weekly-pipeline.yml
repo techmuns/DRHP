@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: main         # always build from & push to main (the deployed branch),
+          fetch-depth: 0     # regardless of which branch triggered the run — and full
+                             # history so the rebase-retry below can find a merge base
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -58,7 +62,20 @@ jobs:
           git add data
           if git diff --cached --quiet; then
             echo "No data changes this run — nothing to commit."
-          else
-            git commit -m "data: weekly DRHP/IPO monitor refresh ($(date -u +%Y-%m-%d))"
-            git push origin HEAD:main
+            exit 0
           fi
+          git commit -m "data: weekly DRHP/IPO monitor refresh ($(date -u +%Y-%m-%d))"
+          # Push to main, self-healing against a concurrent update: if the push is
+          # rejected because main moved on, rebase our single data commit onto the
+          # latest main and retry rather than failing the whole run.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — rebasing onto latest main and retrying."
+            git fetch origin main
+            git rebase origin/main || { echo "Rebase hit a conflict — aborting."; git rebase --abort; exit 1; }
+          done
+          echo "Could not push after 5 attempts."
+          exit 1
