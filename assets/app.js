@@ -137,7 +137,7 @@ function filteredFilings(){ return (DATA.filings || []).filter(passKpi); }
 /* Market Heat — one shared filter state + one merged dataset             */
 /* ====================================================================== */
 let MARKET = [];   // every IPO-lifecycle record, merged from filings + NSE
-function mhReset(){ return {board:'All', stage:'All', sector:'All', reco:'All', subSector:'All', filingType:'All', issueType:'All'}; }
+function mhReset(){ return {board:'All', stage:'All', sector:'All', reco:'All', subSector:'All', filingType:'All', issueType:'All', window:'All'}; }
 let mh = mhReset();
 
 /* canonical lifecycle order (used to sort the Lifecycle selector) */
@@ -254,6 +254,33 @@ function buildMarket(){
   MARKET = out;
 }
 
+/* time-window layer — keep only records active within the last N days, measured
+   against the snapshot's as-of date (not the viewer's clock, so shared links stay
+   stable). "Active" = the most recent lifecycle date a record carries (filing,
+   issue window or listing), so drafts filter on their filing date while listed
+   IPOs filter on when they listed. Anything current or upcoming is always kept. */
+const MH_WINDOWS = [['All','Any time'],['30','Last 30 days'],['60','Last 60 days'],['90','Last 90 days']];
+function mhWindowLabel(v){ const o = MH_WINDOWS.find(w=>w[0]===v); return o ? o[1] : v; }
+function mhAsOf(){ const m = DATA && DATA.meta; return (m && (m.data_as_of || m.run_date)) || null; }
+function daysSince(iso, refIso){
+  const t = Date.parse(iso), r = Date.parse(refIso);
+  if(isNaN(t) || isNaN(r)) return null;
+  return Math.round((r - t) / 86400000);
+}
+/* most recent lifecycle date on a record (ISO strings sort chronologically,
+   so max() naturally ignores any stale sub-date) */
+function rowRecency(r){
+  const c = [r.filingDate, r.issueOpen, r.issueClose, r.listingDate].filter(Boolean);
+  return c.length ? c.reduce((a,b)=> a>b ? a : b) : null;
+}
+function mhInWindow(r){
+  if(mh.window === 'All') return true;
+  const asOf = mhAsOf(), ref = rowRecency(r);
+  if(!asOf || !ref) return false;               // undated record → excluded once a window is set
+  const d = daysSince(ref, asOf);
+  return d !== null && d <= (+mh.window);        // keep current/upcoming (d<=0) and up to N days old
+}
+
 /* one record matches the current filter set, optionally ignoring one dimension
    (so a facet's own chart still shows every still-clickable option) */
 function mhMatch(r, except){
@@ -261,10 +288,11 @@ function mhMatch(r, except){
     if(d.key===except) continue;
     if(mh[d.key]!=='All' && d.val(r)!==mh[d.key]) return false;
   }
+  if(except!=='window' && !mhInWindow(r)) return false;
   return true;
 }
 function mhFiltered(except){ return MARKET.filter(r=>mhMatch(r, except)); }
-function mhActive(){ return MH_DIMS.some(d=>mh[d.key]!=='All'); }
+function mhActive(){ return MH_DIMS.some(d=>mh[d.key]!=='All') || mh.window!=='All'; }
 
 /* ====================================================================== */
 let DATA = null;
@@ -416,8 +444,14 @@ function mhSelectors(){
       <select class="mh-pill-sel" data-dim="${d.key}">${o}</select></label>`;
   };
   const ribbonDims = RIBBON_KEYS.map(k=>MH_DIMS.find(d=>d.key===k)).filter(Boolean);
+  /* fixed-option time window — sits in the ribbon alongside the data-driven pills */
+  const windowPill = `<label class="mh-pill ${mh.window!=='All'?'on':''}">
+      <span class="mh-pill-lbl">Timeframe</span>
+      <select class="mh-pill-sel" data-dim="window">${
+        MH_WINDOWS.map(([v,l])=>`<option value="${v}" ${mh.window===v?'selected':''}>${l}</option>`).join('')
+      }</select></label>`;
   host.innerHTML = `
-    <div class="mh-ribbon-pills">${ribbonDims.map(pill).join('')}</div>
+    <div class="mh-ribbon-pills">${ribbonDims.map(pill).join('')}${windowPill}</div>
     <button class="mh-ribbon-clear ${mhActive()?'':'hide'}">Clear all</button>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{
     mh[s.dataset.dim] = s.value; mhSyncUrl(); renderMarketHeat();
@@ -457,7 +491,10 @@ function mhSummary(){
     const txt = d.disp ? d.disp(mh[d.key]) : mh[d.key];
     return `<button class="mh-sum-chip" data-dim="${d.key}">${esc(txt)} <span class="x">✕</span></button>`;
   }).join('');
-  host.innerHTML = `<span class="mh-sum-show">Showing:</span>${chips}<span class="mh-sum-n">${n} record${n!==1?'s':''}</span>`;
+  const winChip = mh.window!=='All'
+    ? `<button class="mh-sum-chip" data-dim="window">${esc(mhWindowLabel(mh.window))} <span class="x">✕</span></button>`
+    : '';
+  host.innerHTML = `<span class="mh-sum-show">Showing:</span>${chips}${winChip}<span class="mh-sum-n">${n} record${n!==1?'s':''}</span>`;
   host.querySelectorAll('.mh-sum-chip').forEach(b=>b.addEventListener('click',()=>{
     mh[b.dataset.dim]='All'; mhSyncUrl(); renderMarketHeat();
   }));
@@ -1008,6 +1045,7 @@ function mhSyncUrl(){
   MH_DIMS.forEach(d=>{
     if(mh[d.key]!=='All') p.set(d.urlk, d.keymap ? (d.keymap[mh[d.key]]||mh[d.key]) : mh[d.key]);
   });
+  if(mh.window!=='All') p.set('filed', mh.window);
   const qs = p.toString();
   history.replaceState(null, '', qs ? ('?'+qs) : location.pathname);
 }
@@ -1019,6 +1057,8 @@ function mhFromUrl(){
     const raw = p.get(d.urlk);
     if(raw){ mh[d.key] = d.keymap ? (invert(d.keymap)[raw]||raw) : raw; any=true; }
   });
+  const w = p.get('filed');
+  if(['30','60','90'].includes(w)){ mh.window = w; any = true; }
   return any;
 }
 
