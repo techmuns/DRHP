@@ -137,7 +137,7 @@ function filteredFilings(){ return (DATA.filings || []).filter(passKpi); }
 /* Market Heat — one shared filter state + one merged dataset             */
 /* ====================================================================== */
 let MARKET = [];   // every IPO-lifecycle record, merged from filings + NSE
-function mhReset(){ return {board:'All', stage:'All', sector:'All', reco:'All', subSector:'All', filingType:'All', issueType:'All'}; }
+function mhReset(){ return {board:'All', stage:'All', sector:'All', reco:'All', subSector:'All', filingType:'All', issueType:'All', window:'All'}; }
 let mh = mhReset();
 
 /* canonical lifecycle order (used to sort the Lifecycle selector) */
@@ -254,6 +254,33 @@ function buildMarket(){
   MARKET = out;
 }
 
+/* time-window layer — keep only records active within the last N days, measured
+   against the snapshot's as-of date (not the viewer's clock, so shared links stay
+   stable). "Active" = the most recent lifecycle date a record carries (filing,
+   issue window or listing), so drafts filter on their filing date while listed
+   IPOs filter on when they listed. Anything current or upcoming is always kept. */
+const MH_WINDOWS = [['All','Any time'],['30','Last 30 days'],['60','Last 60 days'],['90','Last 90 days']];
+function mhWindowLabel(v){ const o = MH_WINDOWS.find(w=>w[0]===v); return o ? o[1] : v; }
+function mhAsOf(){ const m = DATA && DATA.meta; return (m && (m.data_as_of || m.run_date)) || null; }
+function daysSince(iso, refIso){
+  const t = Date.parse(iso), r = Date.parse(refIso);
+  if(isNaN(t) || isNaN(r)) return null;
+  return Math.round((r - t) / 86400000);
+}
+/* most recent lifecycle date on a record (ISO strings sort chronologically,
+   so max() naturally ignores any stale sub-date) */
+function rowRecency(r){
+  const c = [r.filingDate, r.issueOpen, r.issueClose, r.listingDate].filter(Boolean);
+  return c.length ? c.reduce((a,b)=> a>b ? a : b) : null;
+}
+function mhInWindow(r){
+  if(mh.window === 'All') return true;
+  const asOf = mhAsOf(), ref = rowRecency(r);
+  if(!asOf || !ref) return false;               // undated record → excluded once a window is set
+  const d = daysSince(ref, asOf);
+  return d !== null && d <= (+mh.window);        // keep current/upcoming (d<=0) and up to N days old
+}
+
 /* one record matches the current filter set, optionally ignoring one dimension
    (so a facet's own chart still shows every still-clickable option) */
 function mhMatch(r, except){
@@ -261,10 +288,11 @@ function mhMatch(r, except){
     if(d.key===except) continue;
     if(mh[d.key]!=='All' && d.val(r)!==mh[d.key]) return false;
   }
+  if(except!=='window' && !mhInWindow(r)) return false;
   return true;
 }
 function mhFiltered(except){ return MARKET.filter(r=>mhMatch(r, except)); }
-function mhActive(){ return MH_DIMS.some(d=>mh[d.key]!=='All'); }
+function mhActive(){ return MH_DIMS.some(d=>mh[d.key]!=='All') || mh.window!=='All'; }
 
 /* ====================================================================== */
 let DATA = null;
@@ -280,20 +308,12 @@ async function main(){
     return;
   }
   buildMarket();
-  const fromUrl = mhFromUrl();
   renderHeader();
-  renderSnapshot();
-  renderPulse();
-  renderMarketHeat();
-  renderWatchlist();
-  renderCompetitor();
-  renderAppendix();
+  renderWeekly();
+  renderPipeline();
+  renderArchive();
   renderFooter();
   wireNav();
-  wireKpiSelect();
-  wireCrossNav();
-  wireDrawer();
-  if(fromUrl) activateTab('tab-heat');
 }
 
 function renderHeader(){
@@ -416,8 +436,14 @@ function mhSelectors(){
       <select class="mh-pill-sel" data-dim="${d.key}">${o}</select></label>`;
   };
   const ribbonDims = RIBBON_KEYS.map(k=>MH_DIMS.find(d=>d.key===k)).filter(Boolean);
+  /* fixed-option time window — sits in the ribbon alongside the data-driven pills */
+  const windowPill = `<label class="mh-pill ${mh.window!=='All'?'on':''}">
+      <span class="mh-pill-lbl">Timeframe</span>
+      <select class="mh-pill-sel" data-dim="window">${
+        MH_WINDOWS.map(([v,l])=>`<option value="${v}" ${mh.window===v?'selected':''}>${l}</option>`).join('')
+      }</select></label>`;
   host.innerHTML = `
-    <div class="mh-ribbon-pills">${ribbonDims.map(pill).join('')}</div>
+    <div class="mh-ribbon-pills">${ribbonDims.map(pill).join('')}${windowPill}</div>
     <button class="mh-ribbon-clear ${mhActive()?'':'hide'}">Clear all</button>`;
   host.querySelectorAll('.mh-pill-sel').forEach(s=>s.addEventListener('change',()=>{
     mh[s.dataset.dim] = s.value; mhSyncUrl(); renderMarketHeat();
@@ -457,7 +483,10 @@ function mhSummary(){
     const txt = d.disp ? d.disp(mh[d.key]) : mh[d.key];
     return `<button class="mh-sum-chip" data-dim="${d.key}">${esc(txt)} <span class="x">✕</span></button>`;
   }).join('');
-  host.innerHTML = `<span class="mh-sum-show">Showing:</span>${chips}<span class="mh-sum-n">${n} record${n!==1?'s':''}</span>`;
+  const winChip = mh.window!=='All'
+    ? `<button class="mh-sum-chip" data-dim="window">${esc(mhWindowLabel(mh.window))} <span class="x">✕</span></button>`
+    : '';
+  host.innerHTML = `<span class="mh-sum-show">Showing:</span>${chips}${winChip}<span class="mh-sum-n">${n} record${n!==1?'s':''}</span>`;
   host.querySelectorAll('.mh-sum-chip').forEach(b=>b.addEventListener('click',()=>{
     mh[b.dataset.dim]='All'; mhSyncUrl(); renderMarketHeat();
   }));
@@ -1008,6 +1037,7 @@ function mhSyncUrl(){
   MH_DIMS.forEach(d=>{
     if(mh[d.key]!=='All') p.set(d.urlk, d.keymap ? (d.keymap[mh[d.key]]||mh[d.key]) : mh[d.key]);
   });
+  if(mh.window!=='All') p.set('filed', mh.window);
   const qs = p.toString();
   history.replaceState(null, '', qs ? ('?'+qs) : location.pathname);
 }
@@ -1019,6 +1049,8 @@ function mhFromUrl(){
     const raw = p.get(d.urlk);
     if(raw){ mh[d.key] = d.keymap ? (invert(d.keymap)[raw]||raw) : raw; any=true; }
   });
+  const w = p.get('filed');
+  if(['30','60','90'].includes(w)){ mh.window = w; any = true; }
   return any;
 }
 
@@ -1135,6 +1167,386 @@ function openDrawer(r){
   d.hidden = false; d.setAttribute('aria-hidden','false');
   ov.hidden = false;
   const c = document.getElementById('dw-close'); if(c) c.addEventListener('click', closeDrawer);
+}
+
+/* ======================================================================
+   REDESIGN — Weekly Monitor · Pipeline · Archive
+   Three focused views over the same dataset. Reuses the existing helpers
+   and theme classes only; introduces no new colours.
+   ====================================================================== */
+const DASH = '<span class="subtle tiny">—</span>';
+const finOf  = (r,k)=> (r.financials && r.financials[k]) ? r.financials[k] : null;
+const fvalOf = (r,k)=> { const mv=finOf(r,k); return mv?mv.value:null; };
+
+/* ---- shared: weekly-change classification + data status ---- */
+const CHANGE = {
+  'New DRHP':       {rank:1, cls:'st-filed',  action:'Review'},
+  'Updated Filing': {rank:2, cls:'st-upd',    action:'Review Changes'},
+  'Stage Changed':  {rank:3, cls:'st-open',   action:'View Status'},
+  'Newly Listed':   {rank:4, cls:'st-listed', action:'View Filing'},
+  'Withdrawn':      {rank:5, cls:'st-wd',     action:'View Filing'},
+};
+/* one filing → its single highest-priority weekly change (always derived).
+   `stage` is the ONE shared current-stage used across every page. */
+function weeklyChange(f, stage){
+  const st = f.stamps || [];
+  if(stage==='Withdrawn') return 'Withdrawn';
+  if(stage==='Updated/Corrected' || st.includes('UPDATED')) return 'Updated Filing';
+  if(stage==='Listed') return 'Newly Listed';
+  if(st.includes('IPO_STAGE')) return 'Stage Changed';
+  if(stage==='DRHP Filed' || st.includes('FILED_THIS_WEEK')) return 'New DRHP';
+  return 'Stage Changed';
+}
+/* nicer labels for the score-component breakdown */
+const COMP_LABEL = {rev_growth:'Revenue growth', pat_margin:'PAT margin', roe:'ROE', roce:'ROCE', pat_growth:'PAT growth', revenue_scale:'Revenue scale'};
+function changeChip(ch){ const x=CHANGE[ch]||{cls:'st-filed'}; return `<span class="lc-chip ${x.cls}">${esc(ch)}</span>`; }
+
+/* Complete / Partial / Awaiting Financials — missing is never treated as zero */
+const FIN_KEYS = ['rev_growth_pct','ebitda_margin_pct','pat_growth_pct','pat_margin_pct'];
+function dataStatus(f){
+  const b = f.score && f.score.bucket;
+  if(!b || b==='INSUFFICIENT') return 'Awaiting Financials';
+  const fin = f.financials || {};
+  const have = FIN_KEYS.filter(k => fin[k] && fin[k].value!=null).length;
+  return have===FIN_KEYS.length ? 'Complete' : 'Partial';
+}
+function dsChip(status){
+  const cls = status==='Complete' ? 'ok' : status==='Partial' ? 'mkt' : 'miss';
+  return `<span class="ds-chip ${cls}">${esc(status)}</span>`;
+}
+/* show a score only when adequate financials exist — otherwise "Not Scored" */
+function scoreDisplay(total){
+  if(total==null) return `<span class="ns-tag">Not Scored</span>`;
+  return `<span class="score-cell">${Math.round(total)}</span>`;
+}
+
+/* ---------------- Tab 1: Weekly Monitor ---------------- */
+let WM_ROWS = [];
+function renderWeekly(){
+  const filings = DATA.filings || [];
+  const mByNorm = new Map(MARKET.map(r=>[r.norm, r]));           // shared stage source
+  const stageOf = f => { const m = mByNorm.get(f.company_name_normalized); return (m && m.stage) || f.current_stage || null; };
+  const byNorm = new Map();                       // one row per company, highest-priority change
+  filings.forEach(f => {
+    const stage = stageOf(f);
+    const ch = weeklyChange(f, stage);
+    const prev = byNorm.get(f.company_name_normalized);
+    if(!prev || CHANGE[ch].rank < CHANGE[prev.ch].rank) byNorm.set(f.company_name_normalized, {f, ch, stage});
+  });
+  const sc = f => (f.score && f.score.total!=null) ? f.score.total : -1;
+  WM_ROWS = [...byNorm.values()].sort((a,b) =>
+    CHANGE[a.ch].rank - CHANGE[b.ch].rank ||     // 1 New, 2 Updated, 3 Stage, then score, then date
+    sc(b.f) - sc(a.f) ||
+    String(b.f.filing_date||'').localeCompare(String(a.f.filing_date||'')));
+  renderWmCards();
+  renderWmTable();
+  renderWmInsights();
+}
+
+function renderWmCards(){
+  const cnt = ch => WM_ROWS.filter(r=>r.ch===ch).length;
+  const needs = WM_ROWS.filter(r => r.ch==='New DRHP' || r.ch==='Updated Filing').length;
+  const deltas = (DATA.summary && DATA.summary.deltas) || null;   // only shown when a prior week exists
+  const cards = [
+    {k:'doc',   n:cnt('New DRHP'),       lab:'New DRHPs',       d: deltas && deltas.new_drhp},
+    {k:'spark', n:cnt('Updated Filing'), lab:'Updated Filings', d: deltas && deltas.new_ipo},
+    {k:'trend', n:cnt('Stage Changed'),  lab:'Stage Changes',   d: null},
+    {k:'eye',   n:needs,                 lab:'Needs Review',     d: null},
+  ];
+  document.getElementById('wm-cards').innerHTML = cards.map(c=>`
+    <div class="wm-card">
+      <span class="wm-ic">${icon(c.k,18)}</span>
+      <div class="wm-card-body">
+        <div class="wm-n">${c.n}</div>
+        <div class="wm-lab">${c.lab}</div>
+      </div>
+      ${deltas && c.d ? `<div class="wm-delta ${String(c.d).startsWith('+')?'up':'down'}">${esc(c.d)}</div>` : ''}
+    </div>`).join('');
+}
+
+function renderWmTable(){
+  const head = `<thead><tr>
+    <th>Company</th><th>Weekly Change</th><th>Filing Date</th><th>Current Stage</th>
+    <th>Board</th><th>Sector</th><th class="num">Score</th><th>Data Status</th><th>Action</th>
+  </tr></thead>`;
+  const body = WM_ROWS.length ? WM_ROWS.map(({f, ch, stage}, i) => {
+    const ds = dataStatus(f);
+    return `<tr class="wm-row" data-idx="${i}" tabindex="0" aria-expanded="false">
+      <td>${companyCell(f, false)}</td>
+      <td>${changeChip(ch)}</td>
+      <td class="subtle">${dfmt(f.filing_date)}</td>
+      <td>${stageChip(stage)||DASH}</td>
+      <td>${boardChip(f.board)}</td>
+      <td class="subtle">${esc(f.sector||'—')}</td>
+      <td class="num">${scoreDisplay(f.score && f.score.total)}</td>
+      <td>${dsChip(ds)}</td>
+      <td><button class="wm-act" data-idx="${i}">${esc(CHANGE[ch].action)} <span class="wm-caret">▾</span></button></td>
+    </tr>
+    <tr class="wm-detail" id="wm-detail-${i}" hidden><td colspan="9">${wmDetail(f)}</td></tr>`;
+  }).join('') : `<tr><td colspan="9" class="subtle" style="padding:16px">No filings for the selected week.</td></tr>`;
+  const table = document.getElementById('wm-table');
+  table.innerHTML = head + `<tbody>${body}</tbody>`;
+  document.getElementById('wm-foot').textContent =
+    `${WM_ROWS.length} compan${WM_ROWS.length===1?'y':'ies'} · week of ${dfmt(DATA.meta.week_start)} – ${dfmt(DATA.meta.week_end)}. Click a row to expand full detail.`;
+
+  const toggle = i => {
+    const det = document.getElementById('wm-detail-'+i);
+    const row = table.querySelector(`.wm-row[data-idx="${i}"]`);
+    if(!det || !row) return;
+    const open = det.hidden;
+    det.hidden = !open;
+    row.classList.toggle('open', open);
+    row.setAttribute('aria-expanded', String(open));
+  };
+  table.querySelectorAll('.wm-row').forEach(tr=>{
+    tr.addEventListener('click', e=>{ if(e.target.closest('a')) return; toggle(+tr.dataset.idx); });
+    tr.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(+tr.dataset.idx); } });
+  });
+}
+
+/* inline expandable detail — business, financials, issue, score, history, sources */
+function wmDetail(f){
+  const fin = f.financials || {}, iss = f.issue || {};
+  const kv = (k,v)=> `<div class="wd-row"><span class="wd-k">${k}</span><span class="wd-v">${v}</span></div>`;
+  const frow = (lab,mv,kind)=> (mv && mv.value!=null) ? kv(lab, fcell(mv,kind)) : '';
+  const irow = (lab,v)=> v!=null ? kv(lab, v) : '';
+  const financials = [
+    frow('Revenue growth', fin.rev_growth_pct, 'pct'),
+    frow('EBITDA margin',  fin.ebitda_margin_pct, 'pct'),
+    frow('PAT growth',     fin.pat_growth_pct, 'pct'),
+    frow('PAT margin',     fin.pat_margin_pct, 'pct'),
+  ].filter(Boolean).join('');
+  const issue = [
+    irow('Fresh issue',      iss.fresh_cr!=null ? '₹'+money(iss.fresh_cr)+' Cr' : null),
+    irow('Offer for sale',   iss.ofs_cr!=null ? '₹'+money(iss.ofs_cr)+' Cr' : null),
+    irow('Total issue size', iss.total_cr!=null ? '₹'+money(iss.total_cr)+' Cr' : null),
+  ].filter(Boolean).join('');
+  const comps = (f.score && f.score.components) || {};
+  const scoreBreak = (f.score && f.score.total!=null)
+    ? Object.entries(comps).map(([k,v])=> kv(COMP_LABEL[k]||k.replace(/_/g,' '), v==null?'—':Math.round(v))).join('')
+    : `<div class="subtle tiny">Not scored — awaiting adequate financial disclosure.</div>`;
+  const history = kv(dfmt(f.filing_date), `${esc(f.filing_type||'Filing')} · ${esc(f.current_stage||'—')}`);
+  return `<div class="wd-grid">
+    <div class="wd-col">
+      <div class="wd-h">Business</div>
+      <p class="wd-biz">${f.business_summary?esc(f.business_summary):'<span class="subtle">Not disclosed in this filing.</span>'}</p>
+      ${issue?`<div class="wd-h">Issue structure</div>${issue}`:''}
+    </div>
+    <div class="wd-col">
+      <div class="wd-h">Financials</div>
+      ${financials || '<div class="subtle tiny">Not disclosed in this filing.</div>'}
+      <div class="wd-h">Score breakdown</div>
+      ${scoreBreak}
+    </div>
+    <div class="wd-col">
+      <div class="wd-h">Filing history</div>${history}
+      <div class="wd-h">Sources</div>${srcRow(f)||DASH}
+    </div>
+  </div>`;
+}
+
+function renderWmInsights(){
+  const out = [];
+  const news = WM_ROWS.filter(r=>r.ch==='New DRHP' && r.f.score && r.f.score.total!=null);
+  if(news.length){
+    const top = news.reduce((a,b)=> b.f.score.total>a.f.score.total ? b : a);
+    out.push({k:'trend', t:`Highest-scoring new filing: <b>${esc(top.f.company_name)}</b> — ${Math.round(top.f.score.total)} (${esc(top.f.sector||'—')}).`});
+  }
+  const upd = WM_ROWS.filter(r=>r.ch==='Updated Filing');
+  if(upd.length) out.push({k:'spark', t:`<b>${esc(upd[0].f.company_name)}</b> filed a corrected / updated document — review the changes.`});
+  const bySec = {};
+  WM_ROWS.forEach(r=>{ const s=r.f.sector; if(s) bySec[s]=(bySec[s]||0)+1; });
+  const cluster = Object.entries(bySec).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1])[0];
+  if(cluster) out.push({k:'chart', t:`<b>${cluster[1]}</b> filings in <b>${esc(cluster[0])}</b> this week — sector clustering.`});
+  const miss = WM_ROWS.filter(r=>dataStatus(r.f)==='Awaiting Financials');
+  if(miss.length) out.push({k:'clock', t:`<b>${miss.length}</b> filing${miss.length>1?'s':''} awaiting required financial disclosure.`});
+
+  const host = document.getElementById('wm-insights');
+  if(!out.length){ host.innerHTML=''; return; }
+  host.innerHTML = `<div class="card wm-ins-card">
+    <div class="panel-head"><h3>Weekly Insights</h3></div>
+    <ul class="wm-ins-list">${out.slice(0,3).map(o=>`<li><span class="wm-ins-ic">${icon(o.k,15)}</span><span>${o.t}</span></li>`).join('')}</ul>
+  </div>`;
+}
+
+/* ---------------- Tab 2: Pipeline ---------------- */
+let plFilter = {board:'All', stage:'All', sector:'All', period:'All', q:'', metrics:false};
+const plRecency = r => r.filingDate || r.issueOpen || r.listingDate || null;
+function renderPipeline(){
+  const host = document.getElementById('pl-controls');
+  if(!host.dataset.wired){ buildPlControls(host); host.dataset.wired='1'; }
+  renderPlRows();
+}
+function buildPlControls(host){
+  const opt = (dim,label,opts,disp)=>{
+    const o=[`<option value="All">All</option>`].concat(opts.map(v=>`<option value="${esc(v)}">${esc(disp?disp(v):v)}</option>`)).join('');
+    return `<label class="mh-pill" data-pill="${dim}"><span class="mh-pill-lbl">${label}</span><select class="mh-pill-sel" data-f="${dim}">${o}</select></label>`;
+  };
+  const boards  = [...new Set(MARKET.map(r=>r.board).filter(Boolean))].sort();
+  const stages  = [...new Set(MARKET.map(r=>r.stage).filter(Boolean))].sort((a,b)=>STAGE_ORDER.indexOf(a)-STAGE_ORDER.indexOf(b));
+  const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
+  host.innerHTML = `
+    ${opt('board','Board',boards)}
+    ${opt('stage','Stage',stages,stageLabel)}
+    ${opt('sector','Sector',sectors)}
+    ${opt('period','Filing period',['30','60','90'],v=>'Last '+v+' days')}
+    <label class="ctl-search"><input type="search" id="pl-q" placeholder="Search company…"></label>
+    <label class="ctl-toggle"><input type="checkbox" id="pl-metrics"> Review Metrics</label>
+    <button class="fchip hide" id="pl-reset">Reset</button>`;
+  host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
+    plFilter[s.dataset.f]=s.value;
+    s.closest('.mh-pill').classList.toggle('on', s.value!=='All');
+    renderPlRows();
+  }));
+  const q = host.querySelector('#pl-q'); q.addEventListener('input',()=>{ plFilter.q=q.value; renderPlRows(); });
+  const mt = host.querySelector('#pl-metrics'); mt.addEventListener('change',()=>{ plFilter.metrics=mt.checked; renderPlRows(); });
+  host.querySelector('#pl-reset').addEventListener('click',()=>{
+    plFilter={board:'All',stage:'All',sector:'All',period:'All',q:'',metrics:plFilter.metrics};
+    host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
+    q.value=''; renderPlRows();
+  });
+}
+function renderPlRows(){
+  const asOf = (DATA.meta && (DATA.meta.data_as_of || DATA.meta.run_date)) || null;
+  const daysAgo = iso => { if(!iso||!asOf) return null; const d=(Date.parse(asOf)-Date.parse(iso))/86400000; return isNaN(d)?null:d; };
+  const q = plFilter.q.toLowerCase();
+  const rows = MARKET.filter(r=>
+    (plFilter.board==='All'  || r.board===plFilter.board) &&
+    (plFilter.stage==='All'  || r.stage===plFilter.stage) &&
+    (plFilter.sector==='All' || r.sector===plFilter.sector) &&
+    (q==='' || (r.name||'').toLowerCase().includes(q)) &&
+    (plFilter.period==='All' || (()=>{ const d=daysAgo(plRecency(r)); return d!=null && d<=+plFilter.period; })()));
+  const m = plFilter.metrics;
+  const head = `<thead><tr>
+    <th>Company</th><th>Board</th><th>Sector</th><th>Filing Type</th><th>Filing Date</th><th>Current Stage</th>
+    <th>Open</th><th>Close</th><th>Listing</th><th>Price Band</th><th class="num">Issue Size</th><th class="num">Subscription</th>
+    ${m?'<th class="num">Score</th>':''}
+  </tr></thead>`;
+  const body = rows.length ? rows.map(r=>`<tr>
+    <td class="company">${pipelineName(r)}</td>
+    <td>${boardChip(r.board)}</td>
+    <td class="subtle">${r.sector?esc(r.sector):DASH}</td>
+    <td class="subtle">${r.filingType?esc(r.filingType):DASH}</td>
+    <td class="subtle">${r.filingDate?dfmt(r.filingDate):DASH}</td>
+    <td>${stageChip(r.stage)||DASH}</td>
+    <td class="subtle">${r.issueOpen?dfmt(r.issueOpen):DASH}</td>
+    <td class="subtle">${r.issueClose?dfmt(r.issueClose):DASH}</td>
+    <td class="subtle">${r.listingDate?dfmt(r.listingDate):DASH}</td>
+    <td class="subtle">${r.priceBand?esc(r.priceBand):DASH}</td>
+    <td class="num">${r.issueSizeCr==null?DASH:money(r.issueSizeCr)}</td>
+    <td class="num">${subx(r.subscriptionX)}</td>
+    ${m?`<td class="num">${scoreDisplay(r.score)}</td>`:''}
+  </tr>`).join('') : `<tr><td colspan="${m?13:12}" class="subtle" style="padding:16px">No companies match these filters.</td></tr>`;
+  document.getElementById('pl-table').innerHTML = head + `<tbody>${body}</tbody>`;
+  document.getElementById('pl-foot').textContent =
+    `${rows.length} of ${MARKET.length} companies · one shared lifecycle stage across the dashboard. Scores hidden unless “Review Metrics” is on.`;
+  const active = plFilter.board!=='All'||plFilter.stage!=='All'||plFilter.sector!=='All'||plFilter.period!=='All'||plFilter.q!=='';
+  document.getElementById('pl-reset').classList.toggle('hide', !active);
+}
+
+/* ---------------- Tab 3: Archive ---------------- */
+let arFilter = {q:'', board:'All', stage:'All', sector:'All', ftype:'All', from:'', to:''};
+const AR_COLS = [
+  {h:'Company', sticky:1, cell:r=>pipelineName(r), get:r=>r.name},
+  {h:'Board', cell:r=>boardChip(r.board)||DASH, get:r=>r.board},
+  {h:'Stage', cell:r=>stageChip(r.stage)||DASH, get:r=>r.stage},
+  {h:'Sector', cls:'subtle', cell:r=>r.sector?esc(r.sector):DASH, get:r=>r.sector},
+  {h:'Sub-sector', cls:'subtle', cell:r=>r.subSector?esc(r.subSector):DASH, get:r=>r.subSector},
+  {h:'Filing Type', cls:'subtle', cell:r=>r.filingType?esc(r.filingType):DASH, get:r=>r.filingType},
+  {h:'Filing Date', cls:'subtle', cell:r=>r.filingDate?dfmt(r.filingDate):DASH, get:r=>r.filingDate},
+  {h:'Issue Type', cls:'subtle', cell:r=>r.issueType?esc(r.issueType):DASH, get:r=>r.issueType},
+  {h:'Fresh (₹ Cr)', num:1, cell:r=>r.freshCr==null?DASH:money(r.freshCr), get:r=>r.freshCr},
+  {h:'OFS (₹ Cr)', num:1, cell:r=>r.ofsCr==null?DASH:money(r.ofsCr), get:r=>r.ofsCr},
+  {h:'Total Issue (₹ Cr)', num:1, cell:r=>r.issueSizeCr==null?DASH:money(r.issueSizeCr), get:r=>r.issueSizeCr},
+  {h:'Fresh Shares', num:1, cell:r=>r.freshShares==null?DASH:Number(r.freshShares).toLocaleString('en-IN'), get:r=>r.freshShares},
+  {h:'OFS Shares', num:1, cell:r=>r.ofsShares==null?DASH:Number(r.ofsShares).toLocaleString('en-IN'), get:r=>r.ofsShares},
+  {h:'Total Shares', num:1, cell:r=>r.totalShares==null?DASH:Number(r.totalShares).toLocaleString('en-IN'), get:r=>r.totalShares},
+  {h:'Face Value (₹)', num:1, cell:r=>r.faceValue==null?DASH:money(r.faceValue), get:r=>r.faceValue},
+  {h:'Market Cap (₹ Cr)', num:1, cell:r=>r.marketCapCr==null?DASH:money(r.marketCapCr), get:r=>r.marketCapCr},
+  {h:'Rev Growth', num:1, cell:r=>fcell(finOf(r,'rev_growth_pct'),'pct'), get:r=>fvalOf(r,'rev_growth_pct')},
+  {h:'EBITDA Margin', num:1, cell:r=>fcell(finOf(r,'ebitda_margin_pct'),'pct'), get:r=>fvalOf(r,'ebitda_margin_pct')},
+  {h:'PAT Growth', num:1, cell:r=>fcell(finOf(r,'pat_growth_pct'),'pct'), get:r=>fvalOf(r,'pat_growth_pct')},
+  {h:'PAT Margin', num:1, cell:r=>fcell(finOf(r,'pat_margin_pct'),'pct'), get:r=>fvalOf(r,'pat_margin_pct')},
+  {h:'ROE', num:1, cell:r=>fcell(finOf(r,'roe_pct'),'pct'), get:r=>fvalOf(r,'roe_pct')},
+  {h:'ROCE', num:1, cell:r=>fcell(finOf(r,'roce_pct'),'pct'), get:r=>fvalOf(r,'roce_pct')},
+  {h:'Debt/Equity', num:1, cell:r=>fcell(finOf(r,'debt_equity'),'ratio'), get:r=>fvalOf(r,'debt_equity')},
+  {h:'Open', cls:'subtle', cell:r=>r.issueOpen?dfmt(r.issueOpen):DASH, get:r=>r.issueOpen},
+  {h:'Close', cls:'subtle', cell:r=>r.issueClose?dfmt(r.issueClose):DASH, get:r=>r.issueClose},
+  {h:'Listing', cls:'subtle', cell:r=>r.listingDate?dfmt(r.listingDate):DASH, get:r=>r.listingDate},
+  {h:'Price Band', cls:'subtle', cell:r=>r.priceBand?esc(r.priceBand):DASH, get:r=>r.priceBand},
+  {h:'Subscription', num:1, cell:r=>subx(r.subscriptionX), get:r=>r.subscriptionX},
+  {h:'Score', num:1, cell:r=>scoreDisplay(r.score), get:r=>r.score},
+  {h:'Source', cell:r=>srcRec(r), get:r=>{ const s=r.sources||{}; return s.drhp_pdf_url||s.sebi_url||''; }},
+];
+function arFiltered(){
+  const q = arFilter.q.toLowerCase();
+  return MARKET.filter(r=>
+    (q==='' || (r.name||'').toLowerCase().includes(q)) &&
+    (arFilter.board==='All'  || r.board===arFilter.board) &&
+    (arFilter.stage==='All'  || r.stage===arFilter.stage) &&
+    (arFilter.sector==='All' || r.sector===arFilter.sector) &&
+    (arFilter.ftype==='All'  || r.filingType===arFilter.ftype) &&
+    (arFilter.from==='' || (r.filingDate && r.filingDate>=arFilter.from)) &&
+    (arFilter.to===''   || (r.filingDate && r.filingDate<=arFilter.to)));
+}
+function renderArchive(){
+  const host = document.getElementById('ar-controls');
+  if(!host.dataset.wired){ buildArControls(host); host.dataset.wired='1'; }
+  renderArRows();
+}
+function buildArControls(host){
+  const opt = (dim,label,opts)=>{
+    const o=[`<option value="All">All</option>`].concat(opts.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`)).join('');
+    return `<label class="mh-pill" data-pill="${dim}"><span class="mh-pill-lbl">${label}</span><select class="mh-pill-sel" data-f="${dim}">${o}</select></label>`;
+  };
+  const boards  = [...new Set(MARKET.map(r=>r.board).filter(Boolean))].sort();
+  const stages  = [...new Set(MARKET.map(r=>r.stage).filter(Boolean))].sort((a,b)=>STAGE_ORDER.indexOf(a)-STAGE_ORDER.indexOf(b));
+  const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
+  const ftypes  = [...new Set(MARKET.map(r=>r.filingType).filter(Boolean))].sort();
+  host.innerHTML = `
+    <label class="ctl-search"><input type="search" id="ar-q" placeholder="Search company…"></label>
+    ${opt('board','Board',boards)}
+    ${opt('stage','Stage',stages)}
+    ${opt('sector','Sector',sectors)}
+    ${opt('ftype','Filing type',ftypes)}
+    <label class="ctl-date"><span>From</span><input type="date" id="ar-from"></label>
+    <label class="ctl-date"><span>To</span><input type="date" id="ar-to"></label>
+    <button class="fchip" id="ar-reset">Reset</button>
+    <button class="fchip" id="ar-csv">Export CSV</button>
+    <button class="fchip" id="ar-print">Print / PDF</button>`;
+  host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
+    arFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); renderArRows();
+  }));
+  const q = host.querySelector('#ar-q'); q.addEventListener('input',()=>{ arFilter.q=q.value; renderArRows(); });
+  const from = host.querySelector('#ar-from'); from.addEventListener('change',()=>{ arFilter.from=from.value; renderArRows(); });
+  const to = host.querySelector('#ar-to'); to.addEventListener('change',()=>{ arFilter.to=to.value; renderArRows(); });
+  host.querySelector('#ar-reset').addEventListener('click',()=>{
+    arFilter={q:'',board:'All',stage:'All',sector:'All',ftype:'All',from:'',to:''};
+    host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
+    q.value=''; from.value=''; to.value=''; renderArRows();
+  });
+  host.querySelector('#ar-csv').addEventListener('click', arExportCsv);
+  host.querySelector('#ar-print').addEventListener('click', ()=>window.print());
+}
+function renderArRows(){
+  const recs = arFiltered();
+  const head = `<thead><tr>${AR_COLS.map(c=>`<th class="${c.num?'num':''}${c.sticky?' ar-sticky':''}">${esc(c.h)}</th>`).join('')}</tr></thead>`;
+  const body = recs.length
+    ? recs.map(r=>`<tr>${AR_COLS.map(c=>`<td class="${c.cls||''}${c.num?' num':''}${c.sticky?' ar-sticky':''}">${c.cell(r)}</td>`).join('')}</tr>`).join('')
+    : `<tr><td colspan="${AR_COLS.length}" class="subtle" style="padding:16px">No records match these filters.</td></tr>`;
+  document.getElementById('ar-table').innerHTML = head + `<tbody>${body}</tbody>`;
+  document.getElementById('ar-foot').textContent = `${recs.length} of ${MARKET.length} records · SEBI public filings & NSE. “—” = not disclosed.`;
+}
+function arExportCsv(){
+  const recs = arFiltered();
+  const q = v => { const s=(v==null?'':String(v)); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const lines = [AR_COLS.map(c=>q(c.h)).join(',')];
+  recs.forEach(r=> lines.push(AR_COLS.map(c=>q(c.get(r))).join(',')));
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `drhp-archive-${(DATA.meta&&DATA.meta.snapshot_id)||'export'}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
 document.addEventListener('DOMContentLoaded', main);
