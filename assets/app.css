@@ -638,6 +638,48 @@ a:hover { text-decoration: underline; }
 /* dense tables: appendix + watchlist rows are clickable into the drawer */
 #appendix-table tbody tr.apx-row, #watchlist tr.wl-row { cursor: pointer; }
 
+/* ---------- Score Watchlist — single-screen, no-scroll layout ---------- */
+/* Fit the whole ranked table on one screen: fixed columns remove the
+   horizontal scroll, wrapping headers keep narrow columns readable, and
+   tighter rows + header keep the table inside the viewport height. */
+#tab-watchlist .section-head { margin-bottom: 6px; }
+#tab-watchlist .section-title { font-size: 18px; margin-top: 2px; }
+#tab-watchlist .card { padding: 9px 15px; }
+#tab-watchlist .table-wrap { overflow: hidden; }
+/* shrink the shared header only while the watchlist is open, so the whole
+   table clears the fold on shorter laptops without touching the other tabs */
+body:has(#tab-watchlist:not([hidden])) .topbar { min-height: 104px; padding-top: 14px; padding-bottom: 14px; }
+body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
+#tab-watchlist table { table-layout: fixed; width: 100%; font-size: 12px; }
+
+#tab-watchlist thead th { white-space: normal; padding: 7px 6px; line-height: 1.12; font-size: 9px; letter-spacing: 0.02em; }
+#tab-watchlist tbody td { padding: 3px 8px; vertical-align: top; overflow: hidden; }
+#tab-watchlist .table-foot { margin-top: 8px; }
+
+/* column widths — #, Total Issue, the four metrics, Score and Reco are fixed;
+   Company / Sector / Business Model share the remaining width */
+#tab-watchlist th:nth-child(1),  #tab-watchlist td:nth-child(1)  { width: 24px; }
+#tab-watchlist th:nth-child(3),  #tab-watchlist td:nth-child(3)  { width: 11%; }
+#tab-watchlist th:nth-child(4),  #tab-watchlist td:nth-child(4)  { width: 12%; }
+#tab-watchlist th:nth-child(5),  #tab-watchlist td:nth-child(5)  { width: 64px; }
+#tab-watchlist th:nth-child(n+6):nth-child(-n+9),
+#tab-watchlist td:nth-child(n+6):nth-child(-n+9)                 { width: 58px; }
+#tab-watchlist th:nth-child(10), #tab-watchlist td:nth-child(10) { width: 46px; }
+#tab-watchlist th:nth-child(11), #tab-watchlist td:nth-child(11) { width: 92px; }
+
+/* clamp the two long text columns to their cell width (full text on hover) */
+#tab-watchlist td:nth-child(3), #tab-watchlist td:nth-child(4) { text-overflow: ellipsis; white-space: nowrap; }
+#tab-watchlist .bizclamp { max-width: 100%; }
+
+/* recommendation pill: smaller and allowed to wrap so the full label fits */
+#tab-watchlist td:nth-child(11) .tag { font-size: 8.5px; padding: 2px 7px; white-space: normal; line-height: 1.2; }
+
+/* tighter source links + chips under each company name */
+#tab-watchlist .src { margin-top: 2px; gap: 5px; }
+#tab-watchlist .src-link { padding: 1px 5px; font-size: 9.5px; }
+#tab-watchlist .row-chips { margin-top: 2px; gap: 3px; }
+#tab-watchlist .stamp, #tab-watchlist .ds-chip { font-size: 9px; padding: 1px 6px; }
+
 /* Field Coverage audit chips */
 .cov-yes { color: var(--emerald); font-weight: 600; }
 .cov-no  { color: var(--ink-faint); }
