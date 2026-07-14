@@ -1,14 +1,14 @@
-name: Weekly DRHP/IPO Monitor
+name: Daily DRHP/IPO Monitor
 
-# Runs the data pipeline every week, commits the refreshed data + snapshot to main,
+# Runs the data pipeline every day, commits the refreshed data + snapshot to main,
 # and lets the connected Cloudflare Pages project redeploy the dashboard automatically.
 #
 # Triggers:
-#   * schedule  — every Monday 03:00 UTC (08:30 IST), covering the prior 7 days
+#   * schedule  — every day at 03:00 UTC (08:30 IST), covering the prior 7 days
 #   * manual    — "Run workflow" button, with an optional run-date override
 on:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       run_date:
@@ -64,7 +64,7 @@ jobs:
             echo "No data changes this run — nothing to commit."
             exit 0
           fi
-          git commit -m "data: weekly DRHP/IPO monitor refresh ($(date -u +%Y-%m-%d))"
+          git commit -m "data: daily DRHP/IPO monitor refresh ($(date -u +%Y-%m-%d))"
           # Push to main, self-healing against a concurrent update: if the push is
           # rejected because main moved on, rebase our single data commit onto the
           # latest main and retry rather than failing the whole run.
