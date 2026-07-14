@@ -874,15 +874,17 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .pl-hero-caret { position: absolute; top: 9px; right: 11px; font-size: 13px; font-weight: 700; color: var(--ink-faint); }
 .pl-hero-card.on .pl-hero-caret { color: var(--gold); }
 
-/* 3-5. Funnels — a section intro on the left, capsules on a muted-gold rail */
-.pl-funnels { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-.plc-funnel { display: flex; align-items: stretch; gap: 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); box-shadow: var(--shadow-xs); padding: 12px 14px; }
-.plc-intro { flex: 0 0 158px; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-start; padding-right: 14px; border-right: 1px solid var(--border-soft); }
+/* 3-5. Funnels — three vertical pipelines side by side, capsules stacked on a
+   downward muted-gold rail, section intro as each column's header */
+.pl-funnels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; align-items: start; }
+.plc-funnel { display: flex; flex-direction: column; align-items: stretch; gap: 0; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); box-shadow: var(--shadow-xs); padding: 12px 14px; }
+.plc-intro { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; padding-bottom: 11px; margin-bottom: 11px; border-bottom: 1px solid var(--border-soft); }
 .plc-intro-h { font-size: 13px; font-weight: 700; color: var(--navy); line-height: 1.15; }
 .plc-intro-d { font-size: 10.5px; color: var(--ink-faint); line-height: 1.3; }
-.plc-rail { flex: 1 1 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 0; min-width: 0; }
-.plc-link { flex: 0 0 20px; height: 2px; align-self: center; border-radius: 2px; background: linear-gradient(90deg, var(--gold-bright), var(--gold)); opacity: 0.55; }
-.plc-cap { flex: 1 1 148px; min-width: 128px; display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg); padding: 9px 11px; cursor: pointer; text-align: left; font-family: var(--font); box-shadow: var(--shadow-xs); transition: border-color .14s, background .14s, box-shadow .14s; }
+.plc-rail { display: flex; flex-direction: column; align-items: stretch; gap: 0; min-width: 0; }
+.plc-link { width: 2px; height: 18px; align-self: center; border-radius: 2px; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); opacity: 0.55; }
+.plc-cap { display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg); padding: 9px 11px; cursor: pointer; text-align: left; font-family: var(--font); box-shadow: var(--shadow-xs); transition: border-color .14s, background .14s, box-shadow .14s; }
+@media (max-width: 980px) { .pl-funnels { grid-template-columns: 1fr; } }
 .plc-cap:hover { border-color: var(--gold); }
 .plc-cap.on { border-color: var(--gold); background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold); }
 .plc-cap.empty { opacity: 0.62; }
