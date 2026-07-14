@@ -822,25 +822,117 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
    ========================================================================== */
 .hide { display: none !important; }
 
-/* ---- Weekly Monitor: four compact summary cards in one row ---- */
-.wm-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
-.wm-card { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 14px; box-shadow: var(--shadow-xs); }
-.wm-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--emerald-soft); color: var(--emerald); flex: 0 0 auto; }
+/* ---- Weekly Monitor: four KPI cards — one tone per meaning, all in-palette ----
+   Colour PSYCHOLOGY (subtle, never loud): each card carries a left-accent bar,
+   a tinted icon and a whisper of card tint that matches the Full Tracker family:
+   New DRHPs        = moss / parchment (fresh filing, early-stage, document)
+   New Prospectuses = emerald          (progress, movement toward launch)
+   Updated/Corrected= amber            (amended, revised)
+   DIG DEEPER       = emerald signal + a gold priority accent (strongest cue) */
+.wm-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 15px; }
+.wm-card {
+  --tone: var(--emerald); --tint: rgba(14,122,95,0.05); --icbg: var(--emerald-soft); --icfg: var(--emerald);
+  position: relative; display: flex; align-items: center; gap: 13px; overflow: hidden;
+  background: radial-gradient(140% 150% at 100% 0%, var(--tint), transparent 58%),
+              linear-gradient(180deg, rgba(255,253,248,0.94), rgba(248,251,246,0.88));
+  border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 15px 14px 18px;
+  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: box-shadow .16s ease, transform .16s ease, border-color .16s ease;
+}
+.wm-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tone); }
+.wm-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.5); }
+.wm-card.tone-doc   { --tone: #77875F;        --tint: rgba(119,135,95,0.06);  --icbg: #ECEFE4; --icfg: #63734F; }
+.wm-card.tone-trend { --tone: var(--emerald); --tint: rgba(14,122,95,0.055);  --icbg: var(--emerald-soft); --icfg: var(--emerald); }
+.wm-card.tone-upd   { --tone: #C29A3E;        --tint: rgba(185,138,46,0.06);  --icbg: #F4ECD8; --icfg: #8A6D2E; }
+.wm-card.tone-dig   { --tone: var(--gold);    --tint: rgba(14,122,95,0.075);  --icbg: #DCEFE6; --icfg: var(--emerald);
+  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(185,138,46,0.20); }
+.wm-card.tone-dig:hover { box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 0 0 1px rgba(185,138,46,0.28); }
+.wm-card.tone-dig .wm-n { color: var(--emerald); }
+.wm-ic { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--icbg); color: var(--icfg); flex: 0 0 auto; }
 .wm-card-body { min-width: 0; }
-.wm-n { font-size: 22px; font-weight: 800; color: var(--navy); line-height: 1; font-variant-numeric: tabular-nums; }
-.wm-lab { font-size: 11.5px; color: var(--ink-soft); font-weight: 600; margin-top: 3px; }
-.wm-delta { margin-left: auto; font-size: 11px; font-weight: 700; }
-.wm-delta.up { color: var(--emerald); }
-.wm-delta.down { color: var(--red); }
+.wm-n { font-size: 24px; font-weight: 800; color: var(--navy); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.015em; }
+.wm-lab { font-size: 11px; color: var(--ink-soft); font-weight: 600; margin-top: 4px; letter-spacing: 0.005em; }
+/* micro delta — a small, premium tabular pill; muted tones, never a bright red */
+.wm-delta { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto;
+  font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; padding: 3px 8px; border-radius: 999px;
+  color: var(--ink-soft); background: rgba(6,43,46,0.045); border: 1px solid var(--border-soft); }
+.wm-delta .da { font-size: 7.5px; line-height: 1; }
+.wm-delta.up   { color: var(--emerald); background: rgba(14,122,95,0.08); border-color: rgba(14,122,95,0.16); }
+.wm-delta.down { color: #9C5A50; background: rgba(176,65,58,0.06); border-color: rgba(176,65,58,0.14); }
+.wm-delta.flat { color: var(--ink-faint); }
 
-/* ---- Weekly Monitor: table + click-to-expand rows ---- */
+/* ---- Weekly Monitor: table + click-to-expand rows ----
+   Alternate-row scan-lines match the Full Tracker: a very soft warm-green
+   overlay on every other row (not grey, blue or bright), a smooth deeper tint
+   on hover, and an open row that stays highlighted above its nested detail. */
 .wm-row { cursor: pointer; }
-.wm-row.open > td { background: var(--emerald-soft); }
-.wm-act { font-family: var(--font); font-size: 11.5px; font-weight: 600; color: var(--emerald); background: var(--emerald-soft); border: 1px solid var(--border); border-radius: 7px; padding: 3px 9px; cursor: pointer; white-space: nowrap; }
-.wm-act:hover { border-color: var(--emerald); }
+#wm-table tbody tr.wm-row > td { background: transparent; transition: background .16s ease; }
+#wm-table tbody tr.wm-row.wm-alt > td { background: rgba(13,110,86,0.045); }
+#wm-table tbody tr.wm-row:hover > td { background: rgba(13,110,86,0.09); }
+#wm-table tbody tr.wm-row.open > td { background: var(--emerald-soft); box-shadow: inset 0 -1px 0 rgba(14,122,95,0.16); }
+/* Company stays the strongest element in the row (weight carries the emphasis) */
+#wm-table tbody td:first-child .company { font-weight: 700; color: var(--navy); letter-spacing: -0.005em; }
+.wm-act { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font); font-size: 11.5px; font-weight: 600;
+  color: var(--emerald); background: var(--emerald-soft); border: 1px solid rgba(14,122,95,0.20); border-radius: 7px;
+  padding: 4px 10px; cursor: pointer; white-space: nowrap; transition: border-color .14s, background .14s; }
+.wm-act:hover { border-color: var(--emerald); background: #DDF0E8; }
 .wm-caret { display: inline-block; font-size: 9px; transition: transform .15s; }
 .wm-row.open .wm-caret { transform: rotate(180deg); }
-.wm-detail > td { padding: 0; background: var(--canvas); border-bottom: 1px solid var(--border); }
+/* expanded detail — a nested soft panel under its parent (left emerald accent + inset shadow) */
+.wm-detail > td { padding: 0; background: var(--canvas); border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 7px 10px -9px rgba(6,43,46,0.28), inset 3px 0 0 var(--emerald); }
+
+/* Weekly Event — a secondary, soft tone chip (deliberately lighter than the
+   strong Current-Stage chip): fresh/document · amended/revised · completion */
+.wm-ev { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; line-height: 1.6; }
+.wm-ev::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.85; flex: 0 0 auto; }
+.wm-ev.ev-new  { background: #EFF1E7; color: #63734F; }        /* fresh / early / document */
+.wm-ev.ev-upd  { background: #F5EEDD; color: #8A6D2E; }        /* amended / revised */
+.wm-ev.ev-list { background: #E3EFE9; color: #2C6B58; }        /* completion / transition */
+.wm-ev.ev-move { background: var(--emerald-soft); color: var(--emerald); }   /* stage moved */
+.wm-ev.ev-wd   { background: #F5E9E7; color: #9C4A42; }        /* withdrawn */
+
+/* Filing Type — quiet + readable, lighter than both Weekly Event and Current Stage */
+.wm-ft { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+  background: rgba(6,43,46,0.045); border: 1px solid var(--border-soft); color: var(--ink-soft); }
+.wm-ft.ft-drhp { color: #63734F; }    /* document  */
+.wm-ft.ft-pros { color: #2C6B58; }    /* progress  */
+.wm-ft.ft-corr { color: #8A6D2E; }    /* amended   */
+
+/* Data Status — completeness read calmly, never overpowering the row */
+.wm-ds { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; white-space: nowrap; }
+.wm-ds::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.8; flex: 0 0 auto; }
+.wm-ds-ok   { background: var(--emerald-soft); color: var(--emerald); }   /* complete */
+.wm-ds-part { background: #F4ECD8; color: #8A6D2E; }                       /* partial — amber (half) */
+.wm-ds-wait { background: var(--grey-soft); color: #7C8794; }             /* awaiting — neutral */
+
+/* Recommendation — DIG DEEPER carries a hair more presence (priority) in the
+   monitor table; WATCH / AWAITING DATA stay muted + neutral */
+#wm-table .tag.dig { box-shadow: inset 0 0 0 1px rgba(14,122,95,0.22); }
+
+/* Score — intentional + premium: strong tabular value, subtle dashed underline,
+   clear hover; important and clickable without shouting */
+#wm-table .score-link .score-cell { font-size: 13.5px; font-weight: 800; color: var(--navy);
+  border-bottom: 1px dashed rgba(14,122,95,0.5); padding-bottom: 1px; letter-spacing: -0.01em;
+  transition: color .14s, border-color .14s; }
+#wm-table .score-link:hover .score-cell { color: var(--emerald); border-bottom-color: var(--emerald); }
+/* compact the 10-column table so every column (incl. Action) fits without a
+   horizontal scroll at common widths; Company still wraps to keep its width down */
+#wm-table thead th, #wm-table tbody td { padding: 9px 9px; }
+#wm-table thead th:first-child, #wm-table tbody td:first-child { padding-left: 14px; }
+#wm-table thead th:last-child, #wm-table tbody td:last-child { padding-right: 14px; }
+#wm-table td.num, #wm-table th.num { padding-right: 11px; }
+/* keep the expanded detail within the viewport even if the table scrolls
+   horizontally on a narrow laptop (mirrors the Full Tracker detail behaviour) */
+.wm-detail .wd-grid { position: sticky; left: 0; max-width: calc(100vw - var(--sidebar-w) - 88px); }
+
+/* Table card — cleaner header-strip/body contrast + separated footer note */
+#wm-table-card { padding: 15px 16px 14px; }
+#wm-table-card .table-foot { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--border-soft);
+  font-size: 11.5px; color: var(--ink-faint); }
 .wd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 14px 16px; }
 .wd-h { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-faint); font-weight: 700; margin: 12px 0 5px; }
 .wd-col > .wd-h:first-child { margin-top: 0; }
@@ -852,12 +944,23 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 /* "Not Scored" tag — reuses the existing INSUFFICIENT greys */
 .ns-tag { font-size: 10px; font-weight: 600; color: var(--grey); background: var(--grey-soft); border-radius: 5px; padding: 2px 7px; white-space: nowrap; }
 
-/* ---- Weekly insights ---- */
-.wm-ins-card { margin-top: 14px; }
+/* ---- Weekly Insights — editorial list: tinted icon tile + statement ----
+   Refined to match the Full Tracker's Quick-Insights tone system: a rounded
+   tinted icon tile per statement, clear text hierarchy and soft dividers so the
+   block reads as premium editorial copy, not a plain bullet list. */
+.wm-ins-card { margin-top: 15px; padding: 16px 18px 6px; }
+.wm-ins-head { margin-bottom: 4px; }
+.wm-ins-head h3 { position: relative; font-family: var(--serif); font-size: 16.5px; font-weight: 600; color: var(--head-green); padding-bottom: 8px; }
+.wm-ins-head h3::after { content: ""; position: absolute; left: 0; bottom: 0; width: 24px; height: 2px; border-radius: 2px; background: var(--accent-butter); }
 .wm-ins-list { list-style: none; margin: 0; padding: 0; }
-.wm-ins-list li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border-soft); font-size: 12.5px; color: var(--ink); line-height: 1.45; }
+.wm-ins-list li { display: flex; gap: 13px; align-items: flex-start; padding: 13px 4px; border-bottom: 1px solid var(--border-soft); }
 .wm-ins-list li:last-child { border-bottom: none; }
-.wm-ins-ic { color: var(--emerald); flex: 0 0 auto; margin-top: 1px; }
+.wm-ins-ic { width: 34px; height: 34px; border-radius: 10px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.wm-ins-ic.tone-sage { background: var(--emerald-soft); color: var(--emerald); }
+.wm-ins-ic.tone-gold { background: var(--gold-soft); color: var(--gold); }
+.wm-ins-ic.tone-grey { background: var(--grey-soft); color: #7C8794; }
+.wm-ins-tx { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; padding-top: 6px; }
+.wm-ins-tx b { color: var(--navy); font-weight: 700; }
 
 /* ==== Pipeline — Option C (hero KPIs · gold-rail funnels · status pills) ==== */
 /* funnel tag — reuses existing soft/text colour pairs (used in intros + status) */

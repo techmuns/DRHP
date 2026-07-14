@@ -1210,7 +1210,20 @@ function weeklyEvent(f, stage){
   if(st.includes('IPO_STAGE')) return 'Stage Changed';
   return 'New Filing';
 }
-function eventChip(ev){ const x=EVENT[ev]||{cls:'st-filed'}; return `<span class="lc-chip ${x.cls}">${esc(ev)}</span>`; }
+/* Weekly Event chip — a secondary, soft tone chip, kept deliberately lighter
+   than the Current-Stage chip so the two columns don't compete:
+   fresh/document (new) · amended/revised (updated/corrected) · completion (listed) */
+const EV_CLS = {
+  'New Filing':'ev-new', 'Updated Filing':'ev-upd', 'Corrected Filing':'ev-upd',
+  'Stage Changed':'ev-move', 'Newly Listed':'ev-list', 'Withdrawn':'ev-wd',
+};
+function eventChip(ev){ return `<span class="wm-ev ${EV_CLS[ev]||'ev-new'}">${esc(ev)}</span>`; }
+/* Filing Type chip — quiet + readable, lighter still than the Weekly Event chip */
+function ftChip(t){
+  if(!t) return DASH;
+  const c = (t==='DRHP'||t==='UDRHP') ? 'ft-drhp' : (t==='Prospectus'||t==='RHP') ? 'ft-pros' : t==='Corrigendum' ? 'ft-corr' : '';
+  return `<span class="wm-ft ${c}">${esc(t)}</span>`;
+}
 
 /* Data Status = purely factual financial-disclosure completeness (no score).
    Complete / Partial / Awaiting Financials — missing is never treated as zero */
@@ -1222,8 +1235,8 @@ function dataStatus(f){
   return have===FIN_KEYS.length ? 'Complete' : 'Partial';
 }
 function dsChip(status){
-  const cls = status==='Complete' ? 'ok' : status==='Partial' ? 'mkt' : 'miss';
-  return `<span class="ds-chip ${cls}">${esc(status)}</span>`;
+  const cls = status==='Complete' ? 'wm-ds-ok' : status==='Partial' ? 'wm-ds-part' : 'wm-ds-wait';
+  return `<span class="wm-ds ${cls}">${esc(status)}</span>`;
 }
 
 /* ---------------- Tab 1: Weekly Monitor ---------------- */
@@ -1264,20 +1277,26 @@ function renderWmCards(){
   const dig      = WM_ROWS.filter(r => { const s=fscore(r.f); return s && s.bucket==='DIG DEEPER'; }).length;
   const deltas = (DATA.summary && DATA.summary.deltas) || null;   // only shown when a prior week exists
   const cards = [
-    {k:'doc',    n:newDrhps, lab:'New DRHPs',                   d: deltas && deltas.new_drhp},
-    {k:'trend',  n:newPros,  lab:'New Prospectuses',            d: deltas && deltas.new_ipo},
-    {k:'spark',  n:updCorr,  lab:'Updated / Corrected Filings', d: null},
-    {k:'target', n:dig,      lab:'DIG DEEPER',                  d: deltas && deltas.dig_deeper},
+    {k:'doc',    n:newDrhps, lab:'New DRHPs',                   tone:'tone-doc',   d: deltas && deltas.new_drhp},
+    {k:'trend',  n:newPros,  lab:'New Prospectuses',            tone:'tone-trend', d: deltas && deltas.new_ipo},
+    {k:'spark',  n:updCorr,  lab:'Updated / Corrected Filings', tone:'tone-upd',   d: null},
+    {k:'target', n:dig,      lab:'DIG DEEPER',                  tone:'tone-dig',   d: deltas && deltas.dig_deeper},
   ];
   document.getElementById('wm-cards').innerHTML = cards.map(c=>`
-    <div class="wm-card">
+    <div class="wm-card ${c.tone}">
       <span class="wm-ic">${icon(c.k,18)}</span>
       <div class="wm-card-body">
         <div class="wm-n">${c.n}</div>
         <div class="wm-lab">${c.lab}</div>
       </div>
-      ${deltas && c.d ? `<div class="wm-delta ${String(c.d).startsWith('+')?'up':'down'}">${esc(c.d)}</div>` : ''}
+      ${deltas && c.d ? wmDelta(c.d) : ''}
     </div>`).join('');
+}
+/* micro delta — a small premium pill; muted up/down/flat tones, arrow for direction */
+function wmDelta(d){
+  if(d==='flat') return `<span class="wm-delta flat">flat</span>`;
+  const up = String(d).startsWith('+');
+  return `<span class="wm-delta ${up?'up':'down'}"><span class="da">${up?'▲':'▼'}</span>${esc(d)}</span>`;
 }
 
 function renderWmTable(){
@@ -1288,12 +1307,12 @@ function renderWmTable(){
   </tr></thead>`;
   const body = WM_ROWS.length ? WM_ROWS.map(({f, ev, dstage}, i) => {
     const ds = dataStatus(f);
-    return `<tr class="wm-row" data-idx="${i}" tabindex="0" aria-expanded="false">
+    return `<tr class="wm-row${i%2?' wm-alt':''}" data-idx="${i}" tabindex="0" aria-expanded="false">
       <td>${companyCell(f, false)}</td>
       <td>${eventChip(ev)}</td>
-      <td class="subtle">${f.filing_type?esc(f.filing_type):DASH}</td>
+      <td>${ftChip(f.filing_type)}</td>
       <td class="subtle">${dfmt(f.filing_date)}</td>
-      <td>${dashStageChip(dstage)}</td>
+      <td>${arStageChip(dstage)}</td>
       <td class="subtle">${esc(f.sector||'—')}</td>
       <td class="num">${scoreLink(fscore(f), 'f', i)}</td>
       <td>${recoTag(fscore(f))}</td>
@@ -1422,9 +1441,12 @@ function renderWmInsights(){
 
   const host = document.getElementById('wm-insights');
   if(!out.length){ host.innerHTML=''; return; }
+  // tone psychology per statement — new (sage) · amended (gold) · priority (sage) · awaiting (grey)
+  const TONE = {trend:'sage', spark:'gold', target:'sage', clock:'grey'};
   host.innerHTML = `<div class="card wm-ins-card">
-    <div class="panel-head"><h3>Weekly Insights</h3></div>
-    <ul class="wm-ins-list">${out.slice(0,3).map(o=>`<li><span class="wm-ins-ic">${icon(o.k,15)}</span><span>${o.t}</span></li>`).join('')}</ul>
+    <div class="wm-ins-head"><h3>Weekly Insights</h3></div>
+    <ul class="wm-ins-list">${out.slice(0,3).map(o=>
+      `<li><span class="wm-ins-ic tone-${TONE[o.k]||'sage'}">${icon(o.k,16)}</span><span class="wm-ins-tx">${o.t}</span></li>`).join('')}</ul>
   </div>`;
 }
 
