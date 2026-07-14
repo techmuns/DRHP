@@ -1197,27 +1197,20 @@ function weeklyChange(f, stage){
   if(stage==='DRHP Filed' || st.includes('FILED_THIS_WEEK')) return 'New DRHP';
   return 'Stage Changed';
 }
-/* nicer labels for the score-component breakdown */
-const COMP_LABEL = {rev_growth:'Revenue growth', pat_margin:'PAT margin', roe:'ROE', roce:'ROCE', pat_growth:'PAT growth', revenue_scale:'Revenue scale'};
 function changeChip(ch){ const x=CHANGE[ch]||{cls:'st-filed'}; return `<span class="lc-chip ${x.cls}">${esc(ch)}</span>`; }
 
-/* Complete / Partial / Awaiting Financials — missing is never treated as zero */
+/* Data Status = purely factual financial-disclosure completeness (no score).
+   Complete / Partial / Awaiting Financials — missing is never treated as zero */
 const FIN_KEYS = ['rev_growth_pct','ebitda_margin_pct','pat_growth_pct','pat_margin_pct'];
 function dataStatus(f){
-  const b = f.score && f.score.bucket;
-  if(!b || b==='INSUFFICIENT') return 'Awaiting Financials';
   const fin = f.financials || {};
   const have = FIN_KEYS.filter(k => fin[k] && fin[k].value!=null).length;
+  if(have===0) return 'Awaiting Financials';
   return have===FIN_KEYS.length ? 'Complete' : 'Partial';
 }
 function dsChip(status){
   const cls = status==='Complete' ? 'ok' : status==='Partial' ? 'mkt' : 'miss';
   return `<span class="ds-chip ${cls}">${esc(status)}</span>`;
-}
-/* show a score only when adequate financials exist — otherwise "Not Scored" */
-function scoreDisplay(total){
-  if(total==null) return `<span class="ns-tag">Not Scored</span>`;
-  return `<span class="score-cell">${Math.round(total)}</span>`;
 }
 
 /* ---------------- Tab 1: Weekly Monitor ---------------- */
@@ -1233,10 +1226,8 @@ function renderWeekly(){
     const prev = byNorm.get(f.company_name_normalized);
     if(!prev || CHANGE[ch].rank < CHANGE[prev.ch].rank) byNorm.set(f.company_name_normalized, {f, ch, stage});
   });
-  const sc = f => (f.score && f.score.total!=null) ? f.score.total : -1;
   WM_ROWS = [...byNorm.values()].sort((a,b) =>
-    CHANGE[a.ch].rank - CHANGE[b.ch].rank ||     // 1 New, 2 Updated, 3 Stage, then score, then date
-    sc(b.f) - sc(a.f) ||
+    CHANGE[a.ch].rank - CHANGE[b.ch].rank ||     // New, then Updated, then Stage, then filing date
     String(b.f.filing_date||'').localeCompare(String(a.f.filing_date||'')));
   renderWmCards();
   renderWmTable();
@@ -1267,7 +1258,7 @@ function renderWmCards(){
 function renderWmTable(){
   const head = `<thead><tr>
     <th>Company</th><th>Weekly Change</th><th>Filing Date</th><th>Current Stage</th>
-    <th>Board</th><th>Sector</th><th class="num">Score</th><th>Data Status</th><th>Action</th>
+    <th>Board</th><th>Sector</th><th>Data Status</th><th>Action</th>
   </tr></thead>`;
   const body = WM_ROWS.length ? WM_ROWS.map(({f, ch, stage}, i) => {
     const ds = dataStatus(f);
@@ -1278,12 +1269,11 @@ function renderWmTable(){
       <td>${stageChip(stage)||DASH}</td>
       <td>${boardChip(f.board)}</td>
       <td class="subtle">${esc(f.sector||'—')}</td>
-      <td class="num">${scoreDisplay(f.score && f.score.total)}</td>
       <td>${dsChip(ds)}</td>
       <td><button class="wm-act" data-idx="${i}">${esc(CHANGE[ch].action)} <span class="wm-caret">▾</span></button></td>
     </tr>
-    <tr class="wm-detail" id="wm-detail-${i}" hidden><td colspan="9">${wmDetail(f)}</td></tr>`;
-  }).join('') : `<tr><td colspan="9" class="subtle" style="padding:16px">No filings for the selected week.</td></tr>`;
+    <tr class="wm-detail" id="wm-detail-${i}" hidden><td colspan="8">${wmDetail(f)}</td></tr>`;
+  }).join('') : `<tr><td colspan="8" class="subtle" style="padding:16px">No filings for the selected week.</td></tr>`;
   const table = document.getElementById('wm-table');
   table.innerHTML = head + `<tbody>${body}</tbody>`;
   document.getElementById('wm-foot').textContent =
@@ -1304,7 +1294,7 @@ function renderWmTable(){
   });
 }
 
-/* inline expandable detail — business, financials, issue, score, history, sources */
+/* inline expandable detail — business, financials, issue, filing history, sources */
 function wmDetail(f){
   const fin = f.financials || {}, iss = f.issue || {};
   const kv = (k,v)=> `<div class="wd-row"><span class="wd-k">${k}</span><span class="wd-v">${v}</span></div>`;
@@ -1321,10 +1311,6 @@ function wmDetail(f){
     irow('Offer for sale',   iss.ofs_cr!=null ? '₹'+money(iss.ofs_cr)+' Cr' : null),
     irow('Total issue size', iss.total_cr!=null ? '₹'+money(iss.total_cr)+' Cr' : null),
   ].filter(Boolean).join('');
-  const comps = (f.score && f.score.components) || {};
-  const scoreBreak = (f.score && f.score.total!=null)
-    ? Object.entries(comps).map(([k,v])=> kv(COMP_LABEL[k]||k.replace(/_/g,' '), v==null?'—':Math.round(v))).join('')
-    : `<div class="subtle tiny">Not scored — awaiting adequate financial disclosure.</div>`;
   const history = kv(dfmt(f.filing_date), `${esc(f.filing_type||'Filing')} · ${esc(f.current_stage||'—')}`);
   return `<div class="wd-grid">
     <div class="wd-col">
@@ -1335,8 +1321,6 @@ function wmDetail(f){
     <div class="wd-col">
       <div class="wd-h">Financials</div>
       ${financials || '<div class="subtle tiny">Not disclosed in this filing.</div>'}
-      <div class="wd-h">Score breakdown</div>
-      ${scoreBreak}
     </div>
     <div class="wd-col">
       <div class="wd-h">Filing history</div>${history}
@@ -1347,10 +1331,10 @@ function wmDetail(f){
 
 function renderWmInsights(){
   const out = [];
-  const news = WM_ROWS.filter(r=>r.ch==='New DRHP' && r.f.score && r.f.score.total!=null);
-  if(news.length){
-    const top = news.reduce((a,b)=> b.f.score.total>a.f.score.total ? b : a);
-    out.push({k:'trend', t:`Highest-scoring new filing: <b>${esc(top.f.company_name)}</b> — ${Math.round(top.f.score.total)} (${esc(top.f.sector||'—')}).`});
+  const sized = WM_ROWS.map(r=>r.f).filter(f=>f.issue && f.issue.total_cr!=null);
+  if(sized.length){
+    const big = sized.reduce((a,b)=> (b.issue.total_cr>a.issue.total_cr ? b : a));
+    out.push({k:'chart', t:`Largest issue this week: <b>${esc(big.company_name)}</b> — ₹${money(big.issue.total_cr)} Cr (${esc(big.sector||'—')}).`});
   }
   const upd = WM_ROWS.filter(r=>r.ch==='Updated Filing');
   if(upd.length) out.push({k:'spark', t:`<b>${esc(upd[0].f.company_name)}</b> filed a corrected / updated document — review the changes.`});
@@ -1370,7 +1354,7 @@ function renderWmInsights(){
 }
 
 /* ---------------- Tab 2: Pipeline ---------------- */
-let plFilter = {board:'All', stage:'All', sector:'All', period:'All', q:'', metrics:false};
+let plFilter = {board:'All', stage:'All', sector:'All', period:'All', q:''};
 const plRecency = r => r.filingDate || r.issueOpen || r.listingDate || null;
 function renderPipeline(){
   const host = document.getElementById('pl-controls');
@@ -1391,7 +1375,6 @@ function buildPlControls(host){
     ${opt('sector','Sector',sectors)}
     ${opt('period','Filing period',['30','60','90'],v=>'Last '+v+' days')}
     <label class="ctl-search"><input type="search" id="pl-q" placeholder="Search company…"></label>
-    <label class="ctl-toggle"><input type="checkbox" id="pl-metrics"> Review Metrics</label>
     <button class="fchip hide" id="pl-reset">Reset</button>`;
   host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
     plFilter[s.dataset.f]=s.value;
@@ -1399,9 +1382,8 @@ function buildPlControls(host){
     renderPlRows();
   }));
   const q = host.querySelector('#pl-q'); q.addEventListener('input',()=>{ plFilter.q=q.value; renderPlRows(); });
-  const mt = host.querySelector('#pl-metrics'); mt.addEventListener('change',()=>{ plFilter.metrics=mt.checked; renderPlRows(); });
   host.querySelector('#pl-reset').addEventListener('click',()=>{
-    plFilter={board:'All',stage:'All',sector:'All',period:'All',q:'',metrics:plFilter.metrics};
+    plFilter={board:'All',stage:'All',sector:'All',period:'All',q:''};
     host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
     q.value=''; renderPlRows();
   });
@@ -1416,11 +1398,9 @@ function renderPlRows(){
     (plFilter.sector==='All' || r.sector===plFilter.sector) &&
     (q==='' || (r.name||'').toLowerCase().includes(q)) &&
     (plFilter.period==='All' || (()=>{ const d=daysAgo(plRecency(r)); return d!=null && d<=+plFilter.period; })()));
-  const m = plFilter.metrics;
   const head = `<thead><tr>
     <th>Company</th><th>Board</th><th>Sector</th><th>Filing Type</th><th>Filing Date</th><th>Current Stage</th>
     <th>Open</th><th>Close</th><th>Listing</th><th>Price Band</th><th class="num">Issue Size</th><th class="num">Subscription</th>
-    ${m?'<th class="num">Score</th>':''}
   </tr></thead>`;
   const body = rows.length ? rows.map(r=>`<tr>
     <td class="company">${pipelineName(r)}</td>
@@ -1435,11 +1415,10 @@ function renderPlRows(){
     <td class="subtle">${r.priceBand?esc(r.priceBand):DASH}</td>
     <td class="num">${r.issueSizeCr==null?DASH:money(r.issueSizeCr)}</td>
     <td class="num">${subx(r.subscriptionX)}</td>
-    ${m?`<td class="num">${scoreDisplay(r.score)}</td>`:''}
-  </tr>`).join('') : `<tr><td colspan="${m?13:12}" class="subtle" style="padding:16px">No companies match these filters.</td></tr>`;
+  </tr>`).join('') : `<tr><td colspan="12" class="subtle" style="padding:16px">No companies match these filters.</td></tr>`;
   document.getElementById('pl-table').innerHTML = head + `<tbody>${body}</tbody>`;
   document.getElementById('pl-foot').textContent =
-    `${rows.length} of ${MARKET.length} companies · one shared lifecycle stage across the dashboard. Scores hidden unless “Review Metrics” is on.`;
+    `${rows.length} of ${MARKET.length} companies · one shared lifecycle stage across the dashboard.`;
   const active = plFilter.board!=='All'||plFilter.stage!=='All'||plFilter.sector!=='All'||plFilter.period!=='All'||plFilter.q!=='';
   document.getElementById('pl-reset').classList.toggle('hide', !active);
 }
@@ -1475,7 +1454,6 @@ const AR_COLS = [
   {h:'Listing', cls:'subtle', cell:r=>r.listingDate?dfmt(r.listingDate):DASH, get:r=>r.listingDate},
   {h:'Price Band', cls:'subtle', cell:r=>r.priceBand?esc(r.priceBand):DASH, get:r=>r.priceBand},
   {h:'Subscription', num:1, cell:r=>subx(r.subscriptionX), get:r=>r.subscriptionX},
-  {h:'Score', num:1, cell:r=>scoreDisplay(r.score), get:r=>r.score},
   {h:'Source', cell:r=>srcRec(r), get:r=>{ const s=r.sources||{}; return s.drhp_pdf_url||s.sebi_url||''; }},
 ];
 function arFiltered(){
