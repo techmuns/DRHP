@@ -1,6 +1,6 @@
 # DRHP / IPO Weekly Investment Monitor — Data Pipeline (Phase 0)
 
-This is the **research worker** behind the DRHP Intelligence Dashboard. Once a week,
+This is the **research worker** behind the DRHP Intelligence Dashboard. Every day,
 with nobody pressing anything, it:
 
 1. checks SEBI's two public listing pages for newly filed DRHPs and IPO prospectuses,
@@ -26,9 +26,10 @@ connected by a **frozen data contract** — see [`docs/DATA_CONTRACT.md`](docs/D
 ## How it runs automatically (the important part)
 
 A GitHub Action (`.github/workflows/weekly-pipeline.yml`) runs the pipeline **every
-Monday morning**, commits the refreshed data to `main`, and the connected Cloudflare
-Pages site redeploys itself. After the one-time setup below, **no manual steps are ever
-needed again.**
+morning at 03:00 UTC (08:30 IST)**, commits the refreshed data to `main`, and the
+connected Cloudflare Pages site redeploys itself. On days with no new filings it
+commits nothing, so the site only changes when the data does. After the one-time setup
+below, **no manual steps are ever needed again.**
 
 You can also trigger it by hand anytime: GitHub → **Actions** → *Weekly DRHP/IPO
 Monitor* → **Run workflow**.
@@ -45,7 +46,7 @@ You only do this once. (It needs a Cloudflare account — free tier is fine.)
    - **Build output directory:** `/` *(repository root — the default)*
    - **Production branch:** `main`
 4. Click **Save and Deploy**. Cloudflare now watches the `main` branch.
-5. Done. From now on, every weekly data commit to `main` makes Cloudflare redeploy the
+5. Done. From now on, every data commit to `main` makes Cloudflare redeploy the
    dashboard automatically.
 
 The dashboard is at `index.html`; it reads `data/latest.json` at load
