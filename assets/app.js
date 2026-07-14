@@ -213,6 +213,7 @@ function filingToRec(f){
     bucket: f.score ? f.score.bucket : null,
     sources: f.sources || null,
     financials: f.financials || null,
+    groww: f.groww || null,           // Groww secondary enrichment (fill-only)
     origin: 'filing',
   };
 }
@@ -242,6 +243,7 @@ function buildMarket(){
       if(ex.issuePrice == null) ex.issuePrice = r.issue_price;
       ex.priceBand = ex.priceBand || r.price_band;
       ex.symbol = r.symbol;
+      ex.groww = ex.groww || r.groww || null;
       return;
     }
     out.push({
@@ -253,7 +255,7 @@ function buildMarket(){
       subscriptionX: r.subscription_x, issuePrice: r.issue_price,
       currentPrice: r.current_price, gainPct: r.gain_pct, priceBand: r.price_band, symbol: r.symbol,
       businessSummary: null, leadManagers: null,
-      score: null, bucket: null, sources: null, financials: null, origin: 'nse',
+      score: null, bucket: null, sources: null, financials: null, groww: r.groww || null, origin: 'nse',
     });
   };
   if(m.available){
@@ -1347,6 +1349,69 @@ function renderWmTable(){
   });
 }
 
+/* ---- Groww secondary-source panel (fill-only; official filings stay primary) ----
+   Rendered inside the expanded detail of a company row. Only fields Groww actually
+   returned are shown; missing values are omitted (never zero). A source badge links
+   to the exact matched Groww page. */
+function growwBadge(url){
+  return url
+    ? `<a class="groww-badge" href="${esc(url)}" target="_blank" rel="noopener" title="Open the matched Groww page">${LINK_SVG} Groww</a>`
+    : `<span class="groww-badge static">Groww</span>`;
+}
+function growwSection(g){
+  if(!g) return '';
+  const kv = (k,v)=> `<div class="wd-row"><span class="wd-k">${k}</span><span class="wd-v">${v}</span></div>`;
+  const has = v => v!=null && v!=='';
+  const sx = v => v==null ? null : Number(v).toFixed(2)+'×';
+  const fu = g.fundamentals || {}, ip = g.ipo || {}, sub = g.subscription || {}, prov = g.provenance || {};
+  const url = (g.match && (g.match.stock_url || g.match.ipo_url)) || prov.source_url || null;
+
+  const ipoRows = [
+    has(ip.board) && kv('Board', esc(ip.board)),
+    has(ip.price_band) && kv('Price band', esc(ip.price_band)),
+    has(ip.issue_size_cr) && kv('Issue size', '₹'+money(ip.issue_size_cr)+' Cr'),
+    (has(ip.open_date)||has(ip.close_date)) && kv('Issue window', `${ip.open_date?dfmt(ip.open_date):'—'}${ip.close_date?' – '+dfmt(ip.close_date):''}`),
+    has(ip.listing_date) && kv('Listing date', dfmt(ip.listing_date)),
+    has(ip.issue_price) && kv('Issue price', '₹'+money(ip.issue_price)),
+    has(ip.lot_size) && kv('Lot size', money(ip.lot_size)),
+    has(ip.min_investment) && kv('Min investment', '₹'+money(ip.min_investment)),
+    has(ip.listing_price) && kv('Listing price', '₹'+money(ip.listing_price)),
+    has(ip.listing_gain_pct) && kv('Listing gain/loss', pct(ip.listing_gain_pct)),
+  ].filter(Boolean).join('');
+  const subRows = [
+    has(sub.total) && kv('Overall', sx(sub.total)),
+    has(sub.qib) && kv('QIB', sx(sub.qib)),
+    has(sub.nii) && kv('NII / HNI', sx(sub.nii)),
+    has(sub.retail) && kv('Retail', sx(sub.retail)),
+    has(sub.employee) && kv('Employee', sx(sub.employee)),
+    has(sub.as_of) && kv('As of', esc(String(sub.as_of).slice(0,10))+(sub.status?` · ${esc(sub.status)}`:'')),
+  ].filter(Boolean).join('');
+  const fundRows = [
+    has(fu.market_cap_cr) && kv('Market cap', '₹'+money(fu.market_cap_cr)+' Cr'),
+    has(fu.roe_pct) && kv('ROE', pct(fu.roe_pct)),
+    has(fu.debt_equity) && kv('Debt / equity', ratio(fu.debt_equity)),
+    has(fu.pe_ratio) && kv('P/E (TTM)', ratio(fu.pe_ratio)),
+    has(fu.pb_ratio) && kv('P/B', ratio(fu.pb_ratio)),
+    has(fu.eps) && kv('EPS (TTM)', ratio(fu.eps)),
+    has(fu.book_value) && kv('Book value', '₹'+money(fu.book_value)),
+    has(fu.dividend_yield_pct) && kv('Dividend yield', pct(fu.dividend_yield_pct)),
+    has(fu.industry_pe) && kv('Industry P/E', ratio(fu.industry_pe)),
+    has(fu.promoter_hold_pct) && kv('Promoter holding', pct(fu.promoter_hold_pct)),
+  ].filter(Boolean).join('');
+
+  if(!ipoRows && !subRows && !fundRows) return '';
+  const cols = [
+    ipoRows && `<div class="gw-col"><div class="wd-h">IPO details</div>${ipoRows}</div>`,
+    subRows && `<div class="gw-col"><div class="wd-h">Subscription</div>${subRows}</div>`,
+    fundRows && `<div class="gw-col"><div class="wd-h">Fundamentals</div>${fundRows}</div>`,
+  ].filter(Boolean).join('');
+  const note = `Secondary source — fills gaps only; official filings remain primary${prov.fetched_at?` · fetched ${esc(String(prov.fetched_at).slice(0,10))}`:''}`;
+  return `<div class="groww-panel">
+    <div class="groww-head"><span class="groww-h-tx">Market Data</span>${growwBadge(url)}<span class="groww-note">${note}</span></div>
+    <div class="gw-grid">${cols}</div>
+  </div>`;
+}
+
 /* inline expandable detail — filing info + history, business & issue, full financials.
    Missing values render as "—"; nothing is ever coerced to zero. */
 function wmDetail(row){
@@ -1409,7 +1474,7 @@ function wmDetail(row){
       <div class="wd-h">Financials (from the filing)</div>
       ${financials}
     </div>
-  </div>`;
+  </div>${growwSection(f.groww)}`;
 }
 
 function renderWmInsights(){
@@ -1556,7 +1621,12 @@ function nextMilestone(r){
   const lab = NEXT[mapStage(r)];
   return lab ? {lab, date:null} : null;
 }
-function ipoSizeCell(r){ return r.issueSizeCr==null ? DASH : `₹${money(r.issueSizeCr)} Cr`; }
+function ipoSizeCell(r){
+  if(r.issueSizeCr!=null) return `₹${money(r.issueSizeCr)} Cr`;
+  const gz = r.groww && r.groww.ipo && r.groww.ipo.issue_size_cr;   // fill-only from Groww
+  if(gz!=null) return `<span class="g-fill" title="Source: Groww — not disclosed by the official filing">₹${money(gz)} Cr</span>`;
+  return DASH;
+}
 
 /* ---------------- Full Tracker (lifecycle selector · stage chips · detailed table) ---------------- */
 let arFilter = {q:'', life:'All', stage:'All', board:'All', sector:'All', ftype:'All', from:'', to:'', metrics:false};
@@ -1881,7 +1951,7 @@ function arDetail(r){
       <div class="wd-h">Financials (from the filing)</div>${financials}
       <div class="wd-h">Score breakdown</div>${scoreHead}${scoreRows}
     </div>
-  </div>`;
+  </div>${growwSection(r.groww)}`;
 }
 
 /* Export CSV — the complete tracking record (independent of the visible columns) */

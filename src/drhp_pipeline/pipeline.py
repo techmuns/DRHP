@@ -131,6 +131,7 @@ def run(
     prescraped: Optional[List[ScrapedFiling]] = None,
     fetch_ipo: bool = True,
     nse_raw: Optional[dict] = None,
+    enrich_groww: bool = False,   # opt-in (CLI enables it); keeps run() hermetic for tests
 ) -> Dashboard:
     """Execute the full pipeline and return the emitted Dashboard."""
     window = compute_window(run_date)
@@ -183,6 +184,18 @@ def run(
 
     dashboard = Dashboard(meta=meta, summary=summary, filings=filings, ipo_market=market)
 
+    # Secondary enrichment (Groww) — best-effort, fill-only. Never blocks a run and
+    # never modifies official values; differences are logged to groww_conflicts.
+    if enrich_groww:
+        try:
+            from . import groww_enrich
+            stats = groww_enrich.enrich_dashboard(dashboard)
+            log.info("Groww enrichment: %d/%d matched, %d fields, %d conflicts.",
+                     stats["matched"], stats["distinct_companies"],
+                     stats["fields_populated"], stats["conflicts"])
+        except Exception as e:  # pragma: no cover - network/runtime guard
+            log.warning("Groww enrichment skipped: %s", e)
+
     save_snapshot(dashboard, snapshots_dir)
     emit.write_latest(dashboard, output_path)
     if appendix_path:
@@ -234,6 +247,7 @@ def _parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     p.add_argument("--output", default=emit.LATEST_PATH)
     p.add_argument("--appendix", default=emit.APPENDIX_PATH)
     p.add_argument("--no-excel", action="store_true", help="Skip the Excel appendix")
+    p.add_argument("--no-groww", action="store_true", help="Skip Groww secondary enrichment")
     p.add_argument("--scratch-dir", default="/tmp")
     p.add_argument("-v", "--verbose", action="store_true")
     return p.parse_args(argv)
@@ -254,6 +268,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         output_path=args.output,
         appendix_path=None if args.no_excel else args.appendix,
         scratch_dir=args.scratch_dir,
+        enrich_groww=not args.no_groww,
     )
     return 0
 

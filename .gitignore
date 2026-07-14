@@ -22,3 +22,7 @@ drhp_*.pdf
 
 # NOTE: public/data/ and data/snapshots/ are intentionally committed — they are the
 # pipeline's output and the snapshot history the dashboard reads.
+
+# Transient scraper cache (Groww etc.)
+data/cache/
+data/groww_conflicts.json

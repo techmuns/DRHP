@@ -110,6 +110,98 @@ class Sources(_Model):
 
 
 # ---------------------------------------------------------------------------
+# Groww enrichment (SECONDARY source) — additive namespace.
+#
+# Official filings (SEBI/NSE/BSE) stay primary and are never overwritten. Every
+# Groww-derived value lives here with its own provenance so the UI can (a) fill a
+# blank official field for display and (b) show a Groww source badge/link, while
+# keeping official values authoritative. Differences vs an official value are
+# recorded in `Dashboard.groww_conflicts`, never merged into the official fields.
+# ---------------------------------------------------------------------------
+class GrowwProvenance(_Model):
+    source_name: str = "Groww"
+    source_url: Optional[str] = None
+    fetched_at: Optional[str] = None       # ISO datetime (UTC)
+    data_period: Optional[str] = None      # e.g. "FY2025" | "Jun '26" | "as of 2026-07-14"
+    status: Optional[str] = None           # Live | Final | Historical
+
+
+class GrowwFundamentals(_Model):
+    market_cap_cr: Optional[float] = None
+    roe_pct: Optional[float] = None
+    debt_equity: Optional[float] = None
+    pe_ratio: Optional[float] = None
+    pb_ratio: Optional[float] = None
+    eps: Optional[float] = None
+    book_value: Optional[float] = None
+    dividend_yield_pct: Optional[float] = None
+    industry_pe: Optional[float] = None
+    promoter_hold_pct: Optional[float] = None
+    face_value: Optional[float] = None
+
+
+class GrowwSubscription(_Model):
+    qib: Optional[float] = None
+    nii: Optional[float] = None
+    retail: Optional[float] = None
+    employee: Optional[float] = None
+    total: Optional[float] = None
+    as_of: Optional[str] = None
+    source_url: Optional[str] = None
+    status: Optional[str] = None            # Live | Final
+
+
+class GrowwIpo(_Model):
+    board: Optional[str] = None             # Mainboard | SME
+    type: Optional[str] = None              # Fresh | OFS | Both
+    open_date: Optional[str] = None
+    close_date: Optional[str] = None
+    allotment_date: Optional[str] = None
+    listing_date: Optional[str] = None
+    price_band: Optional[str] = None
+    issue_price: Optional[float] = None
+    lot_size: Optional[float] = None
+    min_investment: Optional[float] = None
+    issue_size_cr: Optional[float] = None
+    fresh_cr: Optional[float] = None
+    ofs_cr: Optional[float] = None
+    listing_price: Optional[float] = None
+    listing_gain_pct: Optional[float] = None
+
+
+class GrowwMatch(_Model):
+    matched_name: Optional[str] = None
+    confidence: Optional[float] = None
+    stock_slug: Optional[str] = None
+    stock_url: Optional[str] = None
+    ipo_slug: Optional[str] = None
+    ipo_url: Optional[str] = None
+    isin: Optional[str] = None
+    nse_code: Optional[str] = None
+
+
+class GrowwEnrichment(_Model):
+    match: GrowwMatch = Field(default_factory=GrowwMatch)
+    provenance: GrowwProvenance = Field(default_factory=GrowwProvenance)
+    fundamentals: GrowwFundamentals = Field(default_factory=GrowwFundamentals)
+    subscription: Optional[GrowwSubscription] = None
+    ipo: Optional[GrowwIpo] = None
+    # {"FY2025": {"revenue_cr": .., "pat_cr": .., "net_worth_cr": .., "basis": ".."}}
+    financials_by_year: dict = Field(default_factory=dict)
+    fetched_at: Optional[str] = None
+
+
+class GrowwConflict(_Model):
+    company: str
+    field: str
+    official_value: Optional[float] = None
+    official_source: Optional[str] = None
+    groww_value: Optional[float] = None
+    groww_url: Optional[str] = None
+    note: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
 # Filing — one row of the monitor
 # ---------------------------------------------------------------------------
 class Filing(_Model):
@@ -133,6 +225,9 @@ class Filing(_Model):
     board: Optional[str] = None          # Mainboard | SME
     current_stage: Optional[str] = None  # DRHP Filed | Updated/Corrected | IPO Open | Listing Soon | Listed | Withdrawn
     listing_outcome: Optional[str] = None  # Positive | Negative | Pending | null
+
+    # ----- Groww secondary enrichment (fill-only; null when unmatched) -----
+    groww: Optional[GrowwEnrichment] = None
 
     # ----- STAGE 2 (always null in Stage 1; UI must tolerate null) -----
     competitor_impact: Optional[dict] = None
@@ -204,6 +299,7 @@ class IpoRow(_Model):
     gain_pct: Optional[float] = None        # listing gain/loss -> null until price exists
     status: Optional[str] = None
     stage: Optional[str] = None             # Upcoming | IPO Open | Listing Soon | Listed | Withdrawn
+    groww: Optional[GrowwEnrichment] = None  # Groww secondary enrichment (fill-only)
 
 
 class IpoPulse(_Model):
@@ -231,6 +327,10 @@ class Dashboard(_Model):
     summary: Summary
     filings: List[Filing] = Field(default_factory=list)
     ipo_market: Optional[IpoMarket] = None
+    # Groww source-comparison log — differences where an official value was kept.
+    groww_conflicts: Optional[List[GrowwConflict]] = None
+    # Run summary for the enrichment pass (counts); null until enrichment runs.
+    groww_summary: Optional[dict] = None
 
     def to_json(self, indent: int = 2) -> str:
         """Serialize to the exact contract JSON (nulls preserved, key order stable)."""

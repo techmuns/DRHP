@@ -123,6 +123,39 @@ Top-level `ipo_market`:
 }
 ```
 
+## Groww enrichment layer (additive, SECONDARY)
+
+Official filings (SEBI / NSE / BSE) stay **primary**. Groww is a *fill-only* secondary
+source: it never overwrites a present official value, and every difference is recorded
+in `groww_conflicts`. All Groww-derived data lives in an additive `groww` namespace on
+each `filing` / `ipo_market` row so the official fields stay pristine.
+
+```jsonc
+"groww": {
+  "match": { "matched_name": "...", "confidence": 1.0,
+             "stock_url": "https://groww.in/stocks/...", "ipo_url": "https://groww.in/ipo/...",
+             "isin": "INE...", "nse_code": "..." },
+  "provenance": { "source_name": "Groww", "source_url": "...", "fetched_at": "...",
+                  "data_period": "Jun '26", "status": "Live|Final|Historical" },
+  "fundamentals": { "market_cap_cr": 6210.0, "roe_pct": 65.01, "debt_equity": 1.47,
+                    "pe_ratio": 119.15, "pb_ratio": 9.34, "eps": 7.20, "book_value": 91.89,
+                    "dividend_yield_pct": 0.0, "industry_pe": 39.54, "promoter_hold_pct": 89.35,
+                    "face_value": 10.0 },
+  "subscription": { "qib": 0.69, "nii": 1.17, "retail": 4.12, "employee": null,
+                    "total": 1.44, "as_of": "...", "source_url": "...", "status": "Final" },
+  "ipo": { "board": "Mainboard", "open_date": "...", "close_date": "...", "listing_date": "...",
+           "price_band": "Rs.769 to Rs.808", "issue_price": 808.0, "lot_size": 18.0,
+           "min_investment": 14544.0, "issue_size_cr": 585.0, "listing_price": 681.0,
+           "listing_gain_pct": -15.72 },
+  "financials_by_year": { "FY2025": { "revenue_cr": 597.68, "pat_cr": 168.19, "basis": "CONSOLIDATED" } }
+}
+```
+
+Top-level `groww_conflicts` is a list of `{ company, field, official_value, official_source,
+groww_value, groww_url, note }` (official kept, difference flagged). `groww_summary` carries
+the run counts. Missing Groww values stay `null` — never zero. Subscription multiples are
+numeric (1.44× → `1.44`); the "×" is UI formatting only.
+
 ## UI rules the contract implies
 
 - Where a financial `value` is `null`, show **"—"**, not `0`.

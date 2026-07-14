@@ -54,7 +54,28 @@ _COLUMNS = [
     ("Verify", lambda f: _low_confidence_fields(f)),
     ("SEBI URL", lambda f: f.sources.sebi_url),
     ("DRHP PDF", lambda f: f.sources.drhp_pdf_url),
+    # ----- Groww secondary enrichment (fill-only; official columns above stay primary) -----
+    ("Groww Match", lambda f: _g(f, "match", "matched_name")),
+    ("Groww Mkt Cap (Cr)", lambda f: _g(f, "fundamentals", "market_cap_cr")),
+    ("Groww ROE %", lambda f: _g(f, "fundamentals", "roe_pct")),
+    ("Groww D/E", lambda f: _g(f, "fundamentals", "debt_equity")),
+    ("Groww Promoter %", lambda f: _g(f, "fundamentals", "promoter_hold_pct")),
+    ("Groww Sub Total", lambda f: _g(f, "subscription", "total")),
+    ("Groww Sub QIB", lambda f: _g(f, "subscription", "qib")),
+    ("Groww Sub NII", lambda f: _g(f, "subscription", "nii")),
+    ("Groww Sub Retail", lambda f: _g(f, "subscription", "retail")),
+    ("Groww Listing Gain %", lambda f: _g(f, "ipo", "listing_gain_pct")),
+    ("Groww URL", lambda f: (_g(f, "match", "stock_url") or _g(f, "match", "ipo_url"))),
 ]
+
+
+def _g(f: Filing, block: str, field: str):
+    """Safe accessor into the optional Groww enrichment block."""
+    g = getattr(f, "groww", None)
+    if g is None:
+        return None
+    sub = getattr(g, block, None)
+    return getattr(sub, field, None) if sub is not None else None
 
 # Financial fields surfaced in the provenance / verify columns.
 _FIN_FIELDS = [
