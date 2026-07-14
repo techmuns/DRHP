@@ -1627,7 +1627,7 @@ function arExportCsv(){
    Python pipeline and the Excel export). A locally-published override is
    kept in localStorage until it is committed to the repo file.
    ====================================================================== */
-const LS_PUB = 'drhp_scoring_published', LS_DRAFT = 'drhp_scoring_draft';
+const LS_PUB = 'drhp_scoring_published';
 const SCORING = {
   repo: null,    // config as committed in the repo (pipeline + Excel use this)
   active: null,  // config the dashboard scores with (repo, unless locally published)
@@ -1821,17 +1821,14 @@ function openScoreBreakdown(f){
       <div class="md-foot">
         <span class="wm-model-tag">Scoring model v${esc(String(cfg.version))}</span>
         <span class="md-foot-btns">
-          <button class="fchip" id="md-open-settings2">Scoring Settings</button>
           <button class="fchip" data-close>Close</button>
         </span>
       </div>
     </div>`, 'md-breakdown');
-  const b = document.getElementById('md-open-settings2');
-  if(b) b.addEventListener('click', openScoringSettings);
 }
 
 /* ---------------- Scoring Settings (editor · preview · publish) ---------------- */
-let SC_WORK = null;   // working copy being edited
+let SC_WORK = null, SC_SHOW_PREVIEW = false, SC_MSG = '';   // working copy + view state
 function bumpVersion(v){
   const m = String(v||'1.0').match(/^(\d+)\.(\d+)$/);
   return m ? `${m[1]}.${+m[2]+1}` : '1.1';
@@ -1840,15 +1837,15 @@ function scValidate(W){
   const errs = [];
   const comps = Object.values(W.components);
   const sum = comps.reduce((a,c)=>a+(+c.weight||0), 0);
-  if(sum !== W.max_total) errs.push(`Component maximums must total ${W.max_total} (currently ${sum}).`);
+  if(sum !== W.max_total) errs.push(`Weights must total ${W.max_total} (currently ${sum}).`);
   comps.forEach(c=>{
-    if(!(+c.weight>0)) errs.push(`${c.label}: maximum points must be a positive number.`);
-    if(!(+c.saturation > +(c.floor||0))) errs.push(`${c.label}: full-points value must be above the zero-points value.`);
+    if(!(+c.weight>0)) errs.push(`${c.label}: weight must be a positive number.`);
+    if(!(+c.saturation > +(c.floor||0))) errs.push(`${c.label}: “full points at” must be greater than 0.`);
   });
   const th = W.thresholds;
-  if(!(+th.dig_deeper_min > +th.monitor_min)) errs.push('DIG DEEPER threshold must be above the MONITOR threshold.');
-  if(!(+th.monitor_min >= 0)) errs.push('MONITOR threshold cannot be negative.');
-  if(!(+W.min_coverage_weight>=0 && +W.min_coverage_weight<=W.max_total)) errs.push(`Minimum coverage must be between 0 and ${W.max_total}.`);
+  if(!(+th.dig_deeper_min > +th.monitor_min)) errs.push('DIG DEEPER must be higher than MONITOR (ranges would overlap).');
+  if(!(+th.monitor_min >= 0)) errs.push('MONITOR cannot be negative.');
+  if(!(+W.min_coverage_weight>=0 && +W.min_coverage_weight<=W.max_total)) errs.push('Minimum data coverage must be between 0 and 100%.');
   return errs;
 }
 function scPreviewRows(W){
@@ -1861,153 +1858,171 @@ function scPreviewRows(W){
 }
 function openScoringSettings(){
   closeModal();
-  let loadedDraft = false;
-  try{
-    const d = JSON.parse(localStorage.getItem(LS_DRAFT)||'null');
-    if(d && d.components){ SC_WORK = d; loadedDraft = true; }
-  }catch(e){}
-  if(!SC_WORK || !loadedDraft) SC_WORK = clone(SCORING.active);
-  renderScoringSettings(loadedDraft ? 'Loaded your saved draft.' : '');
+  SC_WORK = clone(SCORING.active);
+  SC_SHOW_PREVIEW = false; SC_MSG = '';
+  renderScoringSettings();
 }
-function renderScoringSettings(note){
-  const W = SC_WORK, cfg = SCORING.active;
+function renderScoringSettings(){
+  const W = SC_WORK;
+  const th = W.thresholds;
   const compRows = Object.entries(W.components).map(([k,c])=>`
     <tr>
-      <td>${esc(c.label)} <span class="subtle tiny">(${esc(c.unit)})</span></td>
-      <td class="num"><input class="sc-in" type="number" step="1" data-k="${k}" data-f="weight" value="${c.weight}"></td>
-      <td class="num"><input class="sc-in" type="number" step="any" data-k="${k}" data-f="floor" value="${c.floor||0}"></td>
-      <td class="num"><input class="sc-in" type="number" step="any" data-k="${k}" data-f="saturation" value="${c.saturation}"></td>
-      <td class="subtle">Linear between the two; missing value → excluded (never zero)</td>
+      <td>${esc(c.label)}</td>
+      <td class="num"><input class="sc-in sc-in-sm" type="number" step="1" data-k="${k}" data-f="weight" value="${c.weight}"></td>
+      <td class="num"><input class="sc-in sc-in-sm" type="number" step="any" data-k="${k}" data-f="saturation" value="${c.saturation}"><span class="sc-unit">${esc(c.unit)}</span></td>
     </tr>`).join('');
   const errs = scValidate(W);
-  const prev = scPreviewRows(W);
-  const movedN = prev.filter(p=>p.moved).length;
-  const prevRows = prev.map(p=>`
-    <tr class="${p.moved?'sc-moved':''}">
-      <td>${esc(p.name)}</td>
-      <td class="num">${p.oldS.total!=null?p.oldS.total:'—'}</td>
-      <td>${esc(recoLabel(p.oldS.bucket))}</td>
-      <td class="num">${p.newS.total!=null?p.newS.total:'—'}</td>
-      <td>${esc(recoLabel(p.newS.bucket))}</td>
-    </tr>`).join('');
+  const moved = scPreviewRows(W).filter(p=>p.moved);
+  const movedN = moved.length;
+  const affectedTable = (SC_SHOW_PREVIEW && movedN) ? `
+    <div class="table-wrap"><table class="md-table">
+      <thead><tr><th>Company</th><th class="num">Current Score</th><th class="num">New Score</th><th>Current Recommendation</th><th>New Recommendation</th></tr></thead>
+      <tbody>${moved.map(p=>`<tr class="sc-moved">
+        <td>${esc(p.name)}</td>
+        <td class="num">${p.oldS.total!=null?p.oldS.total:'—'}</td>
+        <td class="num">${p.newS.total!=null?p.newS.total:'—'}</td>
+        <td>${esc(recoLabel(p.oldS.bucket))}</td>
+        <td>${esc(recoLabel(p.newS.bucket))}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>` : '';
   openModal(`
     <div class="md-head"><h3>Scoring Settings</h3><button class="dw-close" data-close aria-label="Close">✕</button></div>
     <div class="md-body">
-      ${note?`<div class="sc-note">${esc(note)}</div>`:''}
-      <div class="wd-h">Component weights &amp; point rules</div>
+      ${SC_MSG}
+      <div class="wd-h">Component weights</div>
       <div class="table-wrap"><table class="md-table sc-table">
-        <thead><tr><th>Component</th><th class="num">Max Points</th><th class="num">0 pts at ≤</th><th class="num">Full pts at ≥</th><th>Rule</th></tr></thead>
+        <thead><tr><th>Metric</th><th class="num">Weight</th><th class="num">Full Points At</th></tr></thead>
         <tbody>${compRows}</tbody>
       </table></div>
+      <p class="sc-helper">Scores increase proportionally from 0 to the full-points value. Missing metrics are excluded and are never treated as zero.</p>
+
       <div class="wd-h">Recommendation thresholds</div>
-      <div class="sc-thresholds">
-        <label>DIG DEEPER ≥ <input class="sc-in" type="number" step="1" data-th="dig_deeper_min" value="${W.thresholds.dig_deeper_min}"></label>
-        <label>MONITOR ≥ <input class="sc-in" type="number" step="1" data-th="monitor_min" value="${W.thresholds.monitor_min}"></label>
-        <span class="subtle">WATCH &lt; ${W.thresholds.monitor_min}</span>
-        <label>AWAITING DATA when available weight &lt; <input class="sc-in" type="number" step="1" data-cov="1" value="${W.min_coverage_weight}"></label>
+      <div class="sc-cards">
+        <div class="sc-card">
+          <span class="tag dig">DIG DEEPER</span>
+          <div class="sc-range">score <input class="sc-in sc-in-sm" type="number" step="1" data-th="dig_deeper_min" value="${th.dig_deeper_min}"> and above</div>
+        </div>
+        <div class="sc-card">
+          <span class="tag mon">MONITOR</span>
+          <div class="sc-range">score <input class="sc-in sc-in-sm" type="number" step="1" data-th="monitor_min" value="${th.monitor_min}"> to below ${th.dig_deeper_min}</div>
+        </div>
+        <div class="sc-card">
+          <span class="tag watch">WATCH</span>
+          <div class="sc-range">score below ${th.monitor_min}</div>
+        </div>
       </div>
-      ${errs.length?`<ul class="sc-errors">${errs.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`:''}
-      <div class="wd-h">Live preview — current week under this model (${movedN} compan${movedN===1?'y':'ies'} would change classification)</div>
-      <div class="table-wrap"><table class="md-table">
-        <thead><tr><th>Company</th><th class="num">Old Score</th><th>Old Reco</th><th class="num">New Score</th><th>New Reco</th></tr></thead>
-        <tbody>${prevRows}</tbody>
-      </table></div>
-      <div class="wd-h">Publish</div>
-      <div class="sc-pub">
-        <label>Published by <input class="sc-in sc-in-wide" type="text" id="sc-by" placeholder="Name"></label>
-        <label>Change summary <input class="sc-in sc-in-wide" type="text" id="sc-summary" placeholder="What changed and why"></label>
+
+      <div class="wd-h">Data coverage</div>
+      <div class="sc-coverage">
+        <label>Minimum data coverage: <input class="sc-in sc-in-sm" type="number" step="1" data-cov="1" value="${W.min_coverage_weight}"> %</label>
+        <p class="subtle">Companies below this level are marked Awaiting Data.</p>
       </div>
+
+      ${errs.length?`<div class="sc-errbox">${errs.map(e=>esc(e)).join('<br>')}</div>`:''}
+
+      <div class="wd-h">Preview</div>
+      <div class="sc-preview">
+        <span>${movedN} compan${movedN===1?'y':'ies'} would change classification</span>
+        ${movedN?`<button class="sc-link" id="sc-view">${SC_SHOW_PREVIEW?'Hide':'View affected companies'}</button>`:''}
+      </div>
+      ${affectedTable}
+
       <div class="md-foot">
-        <span class="wm-model-tag">Active: v${esc(String(cfg.version))} · Draft base: v${esc(String(W.version))}</span>
+        <button class="sc-link" id="sc-history">Scoring history</button>
         <span class="md-foot-btns">
-          <button class="fchip" id="sc-restore" ${cfg.previous&&cfg.previous.components?'':'disabled'}>Restore Previous Version</button>
           <button class="fchip" id="sc-reset">Reset to Default</button>
-          <button class="fchip" id="sc-draft">Save as Draft</button>
           <button class="fchip" data-close>Cancel</button>
-          <button class="fchip sc-publish" id="sc-publish" ${errs.length?'disabled':''}>Publish</button>
+          <button class="fchip sc-publish" id="sc-save" ${errs.length?'disabled':''}>Save Changes</button>
         </span>
       </div>
     </div>`, 'md-settings');
   const box = document.getElementById('md-box');
   box.querySelectorAll('.sc-in[data-k]').forEach(inp=>inp.addEventListener('change',()=>{
-    const c = SC_WORK.components[inp.dataset.k];
-    c[inp.dataset.f] = +inp.value;
-    renderScoringSettings('');
+    SC_WORK.components[inp.dataset.k][inp.dataset.f] = +inp.value; SC_MSG=''; renderScoringSettings();
   }));
   box.querySelectorAll('.sc-in[data-th]').forEach(inp=>inp.addEventListener('change',()=>{
-    SC_WORK.thresholds[inp.dataset.th] = +inp.value;
-    renderScoringSettings('');
+    SC_WORK.thresholds[inp.dataset.th] = +inp.value; SC_MSG=''; renderScoringSettings();
   }));
   const cov = box.querySelector('.sc-in[data-cov]');
-  if(cov) cov.addEventListener('change',()=>{ SC_WORK.min_coverage_weight = +cov.value; renderScoringSettings(''); });
-  box.querySelector('#sc-reset').addEventListener('click',()=>{ SC_WORK = clone(SCORING.repo); renderScoringSettings('Reset to the default (repo) configuration.'); });
-  box.querySelector('#sc-draft').addEventListener('click',()=>{
-    localStorage.setItem(LS_DRAFT, JSON.stringify(SC_WORK));
-    renderScoringSettings('Draft saved on this device.');
+  if(cov) cov.addEventListener('change',()=>{ SC_WORK.min_coverage_weight = +cov.value; SC_MSG=''; renderScoringSettings(); });
+  const view = box.querySelector('#sc-view');
+  if(view) view.addEventListener('click',()=>{ SC_SHOW_PREVIEW = !SC_SHOW_PREVIEW; renderScoringSettings(); });
+  box.querySelector('#sc-reset').addEventListener('click',()=>{
+    SC_WORK = clone(SCORING.repo); SC_SHOW_PREVIEW=false;
+    SC_MSG = `<div class="sc-note">Reset to the default model — click <b>Save Changes</b> to apply.</div>`;
+    renderScoringSettings();
   });
-  const restore = box.querySelector('#sc-restore');
-  if(restore) restore.addEventListener('click',()=>{
-    const prevCfg = SCORING.active.previous;
-    if(!prevCfg || !prevCfg.components) return;
-    SCORING.active = prevCfg;
-    if(String(prevCfg.version)===String(SCORING.repo.version)) localStorage.removeItem(LS_PUB);
-    else localStorage.setItem(LS_PUB, JSON.stringify(prevCfg));
-    localStorage.removeItem(LS_DRAFT); SC_WORK = null;
-    closeModal(); rerenderAll();
-  });
-  box.querySelector('#sc-publish').addEventListener('click',()=>{
-    const errs2 = scValidate(SC_WORK);
-    if(errs2.length){ renderScoringSettings('Fix the validation errors before publishing.'); return; }
-    const by = box.querySelector('#sc-by').value.trim();
-    const summary = box.querySelector('#sc-summary').value.trim();
-    if(!by || !summary){ renderScoringSettings('“Published by” and a change summary are required to publish.'); return; }
-    publishScoring(by, summary);
-  });
+  box.querySelector('#sc-history').addEventListener('click', openScoringHistory);
+  box.querySelector('#sc-save').addEventListener('click', saveScoring);
+  const dl = box.querySelector('#sc-dl');
+  if(dl) dl.addEventListener('click',()=>downloadScoringConfig(SCORING.active));
+}
+
+/* Save Changes — validate, apply everywhere, keep history, compact confirmation */
+function saveScoring(){
+  const errs = scValidate(SC_WORK);
+  if(errs.length){ SC_MSG=''; renderScoringSettings(); return; }   // Save is disabled while invalid; belt-and-braces
+  const moved = scPreviewRows(SC_WORK).filter(p=>p.moved).length;
+  const prevActive = clone(SCORING.active); delete prevActive.previous;   // one level of history
+  const cfg = clone(SC_WORK);
+  cfg.version = bumpVersion(SCORING.active.version);
+  cfg.published_date = new Date().toISOString().slice(0,10);
+  cfg.published_by = 'Dashboard user';
+  cfg.change_summary = 'Updated via Scoring Settings';
+  cfg.previous_version = String(SCORING.active.version);
+  cfg.previous = prevActive;
+  const differs = scRulesOf(cfg) !== scRulesOf(SCORING.repo);
+  localStorage.setItem(LS_PUB, JSON.stringify(cfg));
+  SCORING.active = cfg; SC_WORK = clone(cfg); SC_SHOW_PREVIEW = false;
+  rerenderAll();
+  SC_MSG = `<div class="sc-okbox">Saved — scoring model v${esc(cfg.version)} applied${moved?` · ${moved} compan${moved>1?'ies':'y'} reclassified`:''}.${differs?` <button class="sc-link" id="sc-dl">Download config file for the pipeline &amp; Excel</button>`:''}</div>`;
+  renderScoringSettings();
+}
+
+/* configuration history — secondary, kept out of the main workflow */
+function openScoringHistory(){
+  const list = []; let c = SCORING.active, current = true;
+  while(c){ list.push({v:c.version, date:c.published_date, by:c.published_by, sum:c.change_summary, current, cfg:c}); c = c.previous; current = false; }
+  const rows = list.map((e,i)=>`
+    <tr>
+      <td>v${esc(String(e.v))}${e.current?' <span class="subtle tiny">(active)</span>':''}</td>
+      <td class="subtle">${esc(e.date||'—')}</td>
+      <td class="subtle">${esc(e.by||'—')}</td>
+      <td class="subtle">${esc(e.sum||'—')}</td>
+      <td>${(!e.current && e.cfg && e.cfg.components)?`<button class="sc-link sc-restore-v" data-i="${i}">Restore</button>`:''}</td>
+    </tr>`).join('');
+  openModal(`
+    <div class="md-head"><h3>Scoring history</h3><button class="dw-close" data-close aria-label="Close">✕</button></div>
+    <div class="md-body">
+      <div class="table-wrap"><table class="md-table">
+        <thead><tr><th>Version</th><th>Date</th><th>By</th><th>Change</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <div class="md-foot">
+        <button class="sc-link" id="sc-back">← Back to settings</button>
+        <span class="md-foot-btns"><button class="fchip" data-close>Close</button></span>
+      </div>
+    </div>`, 'md-settings');
+  const box = document.getElementById('md-box');
+  box.querySelector('#sc-back').addEventListener('click', openScoringSettings);
+  box.querySelectorAll('.sc-restore-v').forEach(b=>b.addEventListener('click',()=>{
+    const e = list[+b.dataset.i];
+    if(!e.cfg || !e.cfg.components) return;
+    SCORING.active = e.cfg;
+    if(String(e.cfg.version)===String(SCORING.repo.version) && !e.cfg.previous) localStorage.removeItem(LS_PUB);
+    else localStorage.setItem(LS_PUB, JSON.stringify(e.cfg));
+    rerenderAll(); closeModal();
+  }));
+}
+
+function downloadScoringConfig(cfg){
+  const fileCfg = clone(cfg); delete fileCfg.previous;
+  const blob = new Blob([JSON.stringify(fileCfg, null, 2)+'\n'], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'scoring_config.json';
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 function scRulesOf(c){ return JSON.stringify({c:c.components, t:c.thresholds, m:c.min_coverage_weight}); }
-function publishScoring(by, summary){
-  const prevActive = clone(SCORING.active);
-  delete prevActive.previous;                      // keep exactly one level of undo
-  const newCfg = clone(SC_WORK);
-  newCfg.version = bumpVersion(SCORING.active.version);
-  newCfg.published_date = new Date().toISOString().slice(0,10);
-  newCfg.published_by = by;
-  newCfg.change_summary = summary;
-  newCfg.previous_version = String(SCORING.active.version);
-  newCfg.previous = prevActive;
-  const differsFromRepo = scRulesOf(newCfg) !== scRulesOf(SCORING.repo);
-  const finish = ()=>{
-    localStorage.setItem(LS_PUB, JSON.stringify(newCfg));
-    localStorage.removeItem(LS_DRAFT);
-    SCORING.active = newCfg; SC_WORK = null;
-    closeModal(); rerenderAll();
-  };
-  if(!differsFromRepo){ finish(); return; }
-  // Excel / pipeline consistency warning — never publish an inconsistency silently
-  openModal(`
-    <div class="md-head"><h3>Before you publish v${esc(newCfg.version)}</h3><button class="dw-close" data-close aria-label="Close">✕</button></div>
-    <div class="md-body">
-      <p class="md-note"><b>The Python pipeline and the Excel tracker export still score with v${esc(String(SCORING.repo.version))}</b>
-      (from <code>data/scoring_config.json</code> in the repository). Publishing here updates this dashboard immediately,
-      but dashboard and Excel scores will differ until the updated configuration file is committed to the repository.</p>
-      <p class="md-note">Download the configuration below and commit it as <code>data/scoring_config.json</code> to keep every output consistent.</p>
-      <div class="md-foot">
-        <span class="md-foot-btns">
-          <button class="fchip" id="sc-dl">Download scoring_config.json</button>
-          <button class="fchip" data-close>Go back</button>
-          <button class="fchip sc-publish" id="sc-confirm">Publish anyway (dashboard only)</button>
-        </span>
-      </div>
-    </div>`, 'md-warn');
-  document.getElementById('sc-dl').addEventListener('click',()=>{
-    const fileCfg = clone(newCfg); delete fileCfg.previous;
-    const blob = new Blob([JSON.stringify(fileCfg, null, 2)+'\n'], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'scoring_config.json';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  });
-  document.getElementById('sc-confirm').addEventListener('click', finish);
-}
 
 document.addEventListener('DOMContentLoaded', main);
