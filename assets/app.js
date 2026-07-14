@@ -1505,16 +1505,41 @@ function prevStage(stage){
   return i>0 ? ALL_STAGES[i-1] : '—';
 }
 
-/* ---------------- Tab 2: Pipeline (3 funnels + table) ---------------- */
-let plFilter = {board:'All', sector:'All', q:'', metrics:false, dashStage:null};
+/* ---------------- Tab 2: Pipeline — Option C (hero KPIs · funnels · table) ----------------
+   Layout: 1 title · 2 four hero KPI cards · 3-5 three funnels (gold-rail capsules)
+   · 6 filter bar · 7 detailed company table. Hero cards AND funnel capsules both
+   drive one unified `focus` filter over the table. Colours: existing theme only. */
+
+/* dashboard stage → an existing icon key (introduces no new art) */
+const STAGE_DASH_ICON = {
+  'DRHP Filed':'doc', 'Updates & Corrigenda':'spark', 'SEBI Review':'eye', 'IPO Ready':'rocket',
+  'Open':'flame', 'Closed':'clock', 'Allotment':'handshake', 'Listing Scheduled':'clock',
+  'Listed':'check', 'Archived':'xmark',
+};
+/* short intro line under each funnel label (left rail) */
+const FUNNEL_INTRO = {
+  pre:  'DRHP filed → SEBI review → IPO ready',
+  live: 'Bidding open → allotment → listing',
+  done: 'Listed on the exchange, or withdrawn',
+};
+/* the four hero KPIs — each a lens over the base set that also filters the table */
+const PL_HERO = [
+  {v:'new',     k:'doc',    lab:'New DRHPs',       test:r=>movementThisWeek(r)==='New DRHP'},
+  {v:'updated', k:'spark',  lab:'Updated Filings', test:r=>movementThisWeek(r)==='Corrigendum Filed'},
+  {v:'moved',   k:'trend',  lab:'Stage Changes',   test:r=>!!movementThisWeek(r)},
+  {v:'dig',     k:'target', lab:'DIG DEEPER',       test:r=>{const s=rscore(r); return !!(s && s.bucket==='DIG DEEPER');}},
+];
+
+let plFilter = {board:'All', sector:'All', q:'', metrics:false, focus:null};
 function renderPipeline(){
   const host = document.getElementById('pl-controls');
   if(!host.dataset.wired){ buildPlControls(host); host.dataset.wired='1'; }
+  renderPlHero();
   renderFunnels();
   renderPlRows();
 }
-/* board / sector / search filtered set — drives BOTH the funnel counts and the
-   table; the stage filter is applied on top (by clicking a funnel stage). */
+/* board / sector / search filtered set — drives hero counts, funnel counts and the
+   table; the `focus` (a hero lens or a funnel stage) is applied on top. */
 function plBase(){
   const q = plFilter.q.toLowerCase();
   return MARKET.filter(r =>
@@ -1522,6 +1547,112 @@ function plBase(){
     (plFilter.sector==='All' || r.sector===plFilter.sector) &&
     (q==='' || (r.name||'').toLowerCase().includes(q)));
 }
+/* does a record pass the active focus (nothing focused → everything passes)? */
+function plFocusTest(r){
+  const fo = plFilter.focus;
+  if(!fo) return true;
+  if(fo.kind==='stage') return mapStage(r)===fo.value;
+  const h = PL_HERO.find(x=>x.v===fo.value);
+  return h ? h.test(r) : true;
+}
+function setFocus(kind, value, label){
+  const same = plFilter.focus && plFilter.focus.kind===kind && plFilter.focus.value===value;
+  plFilter.focus = same ? null : {kind, value, label};
+  renderPipeline();
+}
+
+/* ---- 2. Hero KPI cards (clickable) ---- */
+function renderPlHero(){
+  const base = plBase();
+  const host = document.getElementById('pl-hero'); if(!host) return;
+  host.innerHTML = PL_HERO.map(c=>{
+    const n = base.filter(c.test).length;
+    const on = plFilter.focus && plFilter.focus.kind==='hero' && plFilter.focus.value===c.v;
+    return `<button class="pl-hero-card${on?' on':''}" data-hero="${c.v}" title="Filter the table to ${esc(c.lab)}">
+      <span class="wm-ic">${icon(c.k,18)}</span>
+      <div class="wm-card-body"><div class="wm-n">${n}</div><div class="wm-lab">${esc(c.lab)}</div></div>
+      <span class="pl-hero-caret" aria-hidden="true">${on?'✕':'›'}</span>
+    </button>`;
+  }).join('');
+  host.querySelectorAll('.pl-hero-card').forEach(b=>b.addEventListener('click',()=>{
+    const c = PL_HERO.find(x=>x.v===b.dataset.hero);
+    setFocus('hero', c.v, c.lab);
+  }));
+}
+
+/* ---- 3-5. Three funnels — Option C capsules on a muted-gold rail ---- */
+function renderFunnels(){
+  const base = plBase();
+  const stats = {}; ALL_STAGES.forEach(s => stats[s] = {count:0, latest:null, week:0, names:[]});
+  base.forEach(r => {
+    const st = stats[mapStage(r)];
+    st.count++;
+    const lm = lastMovement(r); if(lm && (!st.latest || lm>st.latest)) st.latest = lm;
+    if(movementThisWeek(r)) st.week++;
+    st.names.push({name:r.name, lm});
+  });
+  const host = document.getElementById('pl-funnels'); if(!host) return;
+  host.innerHTML = FUNNELS.map(f => `
+    <div class="plc-funnel">
+      <div class="plc-intro">
+        ${funnelTag(f.key)}
+        <div class="plc-intro-h">${esc(f.label)}</div>
+        <div class="plc-intro-d">${esc(FUNNEL_INTRO[f.key]||'')}</div>
+      </div>
+      <div class="plc-rail">
+        ${f.flow.map((s,i)=>{
+          const st = stats[s], on = plFilter.focus && plFilter.focus.kind==='stage' && plFilter.focus.value===s;
+          const chips = st.names.slice().sort((a,b)=>String(b.lm||'').localeCompare(String(a.lm||'')));
+          const shown = chips.slice(0,2).map(c=>`<span class="plc-chip">${esc(c.name)}</span>`).join('');
+          const more = chips.length>2 ? `<span class="plc-chip plc-more">+${chips.length-2}</span>` : '';
+          return `${i?'<span class="plc-link" aria-hidden="true"></span>':''}<button class="plc-cap${on?' on':''}${st.count?'':' empty'}" data-stage="${esc(s)}" title="Filter the table to ${esc(s)}">
+            <span class="plc-cap-top">
+              <span class="plc-cap-ic">${icon(STAGE_DASH_ICON[s]||'doc',15)}</span>
+              <span class="plc-cap-n">${st.count}</span>
+              ${st.week?`<span class="plc-week">+${st.week} this week</span>`:''}
+            </span>
+            <span class="plc-cap-name">${esc(s)}</span>
+            <span class="plc-cap-meta">${st.latest?('Latest '+dfmt(st.latest)):'No activity yet'}</span>
+            ${chips.length?`<span class="plc-chips">${shown}${more}</span>`:''}
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+  host.querySelectorAll('.plc-cap').forEach(b=>b.addEventListener('click',()=>{
+    setFocus('stage', b.dataset.stage, b.dataset.stage);
+  }));
+}
+
+/* next expected step in the lifecycle (a real future date if we hold one, else the
+   stage's natural next milestone). Returns {lab, date} or null. */
+function nextMilestone(r){
+  const asOf = mapAsOf();
+  const fut = d => d && (!asOf || d > asOf);
+  if(fut(r.issueOpen))   return {lab:'IPO opens',   date:r.issueOpen};
+  if(fut(r.issueClose))  return {lab:'IPO closes',  date:r.issueClose};
+  if(fut(r.listingDate)) return {lab:'Lists',       date:r.listingDate};
+  const NEXT = {
+    'DRHP Filed':'SEBI review', 'Updates & Corrigenda':'SEBI review', 'SEBI Review':'SEBI observations',
+    'IPO Ready':'IPO opens', 'Open':'Bidding closes', 'Closed':'Allotment', 'Allotment':'Listing',
+    'Listing Scheduled':'Listing',
+  };
+  const lab = NEXT[mapStage(r)];
+  return lab ? {lab, date:null} : null;
+}
+/* concise live-status pill, coloured by funnel (no new colours) */
+const PL_STATUS = {
+  'DRHP Filed':'Filed', 'Updates & Corrigenda':'Updated', 'SEBI Review':'Under Review', 'IPO Ready':'IPO Ready',
+  'Open':'Open Now', 'Closed':'Bidding Closed', 'Allotment':'Allotment', 'Listing Scheduled':'Listing Soon',
+  'Listed':'Listed', 'Archived':'Withdrawn',
+};
+function pipelineStatus(r){
+  const ds = mapStage(r), ss = sebiStatus(r);
+  const label = ss || PL_STATUS[ds] || ds;
+  return `<span class="pl-status pl-st-${funnelOf(ds).key}">${esc(label)}</span>`;
+}
+function ipoSizeCell(r){ return r.issueSizeCr==null ? DASH : `₹${money(r.issueSizeCr)} Cr`; }
+
+/* ---- 6. Filter bar ---- */
 function buildPlControls(host){
   const opt = (dim,label,opts)=>{
     const o=[`<option value="All">All</option>`].concat(opts.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`)).join('');
@@ -1534,74 +1665,50 @@ function buildPlControls(host){
     ${opt('sector','Sector',sectors)}
     <label class="ctl-search"><input type="search" id="pl-q" placeholder="Search company…"></label>
     <label class="ctl-toggle"><input type="checkbox" id="pl-metrics"> Review Metrics</label>
-    <button class="fchip hide" id="pl-reset">Reset</button>`;
+    <button class="fchip hide" id="pl-reset">Reset</button>
+    <button class="fchip pl-export" id="pl-export" title="Download the current view as CSV">Export</button>`;
   host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
     plFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); renderPipeline();
   }));
   const q = host.querySelector('#pl-q'); q.addEventListener('input',()=>{ plFilter.q=q.value; renderPipeline(); });
   const mt = host.querySelector('#pl-metrics'); mt.addEventListener('change',()=>{ plFilter.metrics=mt.checked; renderPlRows(); });
+  host.querySelector('#pl-export').addEventListener('click', plExportCsv);
   host.querySelector('#pl-reset').addEventListener('click',()=>{
-    plFilter={board:'All',sector:'All',q:'',metrics:plFilter.metrics,dashStage:null};
+    plFilter={board:'All',sector:'All',q:'',metrics:plFilter.metrics,focus:null};
     host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
     q.value=''; renderPipeline();
   });
 }
-function renderFunnels(){
-  const base = plBase();
-  const stats = {}; ALL_STAGES.forEach(s => stats[s] = {count:0, latest:null, week:0});
-  base.forEach(r => {
-    const st = stats[mapStage(r)];
-    st.count++;
-    const lm = lastMovement(r); if(lm && (!st.latest || lm>st.latest)) st.latest = lm;
-    if(movementThisWeek(r)) st.week++;
-  });
-  const host = document.getElementById('pl-funnels'); if(!host) return;
-  host.innerHTML = FUNNELS.map(f => `
-    <div class="fn-section">
-      <div class="fn-title">${esc(f.label)}</div>
-      <div class="fn-stages">
-        ${f.flow.map((s,i)=>{
-          const st = stats[s], on = plFilter.dashStage===s;
-          return `${i?'<span class="fn-arrow" aria-hidden="true">→</span>':''}<button class="fn-stage ${on?'on':''}" data-stage="${esc(s)}" title="Filter the table to ${esc(s)}">
-            <span class="fn-count">${st.count}</span>
-            <span class="fn-name">${esc(s)}</span>
-            <span class="fn-meta">${st.week?`<span class="fn-week">+${st.week} this week</span> · `:''}${st.latest?dfmt(st.latest):'—'}</span>
-          </button>`;
-        }).join('')}
-      </div>
-    </div>`).join('');
-  host.querySelectorAll('.fn-stage').forEach(b=>b.addEventListener('click',()=>{
-    plFilter.dashStage = (plFilter.dashStage===b.dataset.stage) ? null : b.dataset.stage;
-    renderPipeline();
-  }));
+
+/* rows currently in the table (base + focus), latest movement first */
+function plRowSet(){
+  return plBase().filter(plFocusTest)
+    .sort((a,b)=> String(lastMovement(b)||'').localeCompare(String(lastMovement(a)||'')));
 }
+
+/* ---- 7. Detailed company table ---- */
 function renderPlRows(){
   const base = plBase();
-  const rows = base.filter(r => !plFilter.dashStage || mapStage(r)===plFilter.dashStage)
-    .sort((a,b)=> String(lastMovement(b)||'').localeCompare(String(lastMovement(a)||'')));
+  const rows = plRowSet();
   const m = plFilter.metrics;
   const head = `<thead><tr>
-    <th>Company</th><th>Funnel</th><th>Current Stage</th><th>Previous Stage</th><th>Last Movement</th>
-    <th>Movement This Week</th><th>Filing Type</th><th>SEBI Status</th><th>IPO Open</th><th>IPO Close</th><th>Listing Date</th><th>Source</th>
+    <th>Company</th><th>Board</th><th>Sector</th><th>Current Stage</th><th>Last Updated</th>
+    <th>Next Milestone</th><th class="num">IPO Size</th><th>Status</th>
     ${m?'<th class="num">Score</th><th>Recommendation</th>':''}
   </tr></thead>`;
   const body = rows.length ? rows.map(r=>{
-    const ds = mapStage(r), mv = movementThisWeek(r), ss = sebiStatus(r), lm = lastMovement(r);
+    const ds = mapStage(r), lm = lastMovement(r), mv = movementThisWeek(r), nm = nextMilestone(r);
     return `<tr>
     <td class="company">${pipelineName(r)}</td>
-    <td>${funnelTag(funnelOf(ds).key)}</td>
-    <td>${dashStageChip(ds)}</td>
-    <td class="subtle">${esc(prevStage(ds))}</td>
+    <td>${boardChip(r.board)}</td>
+    <td class="subtle">${r.sector?esc(r.sector):DASH}</td>
+    <td>${dashStageChip(ds)}${mv?` <span class="pl-move">${esc(mv)}</span>`:''}</td>
     <td class="subtle">${lm?dfmt(lm):DASH}</td>
-    <td>${mv?mvChip(mv, ds):DASH}</td>
-    <td class="subtle">${r.filingType?esc(r.filingType):DASH}</td>
-    <td class="subtle">${ss?esc(ss):DASH}</td>
-    <td class="subtle">${r.issueOpen?dfmt(r.issueOpen):DASH}</td>
-    <td class="subtle">${r.issueClose?dfmt(r.issueClose):DASH}</td>
-    <td class="subtle">${r.listingDate?dfmt(r.listingDate):DASH}</td>
-    <td>${srcRec(r)}</td>
+    <td class="subtle">${nm?`${esc(nm.lab)}${nm.date?` · ${dfmt(nm.date)}`:''}`:DASH}</td>
+    <td class="num">${ipoSizeCell(r)}</td>
+    <td>${pipelineStatus(r)}</td>
     ${m?`<td class="num">${scoreLink(rscore(r), 'r', MARKET.indexOf(r))}</td><td>${recoTag(rscore(r))}</td>`:''}
-  </tr>`;}).join('') : `<tr><td colspan="${m?14:12}" class="subtle" style="padding:16px">No companies in this view.</td></tr>`;
+  </tr>`;}).join('') : `<tr><td colspan="${m?10:8}" class="subtle" style="padding:16px">No companies in this view.</td></tr>`;
   const plt = document.getElementById('pl-table');
   plt.innerHTML = head + `<tbody>${body}</tbody>`;
   plt.querySelectorAll('.score-link').forEach(b=>b.addEventListener('click', e=>{
@@ -1609,13 +1716,38 @@ function renderPlRows(){
     const rec = MARKET[+b.dataset.idx];
     if(rec) openScoreBreakdown({company_name: rec.name, financials: rec.financials});
   }));
-  const filt = plFilter.dashStage;
+  const fo = plFilter.focus;
   document.getElementById('pl-foot').innerHTML =
-    `${rows.length} of ${base.length} companies${filt?` · filtered to <b>${esc(filt)}</b> <button class="sc-link" id="pl-clear-stage">clear</button>`:''} · one shared lifecycle stage across every page.`;
+    `${rows.length} of ${base.length} companies${fo?` · filtered to <b>${esc(fo.label)}</b> <button class="sc-link" id="pl-clear-stage">clear</button>`:''} · one shared lifecycle stage across every page.`;
   const cs = document.getElementById('pl-clear-stage');
-  if(cs) cs.addEventListener('click',()=>{ plFilter.dashStage=null; renderPipeline(); });
-  const active = plFilter.board!=='All'||plFilter.sector!=='All'||plFilter.q!==''||!!plFilter.dashStage;
+  if(cs) cs.addEventListener('click',()=>{ plFilter.focus=null; renderPipeline(); });
+  const active = plFilter.board!=='All'||plFilter.sector!=='All'||plFilter.q!==''||!!plFilter.focus;
   document.getElementById('pl-reset').classList.toggle('hide', !active);
+}
+
+/* CSV of the current table view (matches the on-screen columns) */
+function plExportCsv(){
+  const rows = plRowSet();
+  const q = v => { const s=(v==null?'':String(v)); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const cols = [
+    ['Company', r=>r.name],
+    ['Board', r=>r.board],
+    ['Sector', r=>r.sector],
+    ['Current Stage', r=>mapStage(r)],
+    ['Last Updated', r=>lastMovement(r)],
+    ['Next Milestone', r=>{const nm=nextMilestone(r); return nm?(nm.lab+(nm.date?(' '+nm.date):'')):'';}],
+    ['IPO Size (Cr)', r=>r.issueSizeCr],
+    ['Status', r=>sebiStatus(r) || PL_STATUS[mapStage(r)] || mapStage(r)],
+    ['Score', r=>{const s=rscore(r); return s&&s.total!=null?s.total:'';}],
+    ['Recommendation', r=>{const s=rscore(r); return recoLabel(s?s.bucket:'INSUFFICIENT');}],
+  ];
+  const lines = [cols.map(c=>q(c[0])).join(',')];
+  rows.forEach(r=> lines.push(cols.map(c=>q(c[1](r))).join(',')));
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `drhp-pipeline-${(DATA.meta&&DATA.meta.snapshot_id)||'export'}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
 /* ---------------- Tab 3: Archive ---------------- */

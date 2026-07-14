@@ -858,24 +858,52 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .wm-ins-list li:last-child { border-bottom: none; }
 .wm-ins-ic { color: var(--emerald); flex: 0 0 auto; margin-top: 1px; }
 
-/* ---- Pipeline: three connected funnels (existing colours only) ---- */
-.pl-funnels { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
-.fn-section { }
-.fn-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); font-weight: 700; margin-bottom: 5px; }
-.fn-stages { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0; }
-.fn-stage { flex: 1 1 0; min-width: 116px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg); padding: 8px 11px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 2px; transition: border-color .14s, background .14s; box-shadow: var(--shadow-xs); }
-.fn-stage:hover { border-color: var(--emerald); }
-.fn-stage.on { border-color: var(--emerald); background: var(--emerald-soft); box-shadow: inset 0 0 0 1px var(--emerald); }
-.fn-count { font-size: 19px; font-weight: 800; color: var(--navy); line-height: 1.05; font-variant-numeric: tabular-nums; }
-.fn-name { font-size: 11.5px; font-weight: 600; color: var(--ink); line-height: 1.2; }
-.fn-meta { font-size: 10px; color: var(--ink-faint); }
-.fn-week { color: var(--emerald); font-weight: 700; }
-.fn-arrow { display: flex; align-items: center; justify-content: center; color: var(--ink-faint); padding: 0 5px; flex: 0 0 auto; font-size: 13px; }
-/* funnel tag in the table — reuses existing soft/text colour pairs */
+/* ==== Pipeline — Option C (hero KPIs · gold-rail funnels · status pills) ==== */
+/* funnel tag — reuses existing soft/text colour pairs (used in intros + status) */
 .fn-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .fn-tag.fn-pre  { background: var(--slate-soft);   color: var(--slate); }
 .fn-tag.fn-live { background: var(--emerald-soft); color: var(--emerald); }
 .fn-tag.fn-done { background: var(--grey-soft);    color: var(--grey); }
+
+/* 2. Hero KPI cards — clickable lenses over the table */
+.pl-hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+.pl-hero-card { position: relative; display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 14px; box-shadow: var(--shadow-xs); cursor: pointer; text-align: left; font-family: var(--font); transition: border-color .14s, background .14s, box-shadow .14s; }
+.pl-hero-card:hover { border-color: var(--gold); }
+.pl-hero-card.on { border-color: var(--gold); background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold); }
+.pl-hero-card.on .wm-ic { background: var(--gold-soft); color: var(--gold); }
+.pl-hero-caret { position: absolute; top: 9px; right: 11px; font-size: 13px; font-weight: 700; color: var(--ink-faint); }
+.pl-hero-card.on .pl-hero-caret { color: var(--gold); }
+
+/* 3-5. Funnels — a section intro on the left, capsules on a muted-gold rail */
+.pl-funnels { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.plc-funnel { display: flex; align-items: stretch; gap: 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); box-shadow: var(--shadow-xs); padding: 12px 14px; }
+.plc-intro { flex: 0 0 158px; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-start; padding-right: 14px; border-right: 1px solid var(--border-soft); }
+.plc-intro-h { font-size: 13px; font-weight: 700; color: var(--navy); line-height: 1.15; }
+.plc-intro-d { font-size: 10.5px; color: var(--ink-faint); line-height: 1.3; }
+.plc-rail { flex: 1 1 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 0; min-width: 0; }
+.plc-link { flex: 0 0 20px; height: 2px; align-self: center; border-radius: 2px; background: linear-gradient(90deg, var(--gold-bright), var(--gold)); opacity: 0.55; }
+.plc-cap { flex: 1 1 148px; min-width: 128px; display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg); padding: 9px 11px; cursor: pointer; text-align: left; font-family: var(--font); box-shadow: var(--shadow-xs); transition: border-color .14s, background .14s, box-shadow .14s; }
+.plc-cap:hover { border-color: var(--gold); }
+.plc-cap.on { border-color: var(--gold); background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold); }
+.plc-cap.empty { opacity: 0.62; }
+.plc-cap-top { display: flex; align-items: center; gap: 8px; }
+.plc-cap-ic { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--gold-soft); color: var(--gold); flex: 0 0 auto; }
+.plc-cap-n { font-size: 20px; font-weight: 800; color: var(--navy); line-height: 1; font-variant-numeric: tabular-nums; }
+.plc-week { margin-left: auto; font-size: 9.5px; font-weight: 700; color: var(--emerald); background: var(--emerald-soft); padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+.plc-cap-name { font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.plc-cap-meta { font-size: 10px; color: var(--ink-faint); }
+.plc-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.plc-chip { max-width: 100%; font-size: 9.5px; font-weight: 600; color: var(--slate); background: var(--slate-soft); padding: 1px 7px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plc-chip.plc-more { color: var(--grey); background: var(--grey-soft); }
+
+/* 7. Table extras — movement tag + live-status pill */
+.pl-move { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.02em; color: var(--emerald); background: var(--emerald-soft); padding: 1px 6px; border-radius: 999px; vertical-align: middle; }
+.pl-status { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pl-st-pre  { background: var(--slate-soft);   color: var(--slate); }
+.pl-st-live { background: var(--emerald-soft); color: var(--emerald); }
+.pl-st-done { background: var(--grey-soft);    color: var(--grey); }
+.pl-export { color: var(--emerald); }
+.pl-export:hover { border-color: var(--emerald); color: var(--teal); }
 
 /* ---- Pipeline / Archive control ribbons (reuse .mh-pill + .fchip) ---- */
 .pl-controls, .ar-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
