@@ -54,9 +54,63 @@ def test_build_market_from_real_fixtures():
     assert any(r.board == "SME" for r in market.open_upcoming)
     # recent listings present, and gain/loss honestly left null (no price feed)
     assert all(r.gain_pct is None and r.current_price is None for r in market.recent_listings)
+    # the past-issues feed mixes in NCDs/bonds/REITs — recent listings must be
+    # equity IPOs only, so no coupon-code (leading-digit) bond symbols leak through
+    assert market.recent_listings, "expected some equity listings in the window"
+    assert all(not (r.symbol or "")[:1].isdigit() for r in market.recent_listings)
     # pulse counts derived; positive/negative listing stays null (not computable)
     assert market.pulse.ipo_open is not None
     assert market.pulse.positive_listing is None
+
+
+def test_is_equity_series():
+    assert im.is_equity_series("EQ")
+    assert im.is_equity_series("sme")      # case-insensitive
+    assert im.is_equity_series(" BE ")     # whitespace-tolerant
+    assert not im.is_equity_series("N0")   # NCD / bond
+    assert not im.is_equity_series("DEBT")
+    assert not im.is_equity_series("RR")   # REIT
+    assert not im.is_equity_series("IV")   # InvIT
+    assert not im.is_equity_series(None)
+
+
+def test_is_debt_symbol():
+    # coupon-code bond/NCD symbols -> debt
+    assert im.is_debt_symbol("783LTFL29")   # 7.83% L&T Finance 2029
+    assert im.is_debt_symbol("12VPT28A")    # 12% Viviana Power Tech 2028-A (SME platform)
+    assert im.is_debt_symbol("727NGEL36")
+    # genuine equity tickers, including digit-led ones -> not debt
+    assert not im.is_debt_symbol("KNACK")
+    assert not im.is_debt_symbol("360ONE")
+    assert not im.is_debt_symbol("20MICRONS")
+    assert not im.is_debt_symbol("63MOONS")
+    assert not im.is_debt_symbol(None)
+
+
+def test_recent_listings_excludes_non_equity():
+    run_date = date(2026, 7, 13)
+    past = [
+        {"companyName": "Knack Packaging Limited", "securityType": "EQ",
+         "symbol": "KNACK", "priceRange": "Rs.100 to Rs.110", "listingDate": "08-Jul-2026"},
+        {"companyName": "Utkal Speciality Limited", "securityType": "SME",
+         "symbol": "UTKAL", "priceRange": "Rs.90 to Rs.95", "listingDate": "17-Jun-2026"},
+        # Mainboard NCD tranche — dropped by the series allowlist (N-series)
+        {"companyName": "L&T Finance Limited", "securityType": "N0",
+         "symbol": "783LTFL29", "priceRange": "Rs.1000", "listingDate": "10-Jul-2026"},
+        # SME-platform NCD — passes the series allowlist (SME) but dropped by the
+        # coupon-code symbol guard
+        {"companyName": "Viviana Power Tech Limited", "securityType": "SME",
+         "symbol": "12VPT28A", "priceRange": "Rs.55", "listingDate": "22-Jun-2026"},
+        # explicit debt — dropped
+        {"companyName": "Nashik Municipal Corporation", "securityType": "DEBT",
+         "symbol": "NMC01", "priceRange": "Rs.1000", "listingDate": "05-Jul-2026"},
+        # REIT — dropped
+        {"companyName": "Bagmane Prime Office REIT", "securityType": "RR",
+         "symbol": "BAGMANE", "priceRange": "Rs.95 to Rs.100", "listingDate": "02-Jul-2026"},
+    ]
+    rows = im.build_recent_listings(past, run_date)
+    assert {r.company_name for r in rows} == {"Knack Packaging Limited", "Utkal Speciality Limited"}
+    assert next(r for r in rows if r.symbol == "UTKAL").board == "SME"
 
 
 def test_build_market_unavailable():

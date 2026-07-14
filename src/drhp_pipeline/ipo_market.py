@@ -12,6 +12,13 @@ Honest limits (do not fabricate): NSE's quote API is blocked (403), so we have N
 current price and therefore CANNOT compute listing gain/loss — those stay null
 ("Pending listing"). Merchant banker and city are not in NSE's IPO feed either.
 
+NSE's `public-past-issues` feed also mixes equity IPOs with *debt* public issues
+(N-series NCDs, DEBT), REITs (RR) and InvITs (IV). We keep only the equity series
+(EQ / BE / SME) so bond tranches never surface as "recent IPO listings" — those rows
+carry no subscription/gain anyway. Some NCDs list on the SME platform and so inherit
+securityType "SME"; we additionally drop coupon-code symbols (e.g. 783LTFL29,
+12VPT28A) to catch those.
+
 NSE also blocks datacenter IPs aggressively, so the weekly CI run may not reach it.
 Every fetch is best-effort: on any failure we return `available=False` and the UI
 shows a "pending source" state rather than crashing or inventing data.
@@ -77,6 +84,30 @@ def clean_company(name: str) -> Tuple[str, bool]:
 
 def board_from_series(series: Optional[str]) -> str:
     return "SME" if (series or "").strip().upper() == "SME" else "Mainboard"
+
+
+# NSE equity series. Everything else in the past-issues feed is a non-equity
+# instrument we exclude: N-series NCDs / DEBT (bonds), RR (REITs), IV (InvITs),
+# Z-group and other special series.
+EQUITY_SERIES = frozenset({"EQ", "BE", "SME"})
+
+
+def is_equity_series(security_type: Optional[str]) -> bool:
+    """True only for NSE equity-share series (Mainboard EQ/BE and SME)."""
+    return (security_type or "").strip().upper() in EQUITY_SERIES
+
+
+# NSE debt symbols embed a coupon rate (leading digits) and a maturity year
+# (trailing 2 digits) around the issuer code, e.g. 783LTFL29 or 12VPT28A. This
+# catches NCDs that list on the SME platform and so carry securityType "SME"
+# despite not being equity. Plain digit-led equity tickers (360ONE, 20MICRONS,
+# 63MOONS) have no trailing maturity year and correctly do not match.
+_DEBT_SYMBOL_RE = re.compile(r"^\d+[A-Z]+\d{2}[A-Z0-9]*$", re.I)
+
+
+def is_debt_symbol(symbol: Optional[str]) -> bool:
+    """True for coupon-code bond/NCD symbols (guards SME-tagged debt tranches)."""
+    return bool(_DEBT_SYMBOL_RE.match((symbol or "").strip()))
 
 
 def parse_price_band(s: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
@@ -169,6 +200,8 @@ def build_recent_listings(past: List[dict], run_date: date) -> List[IpoRow]:
     cutoff = run_date - timedelta(days=RECENT_LISTING_DAYS)
     rows = []
     for r in past or []:
+        if not is_equity_series(r.get("securityType")) or is_debt_symbol(r.get("symbol")):
+            continue  # drop NCDs/bonds, REITs, InvITs — not equity IPO listings
         ld = parse_date(r.get("listingDate"))
         if not ld:
             continue
