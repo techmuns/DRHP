@@ -858,6 +858,25 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .wm-ins-list li:last-child { border-bottom: none; }
 .wm-ins-ic { color: var(--emerald); flex: 0 0 auto; margin-top: 1px; }
 
+/* ---- Pipeline: three connected funnels (existing colours only) ---- */
+.pl-funnels { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+.fn-section { }
+.fn-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); font-weight: 700; margin-bottom: 5px; }
+.fn-stages { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0; }
+.fn-stage { flex: 1 1 0; min-width: 116px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg); padding: 8px 11px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 2px; transition: border-color .14s, background .14s; box-shadow: var(--shadow-xs); }
+.fn-stage:hover { border-color: var(--emerald); }
+.fn-stage.on { border-color: var(--emerald); background: var(--emerald-soft); box-shadow: inset 0 0 0 1px var(--emerald); }
+.fn-count { font-size: 19px; font-weight: 800; color: var(--navy); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.fn-name { font-size: 11.5px; font-weight: 600; color: var(--ink); line-height: 1.2; }
+.fn-meta { font-size: 10px; color: var(--ink-faint); }
+.fn-week { color: var(--emerald); font-weight: 700; }
+.fn-arrow { display: flex; align-items: center; justify-content: center; color: var(--ink-faint); padding: 0 5px; flex: 0 0 auto; font-size: 13px; }
+/* funnel tag in the table — reuses existing soft/text colour pairs */
+.fn-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.fn-tag.fn-pre  { background: var(--slate-soft);   color: var(--slate); }
+.fn-tag.fn-live { background: var(--emerald-soft); color: var(--emerald); }
+.fn-tag.fn-done { background: var(--grey-soft);    color: var(--grey); }
+
 /* ---- Pipeline / Archive control ribbons (reuse .mh-pill + .fchip) ---- */
 .pl-controls, .ar-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
 .ctl-search input { font-family: var(--font); font-size: 12.5px; border: 1px solid var(--border); border-radius: 8px; padding: 7px 11px; background: var(--bg); color: var(--ink); min-width: 172px; }
