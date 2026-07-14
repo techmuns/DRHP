@@ -27,6 +27,7 @@ from .contract import (
 )
 from .financials import enrich
 from .resolve import ResolvedFiling, resolve
+from . import scoring
 from .scoring import score_financials
 from .scraper import ScrapedFiling, scrape_all
 from .sectors import classify
@@ -177,6 +178,7 @@ def run(
         data_as_of=window.data_as_of.isoformat(),
         snapshot_id=snapshot_id,
         previous_snapshot_id=prev_id,
+        scoring_model_version=scoring.SCORING_MODEL_VERSION,
     )
 
     dashboard = Dashboard(meta=meta, summary=summary, filings=filings, ipo_market=market)

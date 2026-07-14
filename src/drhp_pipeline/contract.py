@@ -179,6 +179,7 @@ class Meta(_Model):
     data_as_of: str
     snapshot_id: str
     previous_snapshot_id: Optional[str] = None  # null on first run
+    scoring_model_version: Optional[str] = None  # active scoring config version
 
 
 # ---------------------------------------------------------------------------

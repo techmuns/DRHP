@@ -877,6 +877,51 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 #ar-table tbody td.ar-sticky { z-index: 1; background: var(--bg); box-shadow: 1px 0 0 var(--border-soft); }
 #ar-table tbody tr:nth-child(even) td.ar-sticky { background: #FBFCFD; }
 
+/* ---- scoring: clickable scores, header info icon, model tag, settings gear ---- */
+.score-link { background: none; border: none; padding: 0; cursor: pointer; font-family: var(--font); }
+.score-link .score-cell { border-bottom: 1px dashed var(--emerald); padding-bottom: 1px; }
+.score-link:hover .score-cell { color: var(--emerald); }
+.th-info { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.55); background: none; color: #EAF7F2; font-size: 9.5px; font-weight: 700; font-style: italic; font-family: var(--serif); line-height: 1; cursor: pointer; margin-left: 4px; vertical-align: 1px; }
+.th-info:hover { background: rgba(255,255,255,0.14); }
+.wm-head-right { display: flex; align-items: center; gap: 9px; }
+.wm-model-tag { font-size: 10.5px; font-weight: 600; color: var(--ink-faint); }
+.wm-gear { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink-soft); cursor: pointer; }
+.wm-gear:hover { color: var(--emerald); border-color: var(--emerald); }
+
+/* ---- shared modal host ---- */
+.md-overlay { position: fixed; inset: 0; background: rgba(8,45,38,0.32); z-index: 60; }
+.md-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 61; width: min(760px, calc(100vw - 40px)); max-height: min(84vh, 860px); overflow: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); }
+.md-box.md-settings { width: min(880px, calc(100vw - 40px)); }
+.md-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border-soft); }
+.md-head h3 { font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--head-green); }
+.md-body { padding: 14px 18px 18px; }
+.md-body .wd-h:first-child { margin-top: 0; }
+.md-total { font-weight: 700; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 7px; }
+.md-note { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin: 10px 0 0; }
+.md-note-inline { font-size: 11.5px; color: var(--ink-soft); }
+.md-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.md-foot-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+.md-table { font-size: 12px; }
+.md-table td, .md-table th { padding: 6px 9px; }
+.md-table .md-rule { font-size: 11px; }
+.md-missing td { color: var(--ink-faint); }
+.md-eq { margin-top: 12px; font-size: 12.5px; line-height: 1.6; background: var(--canvas); border: 1px solid var(--border-soft); border-radius: var(--r-sm); padding: 9px 12px; font-variant-numeric: tabular-nums; }
+.md-eq-k { font-weight: 700; color: var(--navy); margin-right: 4px; }
+.md-verdict { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 9px; font-variant-numeric: tabular-nums; }
+
+/* ---- scoring settings editor ---- */
+.sc-in { font-family: var(--font); font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; width: 76px; background: var(--bg); color: var(--ink); text-align: right; }
+.sc-in:focus { outline: none; border-color: var(--emerald); }
+.sc-in-wide { width: 220px; text-align: left; }
+.sc-thresholds { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.sc-errors { margin: 12px 0 0; padding-left: 18px; font-size: 12px; color: var(--red); line-height: 1.6; }
+.sc-note { font-size: 12px; color: var(--emerald); font-weight: 600; margin-bottom: 10px; }
+.sc-moved td { background: var(--gold-soft); }
+.sc-pub { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.sc-publish { background: linear-gradient(135deg, #0C6B5B, #0A7B68); border-color: #0A7B68; color: #fff; }
+.sc-publish:hover { color: #fff; }
+.sc-publish[disabled] { opacity: 0.5; cursor: not-allowed; }
+
 /* ============================================================================
    PRINT — A4. Show every tab in order; appendix lands on its own landscape page.
    ========================================================================== */

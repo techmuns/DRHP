@@ -17,9 +17,14 @@ they can be tuned without touching the logic. A component whose input is missing
 
 from __future__ import annotations
 
+import json
+import logging
+from pathlib import Path
 from typing import Optional
 
 from .contract import Financials, Score, ScoreComponents
+
+log = logging.getLogger(__name__)
 
 # Exact component weights (sum = 100). Do not change without the source email.
 WEIGHTS = {
@@ -46,6 +51,38 @@ BANDS = {
 # mark INSUFFICIENT rather than bucket on a thinly-supported number. Chosen so that
 # revenue-scale + one profitability measure (e.g. PAT margin) clears the bar.
 MIN_COVERAGE_WEIGHT = 30
+
+# Recommendation cut points (>= dig_deeper_min DIG DEEPER, >= monitor_min MONITOR).
+DIG_DEEPER_MIN = 25
+MONITOR_MIN = 10
+
+# Single source of truth shared with the dashboard. When the published scoring
+# configuration file exists it overrides the built-in defaults above (which stay
+# as the frozen v1.0 fallback), so pipeline, Excel export and dashboard always
+# score with the same model.
+CONFIG_PATH = Path("data/scoring_config.json")
+SCORING_MODEL_VERSION = "1.0"
+
+
+def _load_config() -> None:
+    global WEIGHTS, BANDS, MIN_COVERAGE_WEIGHT, DIG_DEEPER_MIN, MONITOR_MIN, SCORING_MODEL_VERSION
+    if not CONFIG_PATH.exists():
+        return
+    try:
+        cfg = json.loads(CONFIG_PATH.read_text())
+        comps = cfg["components"]
+        WEIGHTS = {k: comps[k]["weight"] for k in WEIGHTS}
+        BANDS = {k: float(comps[k]["saturation"]) for k in BANDS}
+        MIN_COVERAGE_WEIGHT = cfg.get("min_coverage_weight", MIN_COVERAGE_WEIGHT)
+        th = cfg.get("thresholds", {})
+        DIG_DEEPER_MIN = th.get("dig_deeper_min", DIG_DEEPER_MIN)
+        MONITOR_MIN = th.get("monitor_min", MONITOR_MIN)
+        SCORING_MODEL_VERSION = str(cfg.get("version", SCORING_MODEL_VERSION))
+    except Exception as exc:  # a broken config must never break the weekly run
+        log.warning("Could not load %s (%s); using built-in scoring defaults.", CONFIG_PATH, exc)
+
+
+_load_config()
 
 
 def _band_score(value: Optional[float], key: str) -> Optional[float]:
@@ -74,9 +111,9 @@ def score_financials(fin: Financials) -> Score:
         return Score(total=None, components=comp, bucket="INSUFFICIENT")
 
     total = round(sum(present.values()), 1)
-    if total >= 25:
+    if total >= DIG_DEEPER_MIN:
         bucket = "DIG DEEPER"
-    elif total >= 10:
+    elif total >= MONITOR_MIN:
         bucket = "MONITOR"
     else:
         bucket = "WATCH"

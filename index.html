@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/app.css?v=20260713b">
+  <link rel="stylesheet" href="./assets/app.css?v=20260714a">
 </head>
 <body>
   <!-- ===================== Sidebar ===================== -->
@@ -28,9 +28,9 @@
       <button class="snav" data-target="tab-pipeline" aria-label="Pipeline">
         <svg viewBox="0 0 24 24" class="ic"><path d="M4 7h10"/><circle cx="18" cy="7" r="2"/><path d="M20 12H10"/><circle cx="6" cy="12" r="2"/><path d="M4 17h10"/><circle cx="18" cy="17" r="2"/></svg>
         <span>Pipeline</span></button>
-      <button class="snav" data-target="tab-archive" aria-label="Archive">
+      <button class="snav" data-target="tab-archive" aria-label="Full Tracker">
         <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
-        <span>Archive</span></button>
+        <span>Full Tracker</span></button>
     </nav>
 
     <div class="side-foot">
@@ -71,7 +71,12 @@
             <div class="eyebrow">Weekly Monitor</div>
             <h2 class="section-title">This Week in DRHP Filings</h2>
           </div>
-          <div class="wm-status no-print" id="wm-status"></div>
+          <div class="wm-head-right no-print">
+            <span class="wm-model-tag" id="wm-model-tag"></span>
+            <button class="wm-gear" id="wm-settings-btn" title="Scoring Settings" aria-label="Scoring Settings">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="wm-cards block" id="wm-cards"></div>
@@ -102,13 +107,13 @@
         </div>
       </section>
 
-      <!-- ===== Tab 3: Archive ===== -->
+      <!-- ===== Tab 3: Full Tracker ===== -->
       <section class="tab-panel" id="tab-archive" hidden>
-        <div class="print-title">03 — Archive</div>
+        <div class="print-title">03 — Full Tracker</div>
         <div class="section-head">
           <div>
-            <div class="eyebrow">Archive</div>
-            <h2 class="section-title">Complete Filing Tracker</h2>
+            <div class="eyebrow">Full Tracker</div>
+            <h2 class="section-title">Complete Filing Database — Current &amp; Historical</h2>
           </div>
         </div>
 
@@ -130,6 +135,10 @@
     </main>
   </div>
 
-  <script src="./assets/app.js?v=20260713b"></script>
+  <!-- ===== Shared modal host (score breakdown · score info · scoring settings) ===== -->
+  <div class="md-overlay no-print" id="md-overlay" hidden></div>
+  <div class="md-box no-print" id="md-box" hidden role="dialog" aria-modal="true"></div>
+
+  <script src="./assets/app.js?v=20260714a"></script>
 </body>
 </html>
