@@ -25,9 +25,6 @@
       <button class="snav active" data-target="tab-weekly" aria-label="Weekly Monitor">
         <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
         <span>Weekly Monitor</span></button>
-      <button class="snav" data-target="tab-pipeline" aria-label="Pipeline">
-        <svg viewBox="0 0 24 24" class="ic"><path d="M4 7h10"/><circle cx="18" cy="7" r="2"/><path d="M20 12H10"/><circle cx="6" cy="12" r="2"/><path d="M4 17h10"/><circle cx="18" cy="17" r="2"/></svg>
-        <span>Pipeline</span></button>
       <button class="snav" data-target="tab-archive" aria-label="Full Tracker">
         <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
         <span>Full Tracker</span></button>
@@ -89,29 +86,9 @@
         <div class="wm-insights block" id="wm-insights"></div>
       </section>
 
-      <!-- ===== Tab 2: Pipeline ===== -->
-      <section class="tab-panel" id="tab-pipeline" hidden>
-        <div class="print-title">02 — Pipeline</div>
-        <div class="section-head">
-          <div>
-            <div class="eyebrow">Pipeline</div>
-            <h2 class="section-title">IPO Lifecycle Monitor</h2>
-          </div>
-        </div>
-
-        <div class="pl-hero block" id="pl-hero"></div>
-        <div class="pl-funnels block" id="pl-funnels"></div>
-        <div class="pl-controls block no-print" id="pl-controls"></div>
-
-        <div class="card block">
-          <div class="table-wrap"><table id="pl-table"></table></div>
-          <div class="table-foot" id="pl-foot"></div>
-        </div>
-      </section>
-
-      <!-- ===== Tab 3: Full Tracker ===== -->
+      <!-- ===== Tab 2: Full Tracker ===== -->
       <section class="tab-panel" id="tab-archive" hidden>
-        <div class="print-title">03 — Full Tracker</div>
+        <div class="print-title">02 — Full Tracker</div>
         <div class="section-head">
           <div>
             <div class="eyebrow">Full Tracker</div>
@@ -119,6 +96,8 @@
           </div>
         </div>
 
+        <div class="ar-life-wrap block no-print" id="ar-lifecycle"></div>
+        <div class="ar-stage-wrap block no-print" id="ar-stages"></div>
         <div class="ar-controls block no-print" id="ar-controls"></div>
 
         <div class="card block">

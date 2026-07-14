@@ -313,7 +313,6 @@ async function main(){
   rescoreAll();
   renderHeader();
   renderWeekly();
-  renderPipeline();
   renderArchive();
   renderFooter();
   wireNav();
@@ -1505,123 +1504,10 @@ function prevStage(stage){
   return i>0 ? ALL_STAGES[i-1] : '—';
 }
 
-/* ---------------- Tab 2: Pipeline — Option C (hero KPIs · funnels · table) ----------------
-   Layout: 1 title · 2 four hero KPI cards · 3-5 three funnels (gold-rail capsules)
-   · 6 filter bar · 7 detailed company table. Hero cards AND funnel capsules both
-   drive one unified `focus` filter over the table. Colours: existing theme only. */
-
-/* dashboard stage → an existing icon key (introduces no new art) */
-const STAGE_DASH_ICON = {
-  'DRHP Filed':'doc', 'Updates & Corrigenda':'spark', 'SEBI Review':'eye', 'IPO Ready':'rocket',
-  'Open':'flame', 'Closed':'clock', 'Allotment':'handshake', 'Listing Scheduled':'clock',
-  'Listed':'check', 'Archived':'xmark',
-};
-/* short intro line under each funnel label (left rail) */
-const FUNNEL_INTRO = {
-  pre:  'DRHP filed → SEBI review → IPO ready',
-  live: 'Bidding open → allotment → listing',
-  done: 'Listed on the exchange, or withdrawn',
-};
-/* the four hero KPIs — each a lens over the base set that also filters the table */
-const PL_HERO = [
-  {v:'new',     k:'doc',    lab:'New DRHPs',       test:r=>movementThisWeek(r)==='New DRHP'},
-  {v:'updated', k:'spark',  lab:'Updated Filings', test:r=>movementThisWeek(r)==='Corrigendum Filed'},
-  {v:'moved',   k:'trend',  lab:'Stage Changes',   test:r=>!!movementThisWeek(r)},
-  {v:'dig',     k:'target', lab:'DIG DEEPER',       test:r=>{const s=rscore(r); return !!(s && s.bucket==='DIG DEEPER');}},
-];
-
-let plFilter = {board:'All', sector:'All', q:'', metrics:false, focus:null};
-function renderPipeline(){
-  const host = document.getElementById('pl-controls');
-  if(!host.dataset.wired){ buildPlControls(host); host.dataset.wired='1'; }
-  renderPlHero();
-  renderFunnels();
-  renderPlRows();
-}
-/* board / sector / search filtered set — drives hero counts, funnel counts and the
-   table; the `focus` (a hero lens or a funnel stage) is applied on top. */
-function plBase(){
-  const q = plFilter.q.toLowerCase();
-  return MARKET.filter(r =>
-    (plFilter.board==='All'  || r.board===plFilter.board) &&
-    (plFilter.sector==='All' || r.sector===plFilter.sector) &&
-    (q==='' || (r.name||'').toLowerCase().includes(q)));
-}
-/* does a record pass the active focus (nothing focused → everything passes)? */
-function plFocusTest(r){
-  const fo = plFilter.focus;
-  if(!fo) return true;
-  if(fo.kind==='stage') return mapStage(r)===fo.value;
-  const h = PL_HERO.find(x=>x.v===fo.value);
-  return h ? h.test(r) : true;
-}
-function setFocus(kind, value, label){
-  const same = plFilter.focus && plFilter.focus.kind===kind && plFilter.focus.value===value;
-  plFilter.focus = same ? null : {kind, value, label};
-  renderPipeline();
-}
-
-/* ---- 2. Hero KPI cards (clickable) ---- */
-function renderPlHero(){
-  const base = plBase();
-  const host = document.getElementById('pl-hero'); if(!host) return;
-  host.innerHTML = PL_HERO.map(c=>{
-    const n = base.filter(c.test).length;
-    const on = plFilter.focus && plFilter.focus.kind==='hero' && plFilter.focus.value===c.v;
-    return `<button class="pl-hero-card${on?' on':''}" data-hero="${c.v}" title="Filter the table to ${esc(c.lab)}">
-      <span class="wm-ic">${icon(c.k,18)}</span>
-      <div class="wm-card-body"><div class="wm-n">${n}</div><div class="wm-lab">${esc(c.lab)}</div></div>
-      <span class="pl-hero-caret" aria-hidden="true">${on?'✕':'›'}</span>
-    </button>`;
-  }).join('');
-  host.querySelectorAll('.pl-hero-card').forEach(b=>b.addEventListener('click',()=>{
-    const c = PL_HERO.find(x=>x.v===b.dataset.hero);
-    setFocus('hero', c.v, c.lab);
-  }));
-}
-
-/* ---- 3-5. Three funnels — Option C capsules on a muted-gold rail ---- */
-function renderFunnels(){
-  const base = plBase();
-  const stats = {}; ALL_STAGES.forEach(s => stats[s] = {count:0, latest:null, week:0, names:[]});
-  base.forEach(r => {
-    const st = stats[mapStage(r)];
-    st.count++;
-    const lm = lastMovement(r); if(lm && (!st.latest || lm>st.latest)) st.latest = lm;
-    if(movementThisWeek(r)) st.week++;
-    st.names.push({name:r.name, lm});
-  });
-  const host = document.getElementById('pl-funnels'); if(!host) return;
-  host.innerHTML = FUNNELS.map(f => `
-    <div class="plc-funnel">
-      <div class="plc-intro">
-        ${funnelTag(f.key)}
-        <div class="plc-intro-h">${esc(f.label)}</div>
-        <div class="plc-intro-d">${esc(FUNNEL_INTRO[f.key]||'')}</div>
-      </div>
-      <div class="plc-rail">
-        ${f.flow.map((s,i)=>{
-          const st = stats[s], on = plFilter.focus && plFilter.focus.kind==='stage' && plFilter.focus.value===s;
-          const chips = st.names.slice().sort((a,b)=>String(b.lm||'').localeCompare(String(a.lm||'')));
-          const shown = chips.slice(0,2).map(c=>`<span class="plc-chip">${esc(c.name)}</span>`).join('');
-          const more = chips.length>2 ? `<span class="plc-chip plc-more">+${chips.length-2}</span>` : '';
-          return `${i?'<span class="plc-link" aria-hidden="true"></span>':''}<button class="plc-cap${on?' on':''}${st.count?'':' empty'}" data-stage="${esc(s)}" title="Filter the table to ${esc(s)}">
-            <span class="plc-cap-top">
-              <span class="plc-cap-ic">${icon(STAGE_DASH_ICON[s]||'doc',15)}</span>
-              <span class="plc-cap-n">${st.count}</span>
-              ${st.week?`<span class="plc-week">+${st.week} this week</span>`:''}
-            </span>
-            <span class="plc-cap-name">${esc(s)}</span>
-            <span class="plc-cap-meta">${st.latest?('Latest '+dfmt(st.latest)):'No activity yet'}</span>
-            ${chips.length?`<span class="plc-chips">${shown}${more}</span>`:''}
-          </button>`;
-        }).join('')}
-      </div>
-    </div>`).join('');
-  host.querySelectorAll('.plc-cap').forEach(b=>b.addEventListener('click',()=>{
-    setFocus('stage', b.dataset.stage, b.dataset.stage);
-  }));
-}
+/* ---------------- Shared lifecycle logic (reused by the Full Tracker) ----------------
+   The Pipeline page was folded into the Full Tracker: its lifecycle selection now
+   lives above the tracker filters. The underlying stage mapping, movement and
+   milestone logic below is retained and reused — no pipeline data or logic is lost. */
 
 /* next expected step in the lifecycle (a real future date if we hold one, else the
    stage's natural next milestone). Returns {lab, date} or null. */
@@ -1639,232 +1525,325 @@ function nextMilestone(r){
   const lab = NEXT[mapStage(r)];
   return lab ? {lab, date:null} : null;
 }
-/* concise live-status pill, coloured by funnel (no new colours) */
-const PL_STATUS = {
-  'DRHP Filed':'Filed', 'Updates & Corrigenda':'Updated', 'SEBI Review':'Under Review', 'IPO Ready':'IPO Ready',
-  'Open':'Open Now', 'Closed':'Bidding Closed', 'Allotment':'Allotment', 'Listing Scheduled':'Listing Soon',
-  'Listed':'Listed', 'Archived':'Withdrawn',
-};
-function pipelineStatus(r){
-  const ds = mapStage(r), ss = sebiStatus(r);
-  const label = ss || PL_STATUS[ds] || ds;
-  return `<span class="pl-status pl-st-${funnelOf(ds).key}">${esc(label)}</span>`;
-}
 function ipoSizeCell(r){ return r.issueSizeCr==null ? DASH : `₹${money(r.issueSizeCr)} Cr`; }
 
-/* ---- 6. Filter bar ---- */
-function buildPlControls(host){
-  const opt = (dim,label,opts)=>{
-    const o=[`<option value="All">All</option>`].concat(opts.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`)).join('');
-    return `<label class="mh-pill" data-pill="${dim}"><span class="mh-pill-lbl">${label}</span><select class="mh-pill-sel" data-f="${dim}">${o}</select></label>`;
-  };
-  const boards  = [...new Set(MARKET.map(r=>r.board).filter(Boolean))].sort();
-  const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
-  host.innerHTML = `
-    ${opt('board','Board',boards)}
-    ${opt('sector','Sector',sectors)}
-    <label class="ctl-search"><input type="search" id="pl-q" placeholder="Search company…"></label>
-    <label class="ctl-toggle"><input type="checkbox" id="pl-metrics"> Review Metrics</label>
-    <button class="fchip hide" id="pl-reset">Reset</button>
-    <button class="fchip pl-export" id="pl-export" title="Download the current view as CSV">Export</button>`;
-  host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
-    plFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); renderPipeline();
-  }));
-  const q = host.querySelector('#pl-q'); q.addEventListener('input',()=>{ plFilter.q=q.value; renderPipeline(); });
-  const mt = host.querySelector('#pl-metrics'); mt.addEventListener('change',()=>{ plFilter.metrics=mt.checked; renderPlRows(); });
-  host.querySelector('#pl-export').addEventListener('click', plExportCsv);
-  host.querySelector('#pl-reset').addEventListener('click',()=>{
-    plFilter={board:'All',sector:'All',q:'',metrics:plFilter.metrics,focus:null};
-    host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
-    q.value=''; renderPipeline();
-  });
-}
+/* ---------------- Full Tracker (lifecycle selector · stage chips · detailed table) ---------------- */
+let arFilter = {q:'', life:'All', stage:'All', board:'All', sector:'All', ftype:'All', from:'', to:'', metrics:false};
 
-/* rows currently in the table (base + focus), latest movement first */
-function plRowSet(){
-  return plBase().filter(plFocusTest)
-    .sort((a,b)=> String(lastMovement(b)||'').localeCompare(String(lastMovement(a)||'')));
-}
-
-/* ---- 7. Detailed company table ---- */
-function renderPlRows(){
-  const base = plBase();
-  const rows = plRowSet();
-  const m = plFilter.metrics;
-  const head = `<thead><tr>
-    <th>Company</th><th>Board</th><th>Sector</th><th>Current Stage</th><th>Last Updated</th>
-    <th>Next Milestone</th><th class="num">IPO Size</th><th>Status</th>
-    ${m?'<th class="num">Score</th><th>Recommendation</th>':''}
-  </tr></thead>`;
-  const body = rows.length ? rows.map(r=>{
-    const ds = mapStage(r), lm = lastMovement(r), mv = movementThisWeek(r), nm = nextMilestone(r);
-    return `<tr>
-    <td class="company">${pipelineName(r)}</td>
-    <td>${boardChip(r.board)}</td>
-    <td class="subtle">${r.sector?esc(r.sector):DASH}</td>
-    <td>${dashStageChip(ds)}${mv?` <span class="pl-move">${esc(mv)}</span>`:''}</td>
-    <td class="subtle">${lm?dfmt(lm):DASH}</td>
-    <td class="subtle">${nm?`${esc(nm.lab)}${nm.date?` · ${dfmt(nm.date)}`:''}`:DASH}</td>
-    <td class="num">${ipoSizeCell(r)}</td>
-    <td>${pipelineStatus(r)}</td>
-    ${m?`<td class="num">${scoreLink(rscore(r), 'r', MARKET.indexOf(r))}</td><td>${recoTag(rscore(r))}</td>`:''}
-  </tr>`;}).join('') : `<tr><td colspan="${m?10:8}" class="subtle" style="padding:16px">No companies in this view.</td></tr>`;
-  const plt = document.getElementById('pl-table');
-  plt.innerHTML = head + `<tbody>${body}</tbody>`;
-  plt.querySelectorAll('.score-link').forEach(b=>b.addEventListener('click', e=>{
-    e.stopPropagation();
-    const rec = MARKET[+b.dataset.idx];
-    if(rec) openScoreBreakdown({company_name: rec.name, financials: rec.financials});
-  }));
-  const fo = plFilter.focus;
-  document.getElementById('pl-foot').innerHTML =
-    `${rows.length} of ${base.length} companies${fo?` · filtered to <b>${esc(fo.label)}</b> <button class="sc-link" id="pl-clear-stage">clear</button>`:''} · one shared lifecycle stage across every page.`;
-  const cs = document.getElementById('pl-clear-stage');
-  if(cs) cs.addEventListener('click',()=>{ plFilter.focus=null; renderPipeline(); });
-  const active = plFilter.board!=='All'||plFilter.sector!=='All'||plFilter.q!==''||!!plFilter.focus;
-  document.getElementById('pl-reset').classList.toggle('hide', !active);
-}
-
-/* CSV of the current table view (matches the on-screen columns) */
-function plExportCsv(){
-  const rows = plRowSet();
-  const q = v => { const s=(v==null?'':String(v)); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
-  const cols = [
-    ['Company', r=>r.name],
-    ['Board', r=>r.board],
-    ['Sector', r=>r.sector],
-    ['Current Stage', r=>mapStage(r)],
-    ['Last Updated', r=>lastMovement(r)],
-    ['Next Milestone', r=>{const nm=nextMilestone(r); return nm?(nm.lab+(nm.date?(' '+nm.date):'')):'';}],
-    ['IPO Size (Cr)', r=>r.issueSizeCr],
-    ['Status', r=>sebiStatus(r) || PL_STATUS[mapStage(r)] || mapStage(r)],
-    ['Score', r=>{const s=rscore(r); return s&&s.total!=null?s.total:'';}],
-    ['Recommendation', r=>{const s=rscore(r); return recoLabel(s?s.bucket:'INSUFFICIENT');}],
-  ];
-  const lines = [cols.map(c=>q(c[0])).join(',')];
-  rows.forEach(r=> lines.push(cols.map(c=>q(c[1](r))).join(',')));
-  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `drhp-pipeline-${(DATA.meta&&DATA.meta.snapshot_id)||'export'}.csv`;
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-}
-
-/* ---------------- Tab 3: Archive ---------------- */
-let arFilter = {q:'', board:'All', stage:'All', sector:'All', ftype:'All', from:'', to:''};
-const AR_COLS = [
-  {h:'Company', sticky:1, cell:r=>pipelineName(r), get:r=>r.name},
-  {h:'Board', cell:r=>boardChip(r.board)||DASH, get:r=>r.board},
-  {h:'Stage', cell:r=>dashStageChip(mapStage(r)), get:r=>mapStage(r)},
-  {h:'Sector', cls:'subtle', cell:r=>r.sector?esc(r.sector):DASH, get:r=>r.sector},
-  {h:'Sub-sector', cls:'subtle', cell:r=>r.subSector?esc(r.subSector):DASH, get:r=>r.subSector},
-  {h:'Business Model', cell:r=>r.businessSummary?`<span class="bizclamp" title="${esc(r.businessSummary)}">${esc(r.businessSummary)}</span>`:DASH, get:r=>r.businessSummary},
-  {h:'Filing Type', cls:'subtle', cell:r=>r.filingType?esc(r.filingType):DASH, get:r=>r.filingType},
-  {h:'Filing Date', cls:'subtle', cell:r=>r.filingDate?dfmt(r.filingDate):DASH, get:r=>r.filingDate},
-  {h:'Issue Type', cls:'subtle', cell:r=>r.issueType?esc(r.issueType):DASH, get:r=>r.issueType},
-  {h:'Fresh (₹ Cr)', num:1, cell:r=>r.freshCr==null?DASH:money(r.freshCr), get:r=>r.freshCr},
-  {h:'OFS (₹ Cr)', num:1, cell:r=>r.ofsCr==null?DASH:money(r.ofsCr), get:r=>r.ofsCr},
-  {h:'Total Issue (₹ Cr)', num:1, cell:r=>r.issueSizeCr==null?DASH:money(r.issueSizeCr), get:r=>r.issueSizeCr},
-  {h:'Fresh Shares', num:1, cell:r=>r.freshShares==null?DASH:Number(r.freshShares).toLocaleString('en-IN'), get:r=>r.freshShares},
-  {h:'OFS Shares', num:1, cell:r=>r.ofsShares==null?DASH:Number(r.ofsShares).toLocaleString('en-IN'), get:r=>r.ofsShares},
-  {h:'Total Shares', num:1, cell:r=>r.totalShares==null?DASH:Number(r.totalShares).toLocaleString('en-IN'), get:r=>r.totalShares},
-  {h:'Face Value (₹)', num:1, cell:r=>r.faceValue==null?DASH:money(r.faceValue), get:r=>r.faceValue},
-  {h:'Market Cap (₹ Cr)', num:1, cell:r=>r.marketCapCr==null?DASH:money(r.marketCapCr), get:r=>r.marketCapCr},
-  {h:'Revenue FY25 (₹ Cr)', num:1, cell:r=>fcell(finOf(r,'revenue_fy25'),'money'), get:r=>fvalOf(r,'revenue_fy25')},
-  {h:'EBITDA FY25 (₹ Cr)', num:1, cell:r=>fcell(finOf(r,'ebitda_fy25'),'money'), get:r=>fvalOf(r,'ebitda_fy25')},
-  {h:'PAT FY25 (₹ Cr)', num:1, cell:r=>fcell(finOf(r,'pat_fy25'),'money'), get:r=>fvalOf(r,'pat_fy25')},
-  {h:'Rev Growth', num:1, cell:r=>fcell(finOf(r,'rev_growth_pct'),'pct'), get:r=>fvalOf(r,'rev_growth_pct')},
-  {h:'EBITDA Margin', num:1, cell:r=>fcell(finOf(r,'ebitda_margin_pct'),'pct'), get:r=>fvalOf(r,'ebitda_margin_pct')},
-  {h:'PAT Growth', num:1, cell:r=>fcell(finOf(r,'pat_growth_pct'),'pct'), get:r=>fvalOf(r,'pat_growth_pct')},
-  {h:'PAT Margin', num:1, cell:r=>fcell(finOf(r,'pat_margin_pct'),'pct'), get:r=>fvalOf(r,'pat_margin_pct')},
-  {h:'ROE', num:1, cell:r=>fcell(finOf(r,'roe_pct'),'pct'), get:r=>fvalOf(r,'roe_pct')},
-  {h:'ROCE', num:1, cell:r=>fcell(finOf(r,'roce_pct'),'pct'), get:r=>fvalOf(r,'roce_pct')},
-  {h:'Debt/Equity', num:1, cell:r=>fcell(finOf(r,'debt_equity'),'ratio'), get:r=>fvalOf(r,'debt_equity')},
-  {h:'Asset Base (₹ Cr)', num:1, cell:r=>fcell(finOf(r,'asset_base_cr'),'money'), get:r=>fvalOf(r,'asset_base_cr')},
-  {h:'Promoter Holding', num:1, cell:r=>fcell(finOf(r,'promoter_hold_pct'),'pct'), get:r=>fvalOf(r,'promoter_hold_pct')},
-  {h:'Lead Managers', cls:'subtle', cell:r=>(r.leadManagers&&r.leadManagers.length)?esc(r.leadManagers.join(', ')):DASH, get:r=>r.leadManagers?r.leadManagers.join('; '):null},
-  {h:'Open', cls:'subtle', cell:r=>r.issueOpen?dfmt(r.issueOpen):DASH, get:r=>r.issueOpen},
-  {h:'Close', cls:'subtle', cell:r=>r.issueClose?dfmt(r.issueClose):DASH, get:r=>r.issueClose},
-  {h:'Listing', cls:'subtle', cell:r=>r.listingDate?dfmt(r.listingDate):DASH, get:r=>r.listingDate},
-  {h:'Price Band', cls:'subtle', cell:r=>r.priceBand?esc(r.priceBand):DASH, get:r=>r.priceBand},
-  {h:'Subscription', num:1, cell:r=>subx(r.subscriptionX), get:r=>r.subscriptionX},
-  {h:'Listing Gain', num:1, cell:r=>r.gainPct==null?DASH:pct(r.gainPct), get:r=>r.gainPct},
-  {h:'Score', num:1, cell:(r,i)=>scoreLink(rscore(r),'r',i), get:r=>{ const s=rscore(r); return s&&s.total!=null?s.total:null; }},
-  {h:'Recommendation', cell:r=>recoTag(rscore(r)), get:r=>{ const s=rscore(r); return s?recoLabel(s.bucket):''; }},
-  {h:'Source', cell:r=>srcRec(r), get:r=>{ const s=r.sources||{}; return s.drhp_pdf_url||s.sebi_url||''; }},
+/* the four top-level lifecycle selections — All + the three funnel groups.
+   Keys match FUNNELS[].key so grouping reuses the one central stage mapping. */
+const AR_LIFE = [
+  {key:'All',  label:'All'},
+  {key:'pre',  label:'Pre-IPO'},
+  {key:'live', label:'Live IPO'},
+  {key:'done', label:'Listed & Archived'},
 ];
-function arFiltered(){
+const FUNNEL_BY_KEY = Object.fromEntries(FUNNELS.map(f=>[f.key, f]));
+
+/* every filter EXCEPT lifecycle/stage — the base the facet counts are drawn from */
+function arBase(){
   const q = arFilter.q.toLowerCase();
   return MARKET.filter(r=>
     (q==='' || (r.name||'').toLowerCase().includes(q)) &&
     (arFilter.board==='All'  || r.board===arFilter.board) &&
-    (arFilter.stage==='All'  || mapStage(r)===arFilter.stage) &&
     (arFilter.sector==='All' || r.sector===arFilter.sector) &&
     (arFilter.ftype==='All'  || r.filingType===arFilter.ftype) &&
     (arFilter.from==='' || (r.filingDate && r.filingDate>=arFilter.from)) &&
     (arFilter.to===''   || (r.filingDate && r.filingDate<=arFilter.to)));
 }
+/* the fully-filtered set shown in the table (base + lifecycle group + sub-stage) */
+function arFiltered(){
+  return arBase().filter(r=>{
+    const ds = mapStage(r);
+    return (arFilter.life==='All'  || funnelOf(ds).key===arFilter.life) &&
+           (arFilter.stage==='All' || ds===arFilter.stage);
+  });
+}
+
 function renderArchive(){
   const host = document.getElementById('ar-controls');
   if(!host.dataset.wired){ buildArControls(host); host.dataset.wired='1'; }
+  renderArLifecycle();
+  renderArStages();
   renderArRows();
 }
+
+/* ---- 1. Lifecycle selector — segmented pills (All / Pre-IPO / Live IPO / Listed & Archived) ---- */
+function renderArLifecycle(){
+  const host = document.getElementById('ar-lifecycle'); if(!host) return;
+  const base = arBase();
+  const count = key => key==='All' ? base.length : base.filter(r=>funnelOf(mapStage(r)).key===key).length;
+  const btns = AR_LIFE.map(g=>{
+    const on = arFilter.life===g.key;
+    return `<button class="ar-seg-btn${on?' on':''}" data-life="${g.key}">${esc(g.label)}<span class="ar-seg-n">${count(g.key)}</span></button>`;
+  }).join('');
+  host.innerHTML = `<span class="ar-life-lab">Lifecycle</span><div class="ar-seg" role="tablist">${btns}</div>`;
+  host.querySelectorAll('.ar-seg-btn').forEach(b=>b.addEventListener('click',()=>{
+    if(arFilter.life===b.dataset.life) return;               // already selected — one group at a time
+    arFilter.life = b.dataset.life; arFilter.stage = 'All';  // reset sub-stage on group change
+    renderArLifecycle(); renderArStages(); renderArRows();
+  }));
+}
+
+/* ---- 2. Sub-stage chips for the selected lifecycle group ---- */
+function renderArStages(){
+  const host = document.getElementById('ar-stages'); if(!host) return;
+  if(arFilter.life==='All'){                     // no group selected → show the All Stages chip only
+    host.innerHTML = `<span class="ar-stage-lab">Stage</span><span class="ar-chip static on">All Stages</span>`;
+    return;
+  }
+  const group = arBase().filter(r=>funnelOf(mapStage(r)).key===arFilter.life);
+  const stageCount = s => group.filter(r=>mapStage(r)===s).length;
+  const flow = (FUNNEL_BY_KEY[arFilter.life]||{flow:[]}).flow;
+  const chips = [`<button class="ar-chip${arFilter.stage==='All'?' on':''}" data-stage="All">All Stages<span class="ar-chip-n">${group.length}</span></button>`]
+    .concat(flow.map(s=>`<button class="ar-chip${arFilter.stage===s?' on':''}" data-stage="${esc(s)}">${esc(s)}<span class="ar-chip-n">${stageCount(s)}</span></button>`))
+    .join('');
+  host.innerHTML = `<span class="ar-stage-lab">Stage</span>${chips}`;
+  host.querySelectorAll('.ar-chip[data-stage]').forEach(b=>b.addEventListener('click',()=>{
+    arFilter.stage = b.dataset.stage;            // one sub-stage at a time within the group
+    renderArStages(); renderArRows();
+  }));
+}
+
+/* ---- 3-11. Filter controls: search · board · sector · filing type · date range ·
+   Review Metrics · Export CSV · Print / PDF · Reset ---- */
 function buildArControls(host){
   const opt = (dim,label,opts)=>{
     const o=[`<option value="All">All</option>`].concat(opts.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`)).join('');
     return `<label class="mh-pill" data-pill="${dim}"><span class="mh-pill-lbl">${label}</span><select class="mh-pill-sel" data-f="${dim}">${o}</select></label>`;
   };
   const boards  = [...new Set(MARKET.map(r=>r.board).filter(Boolean))].sort();
-  const stages  = ALL_STAGES.filter(s => MARKET.some(r => mapStage(r)===s));
   const sectors = [...new Set(MARKET.map(r=>r.sector).filter(Boolean))].sort();
   const ftypes  = [...new Set(MARKET.map(r=>r.filingType).filter(Boolean))].sort();
   host.innerHTML = `
     <label class="ctl-search"><input type="search" id="ar-q" placeholder="Search company…"></label>
     ${opt('board','Board',boards)}
-    ${opt('stage','Stage',stages)}
     ${opt('sector','Sector',sectors)}
     ${opt('ftype','Filing type',ftypes)}
     <label class="ctl-date"><span>From</span><input type="date" id="ar-from"></label>
     <label class="ctl-date"><span>To</span><input type="date" id="ar-to"></label>
-    <button class="fchip" id="ar-reset">Reset</button>
+    <label class="ctl-toggle"><input type="checkbox" id="ar-metrics"> Review Metrics</label>
     <button class="fchip" id="ar-csv">Export CSV</button>
-    <button class="fchip" id="ar-print">Print / PDF</button>`;
+    <button class="fchip" id="ar-print">Print / PDF</button>
+    <button class="fchip" id="ar-reset">Reset</button>`;
+  const refresh = ()=>{ renderArLifecycle(); renderArStages(); renderArRows(); };   // counts follow the other filters
   host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
-    arFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); renderArRows();
+    arFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); refresh();
   }));
-  const q = host.querySelector('#ar-q'); q.addEventListener('input',()=>{ arFilter.q=q.value; renderArRows(); });
-  const from = host.querySelector('#ar-from'); from.addEventListener('change',()=>{ arFilter.from=from.value; renderArRows(); });
-  const to = host.querySelector('#ar-to'); to.addEventListener('change',()=>{ arFilter.to=to.value; renderArRows(); });
-  host.querySelector('#ar-reset').addEventListener('click',()=>{
-    arFilter={q:'',board:'All',stage:'All',sector:'All',ftype:'All',from:'',to:''};
-    host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
-    q.value=''; from.value=''; to.value=''; renderArRows();
-  });
+  const q = host.querySelector('#ar-q'); q.addEventListener('input',()=>{ arFilter.q=q.value; refresh(); });
+  const from = host.querySelector('#ar-from'); from.addEventListener('change',()=>{ arFilter.from=from.value; refresh(); });
+  const to = host.querySelector('#ar-to'); to.addEventListener('change',()=>{ arFilter.to=to.value; refresh(); });
+  const mt = host.querySelector('#ar-metrics'); mt.addEventListener('change',()=>{ arFilter.metrics=mt.checked; renderArRows(); });
   host.querySelector('#ar-csv').addEventListener('click', arExportCsv);
   host.querySelector('#ar-print').addEventListener('click', ()=>window.print());
+  host.querySelector('#ar-reset').addEventListener('click',()=>{
+    arFilter={q:'',life:'All',stage:'All',board:'All',sector:'All',ftype:'All',from:'',to:'',metrics:arFilter.metrics};
+    host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
+    q.value=''; from.value=''; to.value=''; refresh();
+  });
 }
+
+/* visible columns — Review Metrics inserts the four key ratios before Score */
+function arColumns(){
+  const metricCols = [
+    {h:'Rev Growth',    num:1, cell:r=>fcell(finOf(r,'rev_growth_pct'),'pct')},
+    {h:'EBITDA Margin', num:1, cell:r=>fcell(finOf(r,'ebitda_margin_pct'),'pct')},
+    {h:'PAT Growth',    num:1, cell:r=>fcell(finOf(r,'pat_growth_pct'),'pct')},
+    {h:'PAT Margin',    num:1, cell:r=>fcell(finOf(r,'pat_margin_pct'),'pct')},
+  ];
+  return [
+    {h:'Company',        cell:r=>arCompanyCell(r)},
+    {h:'Lifecycle',      cell:r=>funnelTag(funnelOf(mapStage(r)).key)},
+    {h:'Current Stage',  cell:r=>dashStageChip(mapStage(r))},
+    {h:'Board',          cell:r=>boardChip(r.board)||DASH},
+    {h:'Sector',         cls:'subtle', cell:r=>r.sector?esc(r.sector):DASH},
+    {h:'Filing Type',    cls:'subtle', cell:r=>r.filingType?esc(r.filingType):DASH},
+    {h:'Filing Date',    cls:'subtle', cell:r=>r.filingDate?dfmt(r.filingDate):DASH},
+    {h:'Last Movement',  cell:r=>arMoveCell(r)},
+    {h:'Next Milestone', cls:'subtle', cell:r=>{ const nm=nextMilestone(r); return nm?`${esc(nm.lab)}${nm.date?` · ${dfmt(nm.date)}`:''}`:DASH; }},
+    {h:'Issue Size',     num:1, cell:r=>ipoSizeCell(r)},
+    ...(arFilter.metrics ? metricCols : []),
+    {h:'Score',          num:1, cell:(r,i)=>scoreLink(rscore(r),'r',i)},
+    {h:'Recommendation', cell:r=>recoTag(rscore(r))},
+    {h:'Data Status',    cell:r=>dsRec(r)},
+    {h:'Source',         cell:r=>srcRec(r)},
+  ];
+}
+function arCompanyCell(r){ return `<span class="ar-caret" aria-hidden="true">▾</span>${pipelineName(r)}`; }
+function arMoveCell(r){
+  const mv = movementThisWeek(r), lm = lastMovement(r);
+  if(mv) return `<span class="pl-move">${esc(mv)}</span>${lm?` <span class="subtle tiny">${dfmt(lm)}</span>`:''}`;
+  return lm ? `<span class="subtle">${dfmt(lm)}</span>` : DASH;
+}
+
 let AR_VIEW = [];
 function renderArRows(){
   const recs = arFiltered();
   AR_VIEW = recs;
-  const head = `<thead><tr>${AR_COLS.map(c=>`<th class="${c.num?'num':''}${c.sticky?' ar-sticky':''}">${esc(c.h)}</th>`).join('')}</tr></thead>`;
+  const cols = arColumns();
+  const head = `<thead><tr>${cols.map(c=>`<th class="${c.num?'num':''}">${esc(c.h)}</th>`).join('')}</tr></thead>`;
   const body = recs.length
-    ? recs.map((r,i)=>`<tr>${AR_COLS.map(c=>`<td class="${c.cls||''}${c.num?' num':''}${c.sticky?' ar-sticky':''}">${c.cell(r,i)}</td>`).join('')}</tr>`).join('')
-    : `<tr><td colspan="${AR_COLS.length}" class="subtle" style="padding:16px">No records match these filters.</td></tr>`;
+    ? recs.map((r,i)=>`<tr class="ar-row" data-idx="${i}" tabindex="0" aria-expanded="false">${
+        cols.map(c=>`<td class="${c.cls||''}${c.num?' num':''}">${c.cell(r,i)}</td>`).join('')
+      }</tr><tr class="ar-detail" id="ar-detail-${i}" hidden><td colspan="${cols.length}">${arDetail(r)}</td></tr>`).join('')
+    : `<tr><td colspan="${cols.length}" class="subtle" style="padding:16px">No records match these filters.</td></tr>`;
   const art = document.getElementById('ar-table');
   art.innerHTML = head + `<tbody>${body}</tbody>`;
+
+  // a score click opens the breakdown modal — it must not toggle the row
   art.querySelectorAll('.score-link').forEach(b=>b.addEventListener('click', e=>{
     e.stopPropagation();
     const rec = AR_VIEW[+b.dataset.idx];
     if(rec) openScoreBreakdown({company_name: rec.name, financials: rec.financials});
   }));
-  document.getElementById('ar-foot').textContent = `${recs.length} of ${MARKET.length} records · SEBI public filings & NSE. “—” = not disclosed. Scores use the active scoring model.`;
+  // expand / collapse inline WITHOUT re-rendering, so the lifecycle + filter
+  // selection is preserved while rows are opened and closed
+  const toggle = i => {
+    const det = document.getElementById('ar-detail-'+i);
+    const row = art.querySelector(`.ar-row[data-idx="${i}"]`);
+    if(!det || !row) return;
+    const open = det.hidden; det.hidden = !open;
+    row.classList.toggle('open', open);
+    row.setAttribute('aria-expanded', String(open));
+  };
+  art.querySelectorAll('.ar-row').forEach(tr=>{
+    tr.addEventListener('click', e=>{ if(e.target.closest('a')||e.target.closest('.score-link')) return; toggle(+tr.dataset.idx); });
+    tr.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(+tr.dataset.idx); } });
+  });
+
+  const scope = [];
+  if(arFilter.life!=='All')  scope.push(esc((AR_LIFE.find(g=>g.key===arFilter.life)||{}).label));
+  if(arFilter.stage!=='All') scope.push(esc(arFilter.stage));
+  document.getElementById('ar-foot').innerHTML =
+    `<b>${recs.length}</b> of ${MARKET.length} records${scope.length?` · ${scope.join(' › ')}`:''} · SEBI public filings &amp; NSE · one shared lifecycle stage across the app. “—” = not disclosed. Click a row for full detail.`;
+}
+
+/* inline expandable detail — filing info + history, business & issue, full
+   financials and the score breakdown. Missing values render "—", never zero. */
+function arDetail(r){
+  const fin = r.financials || {};
+  const kv = (k,v)=> `<div class="wd-row"><span class="wd-k">${k}</span><span class="wd-v">${v}</span></div>`;
+  const frow = (lab,mv,kind)=> kv(lab, (mv && mv.value!=null) ? fcell(mv,kind) : '—');
+  const mCr = v => v!=null ? '₹'+money(v)+' Cr' : '—';
+  const ds = mapStage(r), nm = nextMilestone(r), lm = lastMovement(r), mv = movementThisWeek(r);
+
+  const filingInfo = [
+    kv('Company', esc(r.name)),
+    kv('Lifecycle', esc(FUNNEL_TAG[funnelOf(ds).key])),
+    kv('Current stage', esc(ds)),
+    kv('Filing type', r.filingType?esc(r.filingType):'—'),
+    kv('Filing date', r.filingDate?dfmt(r.filingDate):'—'),
+    kv('Last movement', mv?esc(mv):(lm?dfmt(lm):'—')),
+    kv('Next milestone', nm?`${esc(nm.lab)}${nm.date?` · ${dfmt(nm.date)}`:''}`:'—'),
+  ].join('');
+
+  const prev = PREV_SNAPSHOT && PREV_SNAPSHOT.byNorm[r.norm];
+  const history = [
+    r.filingDate && kv(dfmt(r.filingDate), `${esc(r.filingType||'Filing')} filed`),
+    r.issueOpen && kv(dfmt(r.issueOpen), 'IPO opened'),
+    r.issueClose && kv(dfmt(r.issueClose), 'IPO closed'),
+    r.listingDate && kv(dfmt(r.listingDate), 'Listed'),
+    prev ? kv(`Week of ${dfmt(PREV_SNAPSHOT.week_end)}`, `${esc(mapStage(filingToRec(prev)))} (prior week)`) : '',
+  ].filter(Boolean).join('') || DASH;
+
+  const business = [
+    kv('Sector', r.sector?esc(r.sector):'—'),
+    kv('Sub-sector', r.subSector?esc(r.subSector):'—'),
+    kv('Issue type', r.issueType?esc(r.issueType):'—'),
+    kv('Fresh issue', mCr(r.freshCr)),
+    kv('OFS', mCr(r.ofsCr)),
+    kv('Total issue size', mCr(r.issueSizeCr)),
+    kv('Market cap', mCr(r.marketCapCr)),
+    kv('Price band', r.priceBand?esc(r.priceBand):'—'),
+    kv('Subscription', r.subscriptionX==null?'—':subx(r.subscriptionX)),
+    kv('Lead managers', (r.leadManagers&&r.leadManagers.length)?esc(r.leadManagers.join(', ')):'—'),
+  ].join('');
+
+  const financials = [
+    frow('Revenue FY25', fin.revenue_fy25, 'money'),
+    frow('Revenue FY24', fin.revenue_fy24, 'money'),
+    frow('Revenue growth', fin.rev_growth_pct, 'pct'),
+    frow('EBITDA FY25', fin.ebitda_fy25, 'money'),
+    frow('EBITDA margin', fin.ebitda_margin_pct, 'pct'),
+    frow('PAT FY25', fin.pat_fy25, 'money'),
+    frow('PAT growth', fin.pat_growth_pct, 'pct'),
+    frow('PAT margin', fin.pat_margin_pct, 'pct'),
+    frow('ROE', fin.roe_pct, 'pct'),
+    frow('ROCE', fin.roce_pct, 'pct'),
+    frow('Debt/Equity', fin.debt_equity, 'ratio'),
+    frow('Promoter holding', fin.promoter_hold_pct, 'pct'),
+  ].join('');
+
+  const s = rscore(r), cfg = SCORING.active;
+  const scoreHead = (s && s.total!=null)
+    ? `<div class="ard-score-total">${s.total} / ${cfg.max_total} ${recoTag(s)}</div>`
+    : `<div class="ard-score-total">${recoTag(s)}</div>`;
+  const scoreRows = Object.entries(cfg.components).map(([k,c])=>{
+    const comp = (s && s.components && s.components[k]) || {};
+    return kv(esc(c.label), `${comp.points==null?'—':comp.points} / ${c.weight}`);
+  }).join('');
+
+  return `<div class="wd-grid ard-grid">
+    <div class="wd-col">
+      <div class="wd-h">Filing information</div>${filingInfo}
+      <div class="wd-h">Filing history</div>${history}
+      <div class="wd-h">Sources</div><div class="ard-src">${srcRec(r)}</div>
+    </div>
+    <div class="wd-col">
+      <div class="wd-h">Business &amp; issue</div>${business}
+      <div class="wd-h">Business model</div>
+      <p class="wd-biz">${r.businessSummary?esc(r.businessSummary):'<span class="subtle">Not disclosed in this filing.</span>'}</p>
+    </div>
+    <div class="wd-col">
+      <div class="wd-h">Financials (from the filing)</div>${financials}
+      <div class="wd-h">Score breakdown</div>${scoreHead}${scoreRows}
+    </div>
+  </div>`;
+}
+
+/* Export CSV — the complete tracking record (independent of the visible columns) */
+const AR_CSV = [
+  ['Company', r=>r.name],
+  ['Lifecycle', r=>FUNNEL_TAG[funnelOf(mapStage(r)).key]],
+  ['Current Stage', r=>mapStage(r)],
+  ['Board', r=>r.board],
+  ['Sector', r=>r.sector],
+  ['Sub-sector', r=>r.subSector],
+  ['Filing Type', r=>r.filingType],
+  ['Filing Date', r=>r.filingDate],
+  ['Last Movement', r=>movementThisWeek(r) || lastMovement(r) || ''],
+  ['Next Milestone', r=>{ const nm=nextMilestone(r); return nm?(nm.lab+(nm.date?(' '+nm.date):'')):''; }],
+  ['Issue Type', r=>r.issueType],
+  ['Fresh (Cr)', r=>r.freshCr],
+  ['OFS (Cr)', r=>r.ofsCr],
+  ['Total Issue (Cr)', r=>r.issueSizeCr],
+  ['Market Cap (Cr)', r=>r.marketCapCr],
+  ['Rev Growth %', r=>fvalOf(r,'rev_growth_pct')],
+  ['EBITDA Margin %', r=>fvalOf(r,'ebitda_margin_pct')],
+  ['PAT Growth %', r=>fvalOf(r,'pat_growth_pct')],
+  ['PAT Margin %', r=>fvalOf(r,'pat_margin_pct')],
+  ['ROE %', r=>fvalOf(r,'roe_pct')],
+  ['ROCE %', r=>fvalOf(r,'roce_pct')],
+  ['Debt/Equity', r=>fvalOf(r,'debt_equity')],
+  ['Open', r=>r.issueOpen],
+  ['Close', r=>r.issueClose],
+  ['Listing', r=>r.listingDate],
+  ['Subscription', r=>r.subscriptionX],
+  ['Score', r=>{ const s=rscore(r); return s&&s.total!=null?s.total:''; }],
+  ['Recommendation', r=>{ const s=rscore(r); return recoLabel(s?s.bucket:'INSUFFICIENT'); }],
+  ['Data Status', r=>arDataStatusText(r)],
+  ['Source', r=>{ const s=r.sources||{}; return s.drhp_pdf_url||s.sebi_url||''; }],
+];
+function arDataStatusText(r){
+  if(r.bucket && r.bucket!=='INSUFFICIENT') return 'Complete';
+  if(r.origin==='nse') return 'Market data';
+  return 'Awaiting financials';
 }
 function arExportCsv(){
   const recs = arFiltered();
   const q = v => { const s=(v==null?'':String(v)); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
-  const lines = [AR_COLS.map(c=>q(c.h)).join(',')];
-  recs.forEach(r=> lines.push(AR_COLS.map(c=>q(c.get(r))).join(',')));
+  const lines = [AR_CSV.map(c=>q(c[0])).join(',')];
+  recs.forEach(r=> lines.push(AR_CSV.map(c=>q(c[1](r))).join(',')));
   const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1968,7 +1947,7 @@ function rescoreAll(){
   const tag = document.getElementById('wm-model-tag');
   if(tag) tag.textContent = `Scoring model v${SCORING.active.version}`;
 }
-function rerenderAll(){ rescoreAll(); renderWeekly(); renderPipeline(); renderArchive(); }
+function rerenderAll(){ rescoreAll(); renderWeekly(); renderArchive(); }
 
 /* score + recommendation presentation (reuses the existing tag colours) */
 const RECO_CLS = {'DIG DEEPER':'dig', 'MONITOR':'mon', 'WATCH':'watch', 'INSUFFICIENT':'insuf'};
