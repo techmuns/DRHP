@@ -31,6 +31,14 @@ def test_find_previous_picks_most_recent_earlier(tmp_path):
     assert find_previous_snapshot_id(str(tmp_path), "2026-06-01") is None
 
 
+def test_find_previous_is_weekly_even_with_daily_snapshots(tmp_path):
+    # Daily snapshots for eleven days. Running on the 30th, "vs last week" must compare
+    # against the 23rd (7 days back) -- NOT the 29th (yesterday).
+    for day in range(20, 31):  # 2026-06-20 .. 2026-06-30
+        save_snapshot(make_dashboard(f"2026-06-{day:02d}"), str(tmp_path))
+    assert find_previous_snapshot_id(str(tmp_path), "2026-06-30") == "2026-06-23"
+
+
 def test_compute_deltas_strings():
     cur = make_dashboard("2026-06-30", drhp=5, ipo=2, dig=4).summary
     prev = make_dashboard("2026-06-23", drhp=3, ipo=2, dig=6).summary.model_dump()
