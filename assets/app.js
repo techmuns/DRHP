@@ -27,6 +27,15 @@ const I = {
   check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>',
   xmark:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   rocket:'<path d="M12 3c3 1.5 5 5 5 9l-2 3H9l-2-3c0-4 2-7.5 5-9z"/><path d="M9 15l-2 4 3-1M15 15l2 4-3-1"/><circle cx="12" cy="9.5" r="1.4"/>',
+  shield:'<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  flag:'<path d="M5 21V4"/><path d="M5 4h11l-1.6 3L16 10H5"/>',
+  activity:'<path d="M3 12h4l2 6 4-14 2 8h6"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+  calendar:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  archive:'<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4"/>',
+  layers:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  download:'<path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M5 21h14"/>',
+  printer:'<path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M8 17h8v4H8z"/>',
 };
 /* sector → tile icon (falls back to a generic building) */
 const SECTOR_ICON = {
@@ -1540,6 +1549,35 @@ const AR_LIFE = [
 ];
 const FUNNEL_BY_KEY = Object.fromEntries(FUNNELS.map(f=>[f.key, f]));
 
+/* icon language: lifecycle groups read as prepare → active → done; each stage
+   carries a scannable glyph. All from the existing outline icon set. */
+const LIFE_ICON = {All:'layers', pre:'doc', live:'rocket', done:'archive'};
+const STG_ICON = {
+  'DRHP Filed':'doc', 'Updates & Corrigenda':'spark', 'SEBI Review':'shield', 'IPO Ready':'flag',
+  'Open':'activity', 'Closed':'lock', 'Allotment':'people', 'Listing Scheduled':'calendar',
+  'Listed':'trend', 'Archived':'archive',
+};
+/* stage → a per-stage slug so each chip can carry its own subtle tint while its
+   family (funnel) supplies a shared left accent. Live-IPO "Open" gets a pulse. */
+const STG_SLUG = {
+  'DRHP Filed':'filed', 'Updates & Corrigenda':'upd', 'SEBI Review':'review', 'IPO Ready':'ready',
+  'Open':'open', 'Closed':'closed', 'Allotment':'allot', 'Listing Scheduled':'sched',
+  'Listed':'listed', 'Archived':'arch',
+};
+/* Full-Tracker Current-Stage chip: family tint + per-stage tint + stage icon */
+function arStageChip(s){
+  if(!s) return DASH;
+  const fam = funnelOf(s).key, slug = STG_SLUG[s] || 'filed';
+  const live = s==='Open' ? '<span class="stg-live" aria-hidden="true"></span>' : '';
+  return `<span class="stg-chip fam-${fam} stg-${slug}">${live}${icon(STG_ICON[s]||'doc',13)}<span class="stg-tx">${esc(s)}</span></span>`;
+}
+/* Full-Tracker Lifecycle cell: deliberately quieter than the stage chip so the
+   two columns don't compete — a family dot + plain label */
+function arLifecycleCell(r){
+  const k = funnelOf(mapStage(r)).key;
+  return `<span class="ar-life-mini fam-${k}"><span class="ar-life-dot" aria-hidden="true"></span>${esc(FUNNEL_TAG[k])}</span>`;
+}
+
 /* every filter EXCEPT lifecycle/stage — the base the facet counts are drawn from */
 function arBase(){
   const q = arFilter.q.toLowerCase();
@@ -1563,6 +1601,8 @@ function arFiltered(){
 function renderArchive(){
   const host = document.getElementById('ar-controls');
   if(!host.dataset.wired){ buildArControls(host); host.dataset.wired='1'; }
+  const actions = document.getElementById('ar-actions');
+  if(actions && !actions.dataset.wired){ buildArActions(actions); actions.dataset.wired='1'; }
   renderArLifecycle();
   renderArStages();
   renderArRows();
@@ -1575,7 +1615,13 @@ function renderArLifecycle(){
   const count = key => key==='All' ? base.length : base.filter(r=>funnelOf(mapStage(r)).key===key).length;
   const btns = AR_LIFE.map(g=>{
     const on = arFilter.life===g.key;
-    return `<button class="ar-seg-btn${on?' on':''}" data-life="${g.key}">${esc(g.label)}<span class="ar-seg-n">${count(g.key)}</span></button>`;
+    const fam = g.key==='All' ? 'all' : g.key;
+    const live = g.key==='live' ? '<span class="stg-live" aria-hidden="true"></span>' : '';
+    return `<button class="ar-seg-btn fam-${fam}${on?' on':''}" data-life="${g.key}" aria-pressed="${on}">
+      <span class="ar-seg-ic">${icon(LIFE_ICON[g.key]||'layers',15)}${live}</span>
+      <span class="ar-seg-tx">${esc(g.label)}</span>
+      <span class="ar-seg-n">${count(g.key)}</span>
+    </button>`;
   }).join('');
   host.innerHTML = `<span class="ar-life-lab">Lifecycle</span><div class="ar-seg" role="tablist">${btns}</div>`;
   host.querySelectorAll('.ar-seg-btn').forEach(b=>b.addEventListener('click',()=>{
@@ -1589,14 +1635,19 @@ function renderArLifecycle(){
 function renderArStages(){
   const host = document.getElementById('ar-stages'); if(!host) return;
   if(arFilter.life==='All'){                     // no group selected → show the All Stages chip only
-    host.innerHTML = `<span class="ar-stage-lab">Stage</span><span class="ar-chip static on">All Stages</span>`;
+    host.innerHTML = `<span class="ar-stage-lab">Stage</span><span class="ar-chip static on fam-all">${icon('layers',12)}<span class="ar-chip-tx">All Stages</span></span>`;
     return;
   }
-  const group = arBase().filter(r=>funnelOf(mapStage(r)).key===arFilter.life);
+  const fam = arFilter.life;
+  const group = arBase().filter(r=>funnelOf(mapStage(r)).key===fam);
   const stageCount = s => group.filter(r=>mapStage(r)===s).length;
-  const flow = (FUNNEL_BY_KEY[arFilter.life]||{flow:[]}).flow;
-  const chips = [`<button class="ar-chip${arFilter.stage==='All'?' on':''}" data-stage="All">All Stages<span class="ar-chip-n">${group.length}</span></button>`]
-    .concat(flow.map(s=>`<button class="ar-chip${arFilter.stage===s?' on':''}" data-stage="${esc(s)}">${esc(s)}<span class="ar-chip-n">${stageCount(s)}</span></button>`))
+  const flow = (FUNNEL_BY_KEY[fam]||{flow:[]}).flow;
+  const chip = (stg,label,n,icoKey,live)=>{
+    const on = arFilter.stage===stg;
+    return `<button class="ar-chip fam-${fam}${on?' on':''}" data-stage="${esc(stg)}">${live?'<span class="stg-live" aria-hidden="true"></span>':''}${icon(icoKey,12)}<span class="ar-chip-tx">${esc(label)}</span><span class="ar-chip-n">${n}</span></button>`;
+  };
+  const chips = [chip('All','All Stages',group.length,'layers',false)]
+    .concat(flow.map(s=>chip(s,s,stageCount(s),STG_ICON[s]||'doc', s==='Open')))
     .join('');
   host.innerHTML = `<span class="ar-stage-lab">Stage</span>${chips}`;
   host.querySelectorAll('.ar-chip[data-stage]').forEach(b=>b.addEventListener('click',()=>{
@@ -1623,9 +1674,7 @@ function buildArControls(host){
     <label class="ctl-date"><span>From</span><input type="date" id="ar-from"></label>
     <label class="ctl-date"><span>To</span><input type="date" id="ar-to"></label>
     <label class="ctl-toggle"><input type="checkbox" id="ar-metrics"> Review Metrics</label>
-    <button class="fchip" id="ar-csv">Export CSV</button>
-    <button class="fchip" id="ar-print">Print / PDF</button>
-    <button class="fchip" id="ar-reset">Reset</button>`;
+    <button class="fchip ctl-reset" id="ar-reset">Reset</button>`;
   const refresh = ()=>{ renderArLifecycle(); renderArStages(); renderArRows(); };   // counts follow the other filters
   host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
     arFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); refresh();
@@ -1634,13 +1683,21 @@ function buildArControls(host){
   const from = host.querySelector('#ar-from'); from.addEventListener('change',()=>{ arFilter.from=from.value; refresh(); });
   const to = host.querySelector('#ar-to'); to.addEventListener('change',()=>{ arFilter.to=to.value; refresh(); });
   const mt = host.querySelector('#ar-metrics'); mt.addEventListener('change',()=>{ arFilter.metrics=mt.checked; renderArRows(); });
-  host.querySelector('#ar-csv').addEventListener('click', arExportCsv);
-  host.querySelector('#ar-print').addEventListener('click', ()=>window.print());
   host.querySelector('#ar-reset').addEventListener('click',()=>{
     arFilter={q:'',life:'All',stage:'All',board:'All',sector:'All',ftype:'All',from:'',to:'',metrics:arFilter.metrics};
     host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
     q.value=''; from.value=''; to.value=''; refresh();
   });
+}
+
+/* table-actions cluster — utility actions that sit with the tracker card,
+   not inside the filter flow. Export CSV is primary, Print / PDF secondary. */
+function buildArActions(host){
+  host.innerHTML = `
+    <button class="ar-act ar-act-primary" id="ar-csv" title="Download the current view as CSV">${icon('download',15)}<span>Export CSV</span></button>
+    <button class="ar-act" id="ar-print" title="Print or save the tracker as a PDF">${icon('printer',15)}<span>Print / PDF</span></button>`;
+  host.querySelector('#ar-csv').addEventListener('click', arExportCsv);
+  host.querySelector('#ar-print').addEventListener('click', ()=>window.print());
 }
 
 /* visible columns — Review Metrics inserts the four key ratios before Score */
@@ -1653,8 +1710,8 @@ function arColumns(){
   ];
   return [
     {h:'Company',        cell:r=>arCompanyCell(r)},
-    {h:'Lifecycle',      cell:r=>funnelTag(funnelOf(mapStage(r)).key)},
-    {h:'Current Stage',  cell:r=>dashStageChip(mapStage(r))},
+    {h:'Lifecycle',      cell:r=>arLifecycleCell(r)},
+    {h:'Current Stage',  cell:r=>arStageChip(mapStage(r))},
     {h:'Board',          cell:r=>boardChip(r.board)||DASH},
     {h:'Sector',         cls:'subtle', cell:r=>r.sector?esc(r.sector):DASH},
     {h:'Filing Type',    cls:'subtle', cell:r=>r.filingType?esc(r.filingType):DASH},
@@ -1669,7 +1726,9 @@ function arColumns(){
     {h:'Source',         cell:r=>srcRec(r)},
   ];
 }
-function arCompanyCell(r){ return `<span class="ar-caret" aria-hidden="true">▾</span>${pipelineName(r)}`; }
+function arCompanyCell(r){
+  return `<span class="ar-caret" aria-hidden="true"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>${pipelineName(r)}`;
+}
 function arMoveCell(r){
   const mv = movementThisWeek(r), lm = lastMovement(r);
   if(mv) return `<span class="pl-move">${esc(mv)}</span>${lm?` <span class="subtle tiny">${dfmt(lm)}</span>`:''}`;
@@ -1714,6 +1773,8 @@ function renderArRows(){
   const scope = [];
   if(arFilter.life!=='All')  scope.push(esc((AR_LIFE.find(g=>g.key===arFilter.life)||{}).label));
   if(arFilter.stage!=='All') scope.push(esc(arFilter.stage));
+  const cnt = document.getElementById('ar-count');
+  if(cnt) cnt.innerHTML = `<b>${recs.length}</b> of ${MARKET.length} records${scope.length?` · ${scope.join(' › ')}`:''}`;
   document.getElementById('ar-foot').innerHTML =
     `<b>${recs.length}</b> of ${MARKET.length} records${scope.length?` · ${scope.join(' › ')}`:''} · SEBI public filings &amp; NSE · one shared lifecycle stage across the app. “—” = not disclosed. Click a row for full detail.`;
 }

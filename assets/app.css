@@ -917,42 +917,135 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .ctl-date { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--ink-soft); }
 .ctl-date input { font-family: var(--font); font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; background: var(--bg); color: var(--ink); }
 
-/* ---- Full Tracker: lifecycle segmented selector + sub-stage chips ---- */
-.ar-life-wrap, .ar-stage-wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.ar-life-wrap { margin-bottom: 10px; }
-.ar-stage-wrap { margin-bottom: 12px; }
+/* ============================================================================
+   Full Tracker — layered selection hierarchy (all within the existing palette)
+   1) Lifecycle = a bold top-level SEGMENTED CONTROL (rounded-rect, family-tinted)
+   2) Stage     = small, light, subordinate PILLS
+   3) Table     = quiet lifecycle dot + a strong, icon-led current-stage chip
+   ========================================================================== */
+.ar-life-wrap, .ar-stage-wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.ar-life-wrap { margin-bottom: 12px; }
+.ar-stage-wrap { margin-bottom: 14px; gap: 8px; }
 .ar-stage-wrap:empty { display: none; }
-.ar-life-lab, .ar-stage-lab { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
-.ar-seg { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 4px; border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,253,248,0.94), rgba(248,251,246,0.9)); border: 1px solid var(--border);
-  box-shadow: inset 0 1px 0 rgba(232,201,94,0.10); }
-.ar-seg-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 15px; border: 0; border-radius: 999px;
-  background: transparent; color: var(--ink-soft); font-family: var(--font); font-size: 12.5px; font-weight: 600;
-  cursor: pointer; transition: color .15s, background .15s; }
-.ar-seg-btn:hover { color: var(--teal); background: rgba(8,122,90,0.06); }
-.ar-seg-btn.on { background: linear-gradient(135deg, #0C6B5B, #0A7B68); color: #fff; box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(232,201,94,0.20); }
-.ar-seg-n { font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; opacity: 0.7; }
-.ar-seg-btn.on .ar-seg-n { opacity: 0.92; }
+.ar-life-lab, .ar-stage-lab { font-size: 9.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-faint); flex: 0 0 auto; }
+.ar-stage-lab { color: var(--ink-faint); opacity: 0.85; }
 
-.ar-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px;
-  background: var(--bg); border: 1px solid rgba(14,122,95,0.30); color: var(--teal);
-  font-family: var(--font); font-size: 11.5px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.ar-chip:hover { background: #F1F8F4; border-color: var(--emerald); }
-.ar-chip.on { background: var(--emerald-soft); border-color: var(--emerald); color: var(--emerald); box-shadow: inset 0 0 0 1px var(--emerald); }
+/* 1) Lifecycle — segmented control: larger pills, generous spacing, family fill */
+.ar-seg { display: inline-flex; flex-wrap: wrap; gap: 6px; padding: 5px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,253,248,0.96), rgba(247,250,245,0.92)); border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(232,201,94,0.12); }
+.ar-seg-btn { display: inline-flex; align-items: center; gap: 9px; padding: 9px 17px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--ink-soft); font-family: var(--font); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.01em; cursor: pointer; transition: color .15s, background .15s, box-shadow .15s; }
+.ar-seg-ic { display: inline-flex; position: relative; }
+.ar-seg-ic svg { width: 15px; height: 15px; }
+.ar-seg-tx { line-height: 1; }
+.ar-seg-n { min-width: 18px; text-align: center; padding: 1px 6px; border-radius: 999px; font-size: 10.5px; font-weight: 800;
+  font-variant-numeric: tabular-nums; color: var(--ink-faint); background: rgba(6,43,46,0.05); }
+.ar-seg-btn:hover { background: rgba(8,122,90,0.06); }
+.ar-seg-btn.on { color: #fff; box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.16); }
+.ar-seg-btn.on .ar-seg-n { color: #fff; background: rgba(255,255,255,0.22); }
+.ar-seg-btn.on .ar-seg-ic { color: #fff; }
+/* family icon tint (inactive) + family fill (active) — muted slate → active emerald → settled grey */
+.ar-seg-btn.fam-all  .ar-seg-ic { color: var(--teal); }
+.ar-seg-btn.fam-pre  .ar-seg-ic { color: var(--slate); }
+.ar-seg-btn.fam-live .ar-seg-ic { color: var(--emerald); }
+.ar-seg-btn.fam-done .ar-seg-ic { color: var(--grey); }
+.ar-seg-btn.fam-all.on  { background: linear-gradient(135deg, #0C6B5B, #0A7B68); }
+.ar-seg-btn.fam-pre.on  { background: linear-gradient(135deg, #5B6B87, #46536D); }
+.ar-seg-btn.fam-live.on { background: linear-gradient(135deg, #0E7A5F, #0F8F70); }
+.ar-seg-btn.fam-done.on { background: linear-gradient(135deg, #767E8D, #5B6270); }
+
+/* 2) Stage — small light pills, clearly subordinate; tinted by the active family */
+.ar-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--border); color: var(--ink-soft);
+  font-family: var(--font); font-size: 11px; font-weight: 600; cursor: pointer; transition: all .14s; }
+.ar-chip svg { width: 12px; height: 12px; opacity: 0.9; }
+.ar-chip-tx { line-height: 1; }
+.ar-chip-n { font-size: 10px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink-faint); }
+.ar-chip:hover { background: #F4FAF7; }
 .ar-chip.static { cursor: default; }
-.ar-chip.static:hover { background: var(--bg); border-color: rgba(14,122,95,0.30); }
-.ar-chip-n { font-size: 10.5px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink-faint); }
-.ar-chip.on .ar-chip-n { color: var(--emerald); }
+.ar-chip.fam-pre  { color: var(--slate); }
+.ar-chip.fam-live { color: var(--emerald); }
+.ar-chip.fam-done { color: var(--grey); }
+.ar-chip.fam-all  { color: var(--teal); }
+.ar-chip.fam-pre:hover  { border-color: rgba(81,96,122,0.5); }
+.ar-chip.fam-live:hover { border-color: rgba(14,122,95,0.5); }
+.ar-chip.fam-done:hover { border-color: rgba(138,147,161,0.55); }
+.ar-chip.on { box-shadow: inset 0 0 0 1px currentColor; font-weight: 700; }
+.ar-chip.fam-pre.on  { background: var(--slate-soft);   border-color: var(--slate);   color: var(--slate); }
+.ar-chip.fam-live.on { background: var(--emerald-soft); border-color: var(--emerald); color: var(--emerald); }
+.ar-chip.fam-done.on { background: var(--grey-soft);    border-color: var(--grey);    color: var(--grey); }
+.ar-chip.fam-all.on  { background: var(--emerald-soft); border-color: var(--emerald); color: var(--emerald); }
+.ar-chip.on .ar-chip-n { color: currentColor; opacity: 0.75; }
 
-/* ---- Full Tracker: sticky header, compact rows, click-to-expand detail ---- */
+/* small live pulse used on "active" markers (Live IPO pill · Open stage) */
+.stg-live { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: 0 0 auto; animation: stgPulse 1.6s ease-in-out infinite; }
+.ar-seg-ic .stg-live { position: absolute; top: -2px; right: -3px; width: 5px; height: 5px; }
+@keyframes stgPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.65); } }
+@media (prefers-reduced-motion: reduce) { .stg-live { animation: none; } }
+
+/* ---- Full Tracker: table-actions cluster (utility actions, by the card) ---- */
+.ar-table-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  margin: -3px 0 13px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
+.ar-th-left { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.ar-th-title { font-family: var(--serif); font-size: 16.5px; font-weight: 600; color: var(--head-green); }
+.ar-th-sub { font-size: 11.5px; color: var(--ink-faint); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ar-th-sub b { color: var(--navy); font-weight: 700; }
+.ar-actions { display: flex; align-items: center; gap: 8px; }
+.ar-act { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--ink-soft);
+  font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-xs);
+  transition: color .14s, background .14s, border-color .14s, box-shadow .12s, transform .06s; }
+.ar-act svg { width: 15px; height: 15px; }
+.ar-act:hover { border-color: var(--emerald); color: var(--teal); background: #F4FAF7; }
+.ar-act:active { transform: translateY(1px); box-shadow: none; }
+.ar-act-primary { border-color: rgba(14,122,95,0.45); color: var(--emerald); background: var(--emerald-soft); }
+.ar-act-primary:hover { color: #fff; background: linear-gradient(135deg, #0C6B5B, #0A7B68); border-color: #0A7B68; box-shadow: var(--shadow-sm); }
+
+/* ---- Full Tracker: table — quiet lifecycle cell, strong current-stage chip ---- */
 .ar-wrap { overflow-x: auto; }
 #ar-table { font-size: 12px; }
 #ar-table th, #ar-table td { white-space: nowrap; }
-#ar-table tbody td { padding: 6px 10px; }
+#ar-table tbody td { padding: 8px 11px; }
+#ar-table thead th:first-child, #ar-table tbody td:first-child { padding-left: 16px; }
+#ar-table tbody td:nth-child(-n+4), #ar-table thead th:nth-child(-n+4) { padding-right: 15px; }
+#ar-table tbody td:first-child { min-width: 188px; }
 #ar-table tbody tr.ar-row { cursor: pointer; }
+#ar-table tbody tr.ar-row:hover > td { background: #F4F8F7; }
 #ar-table tbody tr.ar-row.open > td { background: var(--emerald-soft); }
-.ar-caret { display: inline-block; margin-right: 7px; font-size: 9px; color: var(--ink-faint); transition: transform .15s; }
-.ar-row.open .ar-caret { transform: rotate(180deg); color: var(--emerald); }
+.ar-caret { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: 8px;
+  border-radius: 6px; color: var(--ink-faint); background: var(--grey-soft); vertical-align: middle;
+  transition: transform .18s, background .14s, color .14s; }
+.ar-row:hover .ar-caret { background: #E1EFE8; color: var(--emerald); }
+.ar-row.open .ar-caret { transform: rotate(180deg); background: var(--emerald-soft); color: var(--emerald); }
+
+/* lifecycle cell — deliberately quiet: family dot + coloured label */
+.ar-life-mini { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.ar-life-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+.ar-life-mini.fam-pre  { color: var(--slate);   } .ar-life-mini.fam-pre  .ar-life-dot { background: var(--slate); }
+.ar-life-mini.fam-live { color: var(--emerald); } .ar-life-mini.fam-live .ar-life-dot { background: var(--emerald); }
+.ar-life-mini.fam-done { color: var(--grey);    } .ar-life-mini.fam-done .ar-life-dot { background: var(--grey); }
+
+/* current-stage chip — the stronger signal: family left-accent + per-stage tint + icon */
+.stg-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 9px; border-radius: 7px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; line-height: 1.5; }
+.stg-chip svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.stg-chip.fam-pre  { box-shadow: inset 3px 0 0 var(--slate); }
+.stg-chip.fam-live { box-shadow: inset 3px 0 0 var(--emerald); }
+.stg-chip.fam-done { box-shadow: inset 3px 0 0 var(--grey); }
+.stg-chip.stg-filed  { background: #EEF2F7; color: #51607A; }
+.stg-chip.stg-upd    { background: #F3EFE1; color: #8A6D2E; }
+.stg-chip.stg-review { background: #E7EEF7; color: #2E4F79; }
+.stg-chip.stg-ready  { background: #E7F0EA; color: #2C6B58; }
+.stg-chip.stg-open   { background: #DCEFE4; color: #0C7355; }
+.stg-chip.stg-closed { background: #E9EDF1; color: #55677A; }
+.stg-chip.stg-allot  { background: #F3EFE1; color: #8A6D2E; }
+.stg-chip.stg-sched  { background: #E7F0EA; color: #2C6B58; }
+.stg-chip.stg-listed { background: #E2EFE9; color: #0B6F63; }
+.stg-chip.stg-arch   { background: #F0F2F5; color: #8A93A1; }
+
+/* ---- Full Tracker: click-to-expand detail ---- */
 .ar-detail > td { padding: 0 !important; background: var(--canvas); white-space: normal; border-bottom: 1px solid var(--border); }
 /* keep the expanded detail within the visible viewport even when the table
    scrolls horizontally, so all three detail columns stay readable */
