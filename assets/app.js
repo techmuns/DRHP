@@ -1495,18 +1495,9 @@ function movementThisWeek(r){
   }
   return null;
 }
-function sebiStatus(r){
-  if(mapStage(r)!=='SEBI Review') return null;
-  return r.stage==='Approved' ? 'Observations Issued' : 'Under Review';
-}
-function prevStage(stage){
-  if(stage==='DRHP Filed' || stage==='Archived') return '—';
-  const i = ALL_STAGES.indexOf(stage);
-  return i>0 ? ALL_STAGES[i-1] : '—';
-}
 
 /* ---------------- Tab 2: Pipeline (3 funnels + table) ---------------- */
-let plFilter = {board:'All', sector:'All', q:'', metrics:false, dashStage:null};
+let plFilter = {board:'All', sector:'All', q:'', dashStage:null};
 function renderPipeline(){
   const host = document.getElementById('pl-controls');
   if(!host.dataset.wired){ buildPlControls(host); host.dataset.wired='1'; }
@@ -1533,15 +1524,13 @@ function buildPlControls(host){
     ${opt('board','Board',boards)}
     ${opt('sector','Sector',sectors)}
     <label class="ctl-search"><input type="search" id="pl-q" placeholder="Search company…"></label>
-    <label class="ctl-toggle"><input type="checkbox" id="pl-metrics"> Review Metrics</label>
     <button class="fchip hide" id="pl-reset">Reset</button>`;
   host.querySelectorAll('select[data-f]').forEach(s=>s.addEventListener('change',()=>{
     plFilter[s.dataset.f]=s.value; s.closest('.mh-pill').classList.toggle('on', s.value!=='All'); renderPipeline();
   }));
   const q = host.querySelector('#pl-q'); q.addEventListener('input',()=>{ plFilter.q=q.value; renderPipeline(); });
-  const mt = host.querySelector('#pl-metrics'); mt.addEventListener('change',()=>{ plFilter.metrics=mt.checked; renderPlRows(); });
   host.querySelector('#pl-reset').addEventListener('click',()=>{
-    plFilter={board:'All',sector:'All',q:'',metrics:plFilter.metrics,dashStage:null};
+    plFilter={board:'All',sector:'All',q:'',dashStage:null};
     host.querySelectorAll('select[data-f]').forEach(s=>{ s.value='All'; s.closest('.mh-pill').classList.remove('on'); });
     q.value=''; renderPipeline();
   });
@@ -1579,29 +1568,27 @@ function renderPlRows(){
   const base = plBase();
   const rows = base.filter(r => !plFilter.dashStage || mapStage(r)===plFilter.dashStage)
     .sort((a,b)=> String(lastMovement(b)||'').localeCompare(String(lastMovement(a)||'')));
-  const m = plFilter.metrics;
   const head = `<thead><tr>
-    <th>Company</th><th>Funnel</th><th>Current Stage</th><th>Previous Stage</th><th>Last Movement</th>
-    <th>Movement This Week</th><th>Filing Type</th><th>SEBI Status</th><th>IPO Open</th><th>IPO Close</th><th>Listing Date</th><th>Source</th>
-    ${m?'<th class="num">Score</th><th>Recommendation</th>':''}
+    <th class="sn">#</th>
+    <th>Company</th><th>Funnel</th><th>Current Stage</th><th>Last Movement</th>
+    <th>Movement This Week</th><th>IPO Open</th><th>IPO Close</th><th>Listing Date</th><th>Source</th>
+    <th class="num">Score</th><th>Recommendation</th>
   </tr></thead>`;
-  const body = rows.length ? rows.map(r=>{
-    const ds = mapStage(r), mv = movementThisWeek(r), ss = sebiStatus(r), lm = lastMovement(r);
+  const body = rows.length ? rows.map((r,i)=>{
+    const ds = mapStage(r), mv = movementThisWeek(r), lm = lastMovement(r);
     return `<tr>
+    <td class="sn">${i+1}</td>
     <td class="company">${pipelineName(r)}</td>
     <td>${funnelTag(funnelOf(ds).key)}</td>
     <td>${dashStageChip(ds)}</td>
-    <td class="subtle">${esc(prevStage(ds))}</td>
     <td class="subtle">${lm?dfmt(lm):DASH}</td>
     <td>${mv?mvChip(mv, ds):DASH}</td>
-    <td class="subtle">${r.filingType?esc(r.filingType):DASH}</td>
-    <td class="subtle">${ss?esc(ss):DASH}</td>
     <td class="subtle">${r.issueOpen?dfmt(r.issueOpen):DASH}</td>
     <td class="subtle">${r.issueClose?dfmt(r.issueClose):DASH}</td>
     <td class="subtle">${r.listingDate?dfmt(r.listingDate):DASH}</td>
     <td>${srcRec(r)}</td>
-    ${m?`<td class="num">${scoreLink(rscore(r), 'r', MARKET.indexOf(r))}</td><td>${recoTag(rscore(r))}</td>`:''}
-  </tr>`;}).join('') : `<tr><td colspan="${m?14:12}" class="subtle" style="padding:16px">No companies in this view.</td></tr>`;
+    <td class="num">${scoreLink(rscore(r), 'r', MARKET.indexOf(r))}</td><td>${recoTag(rscore(r))}</td>
+  </tr>`;}).join('') : `<tr><td colspan="12" class="subtle" style="padding:16px">No companies in this view.</td></tr>`;
   const plt = document.getElementById('pl-table');
   plt.innerHTML = head + `<tbody>${body}</tbody>`;
   plt.querySelectorAll('.score-link').forEach(b=>b.addEventListener('click', e=>{

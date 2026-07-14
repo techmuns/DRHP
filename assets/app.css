@@ -877,12 +877,19 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .fn-tag.fn-live { background: var(--emerald-soft); color: var(--emerald); }
 .fn-tag.fn-done { background: var(--grey-soft);    color: var(--grey); }
 
+/* ---- Pipeline table: one simple list — serial column, clear zebra, compact rows ---- */
+#pl-table { font-size: 12px; }
+#pl-table thead th { padding: 7px 9px; white-space: normal; line-height: 1.15; }   /* wrap headers → narrower columns */
+#pl-table tbody td { padding: 6px 8px; white-space: nowrap; }                      /* keep each row to a single line */
+#pl-table td.company { white-space: normal; max-width: 140px; }                    /* long names wrap in a narrow column */
+#pl-table th.sn, #pl-table td.sn { width: 32px; text-align: center; padding-left: 6px; padding-right: 6px; color: var(--ink-faint); font-weight: 700; font-variant-numeric: tabular-nums; }
+#pl-table tbody tr:nth-child(even) { background: #ECF4EF; }   /* clearly alternating mint tint */
+#pl-table tbody tr:hover { background: #DFEEE7; }             /* wins over zebra (same specificity, later rule) */
+
 /* ---- Pipeline / Archive control ribbons (reuse .mh-pill + .fchip) ---- */
 .pl-controls, .ar-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
 .ctl-search input { font-family: var(--font); font-size: 12.5px; border: 1px solid var(--border); border-radius: 8px; padding: 7px 11px; background: var(--bg); color: var(--ink); min-width: 172px; }
 .ctl-search input:focus { outline: none; border-color: var(--emerald); }
-.ctl-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; background: var(--bg); cursor: pointer; }
-.ctl-toggle input { accent-color: var(--emerald); }
 .ctl-date { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--ink-soft); }
 .ctl-date input { font-family: var(--font); font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; background: var(--bg); color: var(--ink); }
 
