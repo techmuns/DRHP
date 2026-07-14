@@ -946,15 +946,18 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .ar-seg-btn.on { color: #fff; box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.16); }
 .ar-seg-btn.on .ar-seg-n { color: #fff; background: rgba(255,255,255,0.22); }
 .ar-seg-btn.on .ar-seg-ic { color: #fff; }
-/* family icon tint (inactive) + family fill (active) — muted slate → active emerald → settled grey */
+/* family colour PSYCHOLOGY — all within deep-green + ivory + muted accents:
+   Pre-IPO  = calm muted moss-green / parchment (preparation, document)
+   Live IPO = vivid emerald (active, market in motion)
+   Archived = grounded graphite (mature, settled) */
 .ar-seg-btn.fam-all  .ar-seg-ic { color: var(--teal); }
-.ar-seg-btn.fam-pre  .ar-seg-ic { color: var(--slate); }
+.ar-seg-btn.fam-pre  .ar-seg-ic { color: #66765C; }
 .ar-seg-btn.fam-live .ar-seg-ic { color: var(--emerald); }
-.ar-seg-btn.fam-done .ar-seg-ic { color: var(--grey); }
+.ar-seg-btn.fam-done .ar-seg-ic { color: #7A828E; }
 .ar-seg-btn.fam-all.on  { background: linear-gradient(135deg, #0C6B5B, #0A7B68); }
-.ar-seg-btn.fam-pre.on  { background: linear-gradient(135deg, #5B6B87, #46536D); }
+.ar-seg-btn.fam-pre.on  { background: linear-gradient(135deg, #6D7C5B, #545F45); }
 .ar-seg-btn.fam-live.on { background: linear-gradient(135deg, #0E7A5F, #0F8F70); }
-.ar-seg-btn.fam-done.on { background: linear-gradient(135deg, #767E8D, #5B6270); }
+.ar-seg-btn.fam-done.on { background: linear-gradient(135deg, #6F7886, #565E6B); }
 
 /* 2) Stage — small light pills, clearly subordinate; tinted by the active family */
 .ar-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px;
@@ -965,17 +968,17 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 .ar-chip-n { font-size: 10px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink-faint); }
 .ar-chip:hover { background: #F4FAF7; }
 .ar-chip.static { cursor: default; }
-.ar-chip.fam-pre  { color: var(--slate); }
+.ar-chip.fam-pre  { color: #5E6B50; }
 .ar-chip.fam-live { color: var(--emerald); }
-.ar-chip.fam-done { color: var(--grey); }
+.ar-chip.fam-done { color: #737B88; }
 .ar-chip.fam-all  { color: var(--teal); }
-.ar-chip.fam-pre:hover  { border-color: rgba(81,96,122,0.5); }
+.ar-chip.fam-pre:hover  { border-color: rgba(109,124,91,0.5); }
 .ar-chip.fam-live:hover { border-color: rgba(14,122,95,0.5); }
-.ar-chip.fam-done:hover { border-color: rgba(138,147,161,0.55); }
+.ar-chip.fam-done:hover { border-color: rgba(122,130,142,0.55); }
 .ar-chip.on { box-shadow: inset 0 0 0 1px currentColor; font-weight: 700; }
-.ar-chip.fam-pre.on  { background: var(--slate-soft);   border-color: var(--slate);   color: var(--slate); }
+.ar-chip.fam-pre.on  { background: #EDF1E6; border-color: #77875F; color: #566249; }
 .ar-chip.fam-live.on { background: var(--emerald-soft); border-color: var(--emerald); color: var(--emerald); }
-.ar-chip.fam-done.on { background: var(--grey-soft);    border-color: var(--grey);    color: var(--grey); }
+.ar-chip.fam-done.on { background: #EDEFF3; border-color: #8A93A1; color: #6B7280; }
 .ar-chip.fam-all.on  { background: var(--emerald-soft); border-color: var(--emerald); color: var(--emerald); }
 .ar-chip.on .ar-chip-n { color: currentColor; opacity: 0.75; }
 
@@ -987,13 +990,14 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 
 /* ---- Full Tracker: table-actions cluster (utility actions, by the card) ---- */
 .ar-table-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
-  margin: -3px 0 13px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
+  margin: -4px -2px 14px; padding: 2px 2px 13px; border-bottom: 1px solid var(--border); }
 .ar-th-left { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
-.ar-th-title { font-family: var(--serif); font-size: 16.5px; font-weight: 600; color: var(--head-green); }
+.ar-th-title { position: relative; font-family: var(--serif); font-size: 16.5px; font-weight: 600; color: var(--head-green); padding-bottom: 4px; }
+.ar-th-title::after { content: ""; position: absolute; left: 0; bottom: 0; width: 24px; height: 2px; border-radius: 2px; background: var(--accent-butter); }
 .ar-th-sub { font-size: 11.5px; color: var(--ink-faint); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ar-th-sub b { color: var(--navy); font-weight: 700; }
 .ar-actions { display: flex; align-items: center; gap: 8px; }
-.ar-act { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 8px;
+.ar-act { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px;
   border: 1px solid var(--border); background: var(--bg); color: var(--ink-soft);
   font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-xs);
   transition: color .14s, background .14s, border-color .14s, box-shadow .12s, transform .06s; }
@@ -1011,9 +1015,17 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 #ar-table thead th:first-child, #ar-table tbody td:first-child { padding-left: 16px; }
 #ar-table tbody td:nth-child(-n+4), #ar-table thead th:nth-child(-n+4) { padding-right: 15px; }
 #ar-table tbody td:first-child { min-width: 188px; }
+/* board / filing type / dates stay lighter so Company + Current Stage lead the eye */
+#ar-table .board-chip { font-weight: 600; }
+#ar-table .board-chip.mb  { background: #EEF3F8; color: #4E6076; }
+#ar-table .board-chip.sme { background: #F2EFF8; color: #6A5A86; }
+/* alternate-row scan-lines — a very soft warm-green overlay over the ivory card
+   (not grey, not blue, not bright); hover deepens smoothly; open stays highlighted */
 #ar-table tbody tr.ar-row { cursor: pointer; }
-#ar-table tbody tr.ar-row:hover > td { background: #F4F8F7; }
-#ar-table tbody tr.ar-row.open > td { background: var(--emerald-soft); }
+#ar-table tbody tr.ar-row > td { background: transparent; transition: background .16s ease; }
+#ar-table tbody tr.ar-row.ar-alt > td { background: rgba(13,110,86,0.045); }
+#ar-table tbody tr.ar-row:hover > td { background: rgba(13,110,86,0.09); }
+#ar-table tbody tr.ar-row.open > td { background: var(--emerald-soft); box-shadow: inset 0 -1px 0 rgba(14,122,95,0.16); }
 .ar-caret { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: 8px;
   border-radius: 6px; color: var(--ink-faint); background: var(--grey-soft); vertical-align: middle;
   transition: transform .18s, background .14s, color .14s; }
@@ -1023,30 +1035,35 @@ body:has(#tab-watchlist:not([hidden])) .content { padding-bottom: 14px; }
 /* lifecycle cell — deliberately quiet: family dot + coloured label */
 .ar-life-mini { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .ar-life-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-.ar-life-mini.fam-pre  { color: var(--slate);   } .ar-life-mini.fam-pre  .ar-life-dot { background: var(--slate); }
+.ar-life-mini.fam-pre  { color: #5E6B50; } .ar-life-mini.fam-pre  .ar-life-dot { background: #77875F; }
 .ar-life-mini.fam-live { color: var(--emerald); } .ar-life-mini.fam-live .ar-life-dot { background: var(--emerald); }
-.ar-life-mini.fam-done { color: var(--grey);    } .ar-life-mini.fam-done .ar-life-dot { background: var(--grey); }
+.ar-life-mini.fam-done { color: #737B88; } .ar-life-mini.fam-done .ar-life-dot { background: #8A93A1; }
 
-/* current-stage chip — the stronger signal: family left-accent + per-stage tint + icon */
+/* current-stage chip — the stronger signal: family left-accent + per-stage tint + icon.
+   Stage psychology (soft, same family, no loud badges):
+   filed=neutral paper · upd/allot=amber (amended/processing) · review=muted steel
+   (diligence) · ready/sched=green (milestone) · open=vivid green +pulse (live) ·
+   closed=settled green-grey · listed=market green · arch=grey (historical) */
 .stg-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 9px; border-radius: 7px;
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; line-height: 1.5; }
 .stg-chip svg { width: 13px; height: 13px; flex: 0 0 auto; }
-.stg-chip.fam-pre  { box-shadow: inset 3px 0 0 var(--slate); }
+.stg-chip.fam-pre  { box-shadow: inset 3px 0 0 #77875F; }
 .stg-chip.fam-live { box-shadow: inset 3px 0 0 var(--emerald); }
-.stg-chip.fam-done { box-shadow: inset 3px 0 0 var(--grey); }
-.stg-chip.stg-filed  { background: #EEF2F7; color: #51607A; }
-.stg-chip.stg-upd    { background: #F3EFE1; color: #8A6D2E; }
-.stg-chip.stg-review { background: #E7EEF7; color: #2E4F79; }
-.stg-chip.stg-ready  { background: #E7F0EA; color: #2C6B58; }
-.stg-chip.stg-open   { background: #DCEFE4; color: #0C7355; }
-.stg-chip.stg-closed { background: #E9EDF1; color: #55677A; }
-.stg-chip.stg-allot  { background: #F3EFE1; color: #8A6D2E; }
-.stg-chip.stg-sched  { background: #E7F0EA; color: #2C6B58; }
+.stg-chip.fam-done { box-shadow: inset 3px 0 0 #8A93A1; }
+.stg-chip.stg-filed  { background: #F0F1E8; color: #5E6B4E; }
+.stg-chip.stg-upd    { background: #F4EEDE; color: #8A6D2E; }
+.stg-chip.stg-review { background: #E9EDF1; color: #46586B; }
+.stg-chip.stg-ready  { background: #E6F0E9; color: #2C6B58; }
+.stg-chip.stg-open   { background: #DAF0E2; color: #0C7355; }
+.stg-chip.stg-closed { background: #E7EDE9; color: #4E6559; }
+.stg-chip.stg-allot  { background: #F4EEDE; color: #8A6D2E; }
+.stg-chip.stg-sched  { background: #E6F0E9; color: #2C6B58; }
 .stg-chip.stg-listed { background: #E2EFE9; color: #0B6F63; }
-.stg-chip.stg-arch   { background: #F0F2F5; color: #8A93A1; }
+.stg-chip.stg-arch   { background: #EEF0F3; color: #7A828E; }
 
-/* ---- Full Tracker: click-to-expand detail ---- */
-.ar-detail > td { padding: 0 !important; background: var(--canvas); white-space: normal; border-bottom: 1px solid var(--border); }
+/* ---- Full Tracker: click-to-expand detail — nested soft panel under its parent ---- */
+.ar-detail > td { padding: 0 !important; background: var(--canvas); white-space: normal; border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 7px 10px -9px rgba(6,43,46,0.28), inset 3px 0 0 var(--emerald); }
 /* keep the expanded detail within the visible viewport even when the table
    scrolls horizontally, so all three detail columns stay readable */
 .ar-detail .ard-grid { position: sticky; left: 0; max-width: calc(100vw - var(--sidebar-w) - 96px); }

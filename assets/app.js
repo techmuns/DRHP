@@ -1742,7 +1742,7 @@ function renderArRows(){
   const cols = arColumns();
   const head = `<thead><tr>${cols.map(c=>`<th class="${c.num?'num':''}">${esc(c.h)}</th>`).join('')}</tr></thead>`;
   const body = recs.length
-    ? recs.map((r,i)=>`<tr class="ar-row" data-idx="${i}" tabindex="0" aria-expanded="false">${
+    ? recs.map((r,i)=>`<tr class="ar-row${i%2?' ar-alt':''}" data-idx="${i}" tabindex="0" aria-expanded="false">${
         cols.map(c=>`<td class="${c.cls||''}${c.num?' num':''}">${c.cell(r,i)}</td>`).join('')
       }</tr><tr class="ar-detail" id="ar-detail-${i}" hidden><td colspan="${cols.length}">${arDetail(r)}</td></tr>`).join('')
     : `<tr><td colspan="${cols.length}" class="subtle" style="padding:16px">No records match these filters.</td></tr>`;
