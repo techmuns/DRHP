@@ -45,6 +45,19 @@ def compute_window(run_date: date) -> WeekWindow:
     )
 
 
+def week_anchor(run_date: date) -> date:
+    """The Monday of the calendar week containing run_date.
+
+    This is the stable id for the week's snapshot. The pipeline now runs *daily*,
+    but the product is a weekly monitor: anchoring every run in a week to the same
+    Monday means the daily runs overwrite one snapshot instead of piling up a file
+    per day, and "vs last week" deltas compare against the *previous week's*
+    snapshot rather than yesterday's. The live view (`latest.json`) still refreshes
+    every day off the trailing-7-day window above — only the snapshot id is anchored.
+    """
+    return run_date - timedelta(days=run_date.weekday())
+
+
 def select_this_week(
     resolved: List[ResolvedFiling], window: WeekWindow
 ) -> List[ResolvedFiling]:

@@ -1,0 +1,8 @@
+# Cloudflare Pages response headers.
+#
+# Always serve the data files fresh so a new daily commit shows up on the live
+# dashboard immediately, without a browser or CDN edge handing back a stale copy.
+# The dashboard's own fetch() already uses {cache:'no-store'}; this is the matching
+# server-side guarantee for direct hits and any intermediary cache.
+/data/*
+  Cache-Control: no-cache, must-revalidate

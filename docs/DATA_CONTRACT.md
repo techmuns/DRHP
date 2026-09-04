@@ -12,8 +12,8 @@ reject unknown fields). Stage-2 fields are present but always `null` for now.
     "week_start": "2026-06-24",          // trailing 7-day window, inclusive
     "week_end": "2026-06-30",
     "data_as_of": "2026-06-30",
-    "snapshot_id": "2026-06-30",
-    "previous_snapshot_id": null         // null on the first run
+    "snapshot_id": "2026-06-29",         // the week's Monday; daily runs share it
+    "previous_snapshot_id": null         // prior week's Monday; null on the first run
   },
   "summary": {
     "new_drhp_count": 0,

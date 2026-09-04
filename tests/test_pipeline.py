@@ -61,9 +61,47 @@ def test_deltas_appear_on_second_run(tmp_path):
              prescraped=[sf("C One Limited", date(2026, 6, 25), "DRHP", "DRHP"),
                          sf("C Two Limited", date(2026, 6, 26), "DRHP", "DRHP"),
                          sf("C Three Limited", date(2026, 6, 27), "DRHP", "DRHP")], fetch_ipo=False)
-    assert d2.meta.previous_snapshot_id == "2026-06-23"
+    # Snapshots are anchored to their week's Monday, so 2026-06-23 (Tue) is stored
+    # under 2026-06-22 and 2026-06-30 (Tue) compares back to it: "vs last week".
+    assert d2.meta.snapshot_id == "2026-06-29"
+    assert d2.meta.previous_snapshot_id == "2026-06-22"
     assert d2.summary.deltas is not None
     assert d2.summary.deltas.new_drhp == "+1"
+
+
+def test_daily_runs_same_week_share_one_snapshot(tmp_path):
+    """Running every day within a week overwrites one weekly snapshot (no daily
+    pile-up) and keeps comparing against the previous week, not yesterday."""
+    import glob, os
+    snaps = str(tmp_path / "snaps")
+    # Last week's baseline: Monday 2026-08-24, one DRHP filed in-window.
+    run(run_date=date(2026, 8, 24), snapshots_dir=snaps,
+        output_path=str(tmp_path / "base.json"), appendix_path=None,
+        prescraped=[sf("Base Steel Limited", date(2026, 8, 20), "DRHP", "DRHP")],
+        fetch_ipo=False)
+    # This week, two daily runs (Wed + Fri) — both anchor to Monday 2026-08-31.
+    this_week = [sf("Fresh One Limited", date(2026, 9, 1), "DRHP", "DRHP"),
+                 sf("Fresh Two Limited", date(2026, 9, 1), "DRHP", "DRHP")]
+    d_wed = run(run_date=date(2026, 9, 2), snapshots_dir=snaps,
+                output_path=str(tmp_path / "wed.json"), appendix_path=None,
+                prescraped=this_week, fetch_ipo=False)
+    d_fri = run(run_date=date(2026, 9, 4), snapshots_dir=snaps,
+                output_path=str(tmp_path / "fri.json"), appendix_path=None,
+                prescraped=this_week, fetch_ipo=False)
+
+    # Both daily runs land on the same weekly snapshot id and the same baseline.
+    assert d_wed.meta.snapshot_id == "2026-08-31"
+    assert d_fri.meta.snapshot_id == "2026-08-31"
+    assert d_fri.meta.previous_snapshot_id == "2026-08-24"
+    # ...but the live view still moves daily (window end tracks the run date).
+    assert d_wed.meta.week_end == "2026-09-02"
+    assert d_fri.meta.week_end == "2026-09-04"
+    # Delta is "vs last week" (2 this week - 1 last week), not "vs yesterday".
+    assert d_fri.summary.deltas.new_drhp == "+1"
+    # Exactly two snapshot files on disk (last week + this week) — no per-day files.
+    ids = sorted(os.path.splitext(os.path.basename(p))[0]
+                 for p in glob.glob(os.path.join(snaps, "*.json")))
+    assert ids == ["2026-08-24", "2026-08-31"]
 
 
 def test_idempotent_same_date(tmp_path):

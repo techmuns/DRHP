@@ -34,7 +34,7 @@ from .sectors import classify
 from .snapshot import compute_deltas, find_previous_snapshot_id, load_snapshot, save_snapshot
 from . import emit, ipo_market
 from .contract import IpoMarket
-from .weeklogic import compute_window, select_this_week
+from .weeklogic import compute_window, select_this_week, week_anchor
 
 log = logging.getLogger("drhp.pipeline")
 
@@ -148,7 +148,10 @@ def run(
 
     summary = build_summary(filings)
 
-    snapshot_id = run_date.isoformat()
+    # Anchor the snapshot to the week's Monday: daily runs within a week overwrite
+    # one snapshot (no daily file pile-up) and deltas compare against the previous
+    # week, not yesterday. The live window above still moves every day.
+    snapshot_id = week_anchor(run_date).isoformat()
     prev_id = find_previous_snapshot_id(snapshots_dir, snapshot_id)
     prev = load_snapshot(snapshots_dir, prev_id) if prev_id else None
     if prev and prev.get("summary"):
