@@ -1,9 +1,9 @@
 {
   "meta": {
-    "run_date": "2026-09-05",
-    "week_start": "2026-08-30",
-    "week_end": "2026-09-05",
-    "data_as_of": "2026-09-05",
+    "run_date": "2026-09-06",
+    "week_start": "2026-08-31",
+    "week_end": "2026-09-06",
+    "data_as_of": "2026-09-06",
     "snapshot_id": "2026-08-31",
     "previous_snapshot_id": "2026-08-24",
     "scoring_model_version": "1.0"
@@ -794,7 +794,7 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/priority-jewels-ltd",
-          "fetched_at": "2026-09-05T07:20:02+00:00",
+          "fetched_at": "2026-09-06T07:32:07+00:00",
           "data_period": null,
           "status": "Live"
         },
@@ -839,7 +839,7 @@
           "listing_gain_pct": 15.0
         },
         "financials_by_year": {},
-        "fetched_at": "2026-09-05T07:20:02+00:00"
+        "fetched_at": "2026-09-06T07:32:07+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -1099,7 +1099,7 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/annu-projects-ltd",
-          "fetched_at": "2026-09-05T07:20:10+00:00",
+          "fetched_at": "2026-09-06T07:32:15+00:00",
           "data_period": "Sep '26",
           "status": "Live"
         },
@@ -1173,7 +1173,7 @@
             "net_worth_cr": 122.06
           }
         },
-        "fetched_at": "2026-09-05T07:20:10+00:00"
+        "fetched_at": "2026-09-06T07:32:15+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -1182,12 +1182,12 @@
   ],
   "ipo_market": {
     "available": true,
-    "as_of": "2026-09-05",
+    "as_of": "2026-09-06",
     "source": "NSE",
     "pulse": {
       "drhp_filed": 6,
       "updated": 2,
-      "ipo_open": 0,
+      "ipo_open": 1,
       "listing_soon": 0,
       "listed": 30,
       "positive_listing": null,
@@ -1195,9 +1195,87 @@
     },
     "by_board": {
       "mainboard": 4,
-      "sme": 0
+      "sme": 1
     },
     "open_upcoming": [
+      {
+        "company_name": "Qualiance International Limited",
+        "board": "SME",
+        "sector": null,
+        "symbol": "QUALIANCE",
+        "issue_open": "2026-09-04",
+        "issue_close": "2026-09-08",
+        "listing_date": null,
+        "price_band": null,
+        "issue_size_cr": null,
+        "subscription_x": 12.51,
+        "issue_price": null,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Active",
+        "stage": "IPO Open",
+        "groww": {
+          "match": {
+            "matched_name": "Qualiance International Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "qualiance-international-ipo",
+            "ipo_url": "https://groww.in/ipo/qualiance-international-ipo",
+            "isin": "INE1XJ401012",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/qualiance-international-ipo",
+            "fetched_at": "2026-09-06T07:32:21+00:00",
+            "data_period": "2026-09-04T18:55:33",
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": 4.11,
+            "nii": 10.12,
+            "retail": 18.68,
+            "employee": null,
+            "total": 12.51,
+            "as_of": "2026-09-04T18:55:33",
+            "source_url": "https://groww.in/ipo/qualiance-international-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "SME",
+            "type": null,
+            "open_date": "2026-09-04",
+            "close_date": "2026-09-08",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.120 to Rs.127",
+            "issue_price": 127.0,
+            "lot_size": 1000.0,
+            "min_investment": 127000.0,
+            "issue_size_cr": 45.11,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-06T07:32:21+00:00"
+        }
+      },
       {
         "company_name": "Kanohar Electricals Limited",
         "board": "Mainboard",
@@ -1220,15 +1298,15 @@
             "confidence": 1.0,
             "stock_slug": "kanohar-electricals-ltd",
             "stock_url": "https://groww.in/stocks/kanohar-electricals-ltd",
-            "ipo_slug": null,
-            "ipo_url": null,
+            "ipo_slug": "kanohar-electricals-ipo",
+            "ipo_url": "https://groww.in/ipo/kanohar-electricals-ipo",
             "isin": "",
             "nse_code": null
           },
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/kanohar-electricals-ltd",
-            "fetched_at": "2026-09-05T07:20:16+00:00",
+            "fetched_at": "2026-09-06T07:32:25+00:00",
             "data_period": null,
             "status": "Live"
           },
@@ -1245,10 +1323,35 @@
             "promoter_hold_pct": null,
             "face_value": null
           },
-          "subscription": null,
-          "ipo": null,
+          "subscription": {
+            "qib": null,
+            "nii": null,
+            "retail": null,
+            "employee": null,
+            "total": null,
+            "as_of": null,
+            "source_url": "https://groww.in/ipo/kanohar-electricals-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-08",
+            "close_date": "2026-09-10",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.601 to Rs.632",
+            "issue_price": 632.0,
+            "lot_size": 23.0,
+            "min_investment": 14536.0,
+            "issue_size_cr": 1055.74,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:20:16+00:00"
+          "fetched_at": "2026-09-06T07:32:25+00:00"
         }
       },
       {
@@ -1267,7 +1370,67 @@
         "gain_pct": null,
         "status": "Forthcoming",
         "stage": "Upcoming",
-        "groww": null
+        "groww": {
+          "match": {
+            "matched_name": "Prasol Chemicals Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "prasol-chemicals-ipo",
+            "ipo_url": "https://groww.in/ipo/prasol-chemicals-ipo",
+            "isin": "INE455U01024",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/prasol-chemicals-ipo",
+            "fetched_at": "2026-09-06T07:32:31+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": null,
+            "nii": null,
+            "retail": null,
+            "employee": null,
+            "total": null,
+            "as_of": null,
+            "source_url": "https://groww.in/ipo/prasol-chemicals-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-08",
+            "close_date": "2026-09-10",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.643 to Rs.676",
+            "issue_price": 676.0,
+            "lot_size": 22.0,
+            "min_investment": 14872.0,
+            "issue_size_cr": 500.0,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-06T07:32:31+00:00"
+        }
       },
       {
         "company_name": "Glass Wall Systems (India) Limited",
@@ -1317,7 +1480,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/ipo/pranav-constructions-ipo",
-            "fetched_at": "2026-09-05T07:20:24+00:00",
+            "fetched_at": "2026-09-06T07:32:36+00:00",
             "data_period": null,
             "status": "Live"
           },
@@ -1362,7 +1525,7 @@
             "listing_gain_pct": null
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:20:24+00:00"
+          "fetched_at": "2026-09-06T07:32:36+00:00"
         }
       }
     ],
@@ -1397,7 +1560,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/priority-jewels-ltd",
-            "fetched_at": "2026-09-05T07:20:02+00:00",
+            "fetched_at": "2026-09-06T07:32:07+00:00",
             "data_period": null,
             "status": "Live"
           },
@@ -1442,7 +1605,7 @@
             "listing_gain_pct": 15.0
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:20:02+00:00"
+          "fetched_at": "2026-09-06T07:32:07+00:00"
         }
       },
       {
@@ -1475,7 +1638,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/esds-software-solution-ltd",
-            "fetched_at": "2026-09-05T07:20:28+00:00",
+            "fetched_at": "2026-09-06T07:32:40+00:00",
             "data_period": "Sep '21",
             "status": "Live"
           },
@@ -1520,7 +1683,7 @@
             "listing_gain_pct": 76.46
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:20:28+00:00"
+          "fetched_at": "2026-09-06T07:32:40+00:00"
         }
       },
       {
@@ -1553,7 +1716,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/lumino-industries-ltd",
-            "fetched_at": "2026-09-05T07:20:34+00:00",
+            "fetched_at": "2026-09-06T07:32:46+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
@@ -1634,7 +1797,7 @@
               "net_worth_cr": 729.71
             }
           },
-          "fetched_at": "2026-09-05T07:20:34+00:00"
+          "fetched_at": "2026-09-06T07:32:46+00:00"
         }
       },
       {
@@ -1667,7 +1830,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/annu-projects-ltd",
-            "fetched_at": "2026-09-05T07:20:10+00:00",
+            "fetched_at": "2026-09-06T07:32:15+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
@@ -1741,7 +1904,7 @@
               "net_worth_cr": 122.06
             }
           },
-          "fetched_at": "2026-09-05T07:20:10+00:00"
+          "fetched_at": "2026-09-06T07:32:15+00:00"
         }
       },
       {
@@ -1774,7 +1937,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/sumax-engineering-ltd",
-            "fetched_at": "2026-09-05T07:20:39+00:00",
+            "fetched_at": "2026-09-06T07:32:52+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -1819,7 +1982,7 @@
             "listing_gain_pct": 9.9
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:20:39+00:00"
+          "fetched_at": "2026-09-06T07:32:52+00:00"
         }
       },
       {
@@ -1852,7 +2015,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/avp-infracon-ltd",
-            "fetched_at": "2026-09-05T07:20:46+00:00",
+            "fetched_at": "2026-09-06T07:32:58+00:00",
             "data_period": "Mar '26",
             "status": "Live"
           },
@@ -1894,7 +2057,7 @@
               "net_worth_cr": 126.76
             }
           },
-          "fetched_at": "2026-09-05T07:20:46+00:00"
+          "fetched_at": "2026-09-06T07:32:58+00:00"
         }
       },
       {
@@ -1927,7 +2090,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/symbiotec-pharmalab-ltd",
-            "fetched_at": "2026-09-05T07:20:50+00:00",
+            "fetched_at": "2026-09-06T07:33:02+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2008,7 +2171,7 @@
               "net_worth_cr": 1149.59
             }
           },
-          "fetched_at": "2026-09-05T07:20:50+00:00"
+          "fetched_at": "2026-09-06T07:33:02+00:00"
         }
       },
       {
@@ -2041,7 +2204,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/hytech-engineers-ltd",
-            "fetched_at": "2026-09-05T07:20:56+00:00",
+            "fetched_at": "2026-09-06T07:33:08+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2122,7 +2285,7 @@
               "net_worth_cr": 122.02
             }
           },
-          "fetched_at": "2026-09-05T07:20:56+00:00"
+          "fetched_at": "2026-09-06T07:33:08+00:00"
         }
       },
       {
@@ -2155,7 +2318,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/skyways-air-services-ltd",
-            "fetched_at": "2026-09-05T07:21:02+00:00",
+            "fetched_at": "2026-09-06T07:33:14+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2236,7 +2399,7 @@
               "net_worth_cr": 494.74
             }
           },
-          "fetched_at": "2026-09-05T07:21:02+00:00"
+          "fetched_at": "2026-09-06T07:33:14+00:00"
         }
       },
       {
@@ -2269,7 +2432,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/abh-healthcare-ltd",
-            "fetched_at": "2026-09-05T07:21:08+00:00",
+            "fetched_at": "2026-09-06T07:33:20+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2350,7 +2513,7 @@
               "net_worth_cr": 17.34
             }
           },
-          "fetched_at": "2026-09-05T07:21:08+00:00"
+          "fetched_at": "2026-09-06T07:33:20+00:00"
         }
       },
       {
@@ -2383,7 +2546,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/madhur-knit-crafts-ltd",
-            "fetched_at": "2026-09-05T07:21:14+00:00",
+            "fetched_at": "2026-09-06T07:33:26+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2428,7 +2591,7 @@
             "listing_gain_pct": 0.0
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:21:14+00:00"
+          "fetched_at": "2026-09-06T07:33:26+00:00"
         }
       },
       {
@@ -2461,7 +2624,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/vision-infra-equipment-solutions-ltd",
-            "fetched_at": "2026-09-05T07:21:20+00:00",
+            "fetched_at": "2026-09-06T07:33:31+00:00",
             "data_period": "Jul '26",
             "status": "Live"
           },
@@ -2496,7 +2659,7 @@
               "net_worth_cr": 164.99
             }
           },
-          "fetched_at": "2026-09-05T07:21:20+00:00"
+          "fetched_at": "2026-09-06T07:33:31+00:00"
         }
       },
       {
@@ -2529,7 +2692,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/augmont-enterprises-ltd",
-            "fetched_at": "2026-09-05T07:21:24+00:00",
+            "fetched_at": "2026-09-06T07:33:35+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2610,7 +2773,7 @@
               "net_worth_cr": 932.75
             }
           },
-          "fetched_at": "2026-09-05T07:21:24+00:00"
+          "fetched_at": "2026-09-06T07:33:35+00:00"
         }
       },
       {
@@ -2643,7 +2806,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/tempsens-instruments-india-ltd",
-            "fetched_at": "2026-09-05T07:21:30+00:00",
+            "fetched_at": "2026-09-06T07:33:41+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2699,7 +2862,7 @@
               "net_worth_cr": 525.48
             }
           },
-          "fetched_at": "2026-09-05T07:21:30+00:00"
+          "fetched_at": "2026-09-06T07:33:41+00:00"
         }
       },
       {
@@ -2732,7 +2895,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/power-finance-corporation-ltd",
-            "fetched_at": "2026-09-05T07:21:34+00:00",
+            "fetched_at": "2026-09-06T07:33:46+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
@@ -2788,7 +2951,7 @@
               "net_worth_cr": 173441.02
             }
           },
-          "fetched_at": "2026-09-05T07:21:34+00:00"
+          "fetched_at": "2026-09-06T07:33:46+00:00"
         }
       },
       {
@@ -2821,7 +2984,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/gaja-alternative-asset-management-ltd",
-            "fetched_at": "2026-09-05T07:21:38+00:00",
+            "fetched_at": "2026-09-06T07:33:50+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2877,7 +3040,7 @@
               "net_worth_cr": 613.35
             }
           },
-          "fetched_at": "2026-09-05T07:21:38+00:00"
+          "fetched_at": "2026-09-06T07:33:50+00:00"
         }
       },
       {
@@ -2910,7 +3073,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/sunshine-pictures-ltd",
-            "fetched_at": "2026-09-05T07:21:42+00:00",
+            "fetched_at": "2026-09-06T07:33:54+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -2966,7 +3129,7 @@
               "net_worth_cr": 105.07
             }
           },
-          "fetched_at": "2026-09-05T07:21:42+00:00"
+          "fetched_at": "2026-09-06T07:33:54+00:00"
         }
       },
       {
@@ -2999,7 +3162,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/shankesh-jewellers-ltd",
-            "fetched_at": "2026-09-05T07:21:46+00:00",
+            "fetched_at": "2026-09-06T07:33:58+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3044,7 +3207,7 @@
             "listing_gain_pct": 11.08
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:21:46+00:00"
+          "fetched_at": "2026-09-06T07:33:58+00:00"
         }
       },
       {
@@ -3077,7 +3240,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/lalithaa-jewellery-mart-ltd",
-            "fetched_at": "2026-09-05T07:21:52+00:00",
+            "fetched_at": "2026-09-06T07:34:04+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3144,7 +3307,7 @@
               "net_worth_cr": 2929.72
             }
           },
-          "fetched_at": "2026-09-05T07:21:52+00:00"
+          "fetched_at": "2026-09-06T07:34:04+00:00"
         }
       },
       {
@@ -3177,7 +3340,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/horizon-industrial-parks-ltd",
-            "fetched_at": "2026-09-05T07:21:58+00:00",
+            "fetched_at": "2026-09-06T07:34:10+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3226,7 +3389,7 @@
               "net_worth_cr": 5858.74
             }
           },
-          "fetched_at": "2026-09-05T07:21:58+00:00"
+          "fetched_at": "2026-09-06T07:34:10+00:00"
         }
       },
       {
@@ -3259,7 +3422,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/fascinate-textiles-ltd",
-            "fetched_at": "2026-09-05T07:22:02+00:00",
+            "fetched_at": "2026-09-06T07:34:14+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3304,7 +3467,7 @@
             "listing_gain_pct": -20.0
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:22:02+00:00"
+          "fetched_at": "2026-09-06T07:34:14+00:00"
         }
       },
       {
@@ -3355,7 +3518,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/skytech-infinite-platform-ltd",
-            "fetched_at": "2026-09-05T07:22:10+00:00",
+            "fetched_at": "2026-09-06T07:34:22+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3400,7 +3563,7 @@
             "listing_gain_pct": -3.9
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:22:10+00:00"
+          "fetched_at": "2026-09-06T07:34:22+00:00"
         }
       },
       {
@@ -3433,7 +3596,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/credent-connect-n-care-ltd",
-            "fetched_at": "2026-09-05T07:22:16+00:00",
+            "fetched_at": "2026-09-06T07:34:28+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3486,7 +3649,7 @@
               "net_worth_cr": 43.79
             }
           },
-          "fetched_at": "2026-09-05T07:22:16+00:00"
+          "fetched_at": "2026-09-06T07:34:28+00:00"
         }
       },
       {
@@ -3519,7 +3682,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/shiprocket-ltd",
-            "fetched_at": "2026-09-05T07:22:22+00:00",
+            "fetched_at": "2026-09-06T07:34:34+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3600,7 +3763,7 @@
               "net_worth_cr": 1524.31
             }
           },
-          "fetched_at": "2026-09-05T07:22:22+00:00"
+          "fetched_at": "2026-09-06T07:34:34+00:00"
         }
       },
       {
@@ -3633,7 +3796,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/behari-lal-engineering-ltd",
-            "fetched_at": "2026-09-05T07:22:28+00:00",
+            "fetched_at": "2026-09-06T07:34:40+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3678,7 +3841,7 @@
             "listing_gain_pct": 63.16
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-05T07:22:28+00:00"
+          "fetched_at": "2026-09-06T07:34:40+00:00"
         }
       },
       {
@@ -3711,7 +3874,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/pramodini-medicare-ltd",
-            "fetched_at": "2026-09-05T07:22:35+00:00",
+            "fetched_at": "2026-09-06T07:34:46+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3778,7 +3941,7 @@
               "net_worth_cr": 53.15
             }
           },
-          "fetched_at": "2026-09-05T07:22:35+00:00"
+          "fetched_at": "2026-09-06T07:34:46+00:00"
         }
       },
       {
@@ -3811,7 +3974,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/milky-mist-dairy-food-ltd",
-            "fetched_at": "2026-09-05T07:22:41+00:00",
+            "fetched_at": "2026-09-06T07:34:52+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3885,7 +4048,7 @@
               "net_worth_cr": 463.01
             }
           },
-          "fetched_at": "2026-09-05T07:22:41+00:00"
+          "fetched_at": "2026-09-06T07:34:52+00:00"
         }
       },
       {
@@ -3918,7 +4081,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/molbio-diagnostics-ltd",
-            "fetched_at": "2026-09-05T07:22:47+00:00",
+            "fetched_at": "2026-09-06T07:34:58+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -3999,7 +4162,7 @@
               "net_worth_cr": 1308.78
             }
           },
-          "fetched_at": "2026-09-05T07:22:47+00:00"
+          "fetched_at": "2026-09-06T07:34:58+00:00"
         }
       },
       {
@@ -4032,7 +4195,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/dhoot-transmission-ltd",
-            "fetched_at": "2026-09-05T07:22:53+00:00",
+            "fetched_at": "2026-09-06T07:35:04+00:00",
             "data_period": "Aug '26",
             "status": "Live"
           },
@@ -4113,12 +4276,21 @@
               "net_worth_cr": 2434.95
             }
           },
-          "fetched_at": "2026-09-05T07:22:53+00:00"
+          "fetched_at": "2026-09-06T07:35:04+00:00"
         }
       }
     ]
   },
   "groww_conflicts": [
+    {
+      "company": "Prasol Chemicals Limited",
+      "field": "issue_size_cr",
+      "official_value": 525.66,
+      "official_source": "NSE",
+      "groww_value": 500.0,
+      "groww_url": "https://groww.in/ipo/prasol-chemicals-ipo",
+      "note": null
+    },
     {
       "company": "Pranav Constructions Limited",
       "field": "issue_size_cr",
@@ -4130,17 +4302,17 @@
     }
   ],
   "groww_summary": {
-    "companies_seen": 42,
-    "distinct_companies": 40,
-    "matched": 31,
+    "companies_seen": 43,
+    "distinct_companies": 41,
+    "matched": 33,
     "stock_pages": 30,
-    "ipo_pages": 23,
-    "records_enriched": 33,
-    "fields_populated": 780,
-    "conflicts": 1,
+    "ipo_pages": 26,
+    "records_enriched": 35,
+    "fields_populated": 808,
+    "conflicts": 2,
     "fetch_failures": 0,
-    "network_fetches": 95,
+    "network_fetches": 99,
     "cache_hits": 0,
-    "unmatched_count": 9
+    "unmatched_count": 8
   }
 }
