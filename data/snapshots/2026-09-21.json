@@ -1,36 +1,36 @@
 {
   "meta": {
-    "run_date": "2026-09-23",
-    "week_start": "2026-09-17",
-    "week_end": "2026-09-23",
-    "data_as_of": "2026-09-23",
+    "run_date": "2026-09-24",
+    "week_start": "2026-09-18",
+    "week_end": "2026-09-24",
+    "data_as_of": "2026-09-24",
     "snapshot_id": "2026-09-21",
     "previous_snapshot_id": "2026-09-14",
     "scoring_model_version": "1.0"
   },
   "summary": {
-    "new_drhp_count": 6,
-    "new_ipo_count": 8,
+    "new_drhp_count": 4,
+    "new_ipo_count": 7,
     "buckets": {
-      "dig_deeper": 3,
+      "dig_deeper": 2,
       "monitor": 0,
       "watch": 1
     },
     "deltas": {
-      "new_drhp": "+1",
-      "new_ipo": "+2",
-      "dig_deeper": "+1",
+      "new_drhp": "-1",
+      "new_ipo": "+1",
+      "dig_deeper": "flat",
       "monitor": "flat",
       "watch": "+1"
     },
     "sector_concentration": [
       {
         "sector": "Unclassified",
-        "count": 6,
+        "count": 4,
         "total_issue_cr": 0.0
       },
       {
-        "sector": "Healthcare",
+        "sector": "Industrials",
         "count": 2,
         "total_issue_cr": 0.0
       },
@@ -45,17 +45,12 @@
         "total_issue_cr": 0.0
       },
       {
-        "sector": "Energy",
-        "count": 1,
-        "total_issue_cr": 0.0
-      },
-      {
         "sector": "Financials",
         "count": 1,
         "total_issue_cr": 0.0
       },
       {
-        "sector": "Industrials",
+        "sector": "Healthcare",
         "count": 1,
         "total_issue_cr": 0.0
       },
@@ -312,128 +307,6 @@
       "sector_kpis": null
     },
     {
-      "id": "8adad5bb171a",
-      "company_name": "Iberia Pharmaceuticals India Limited",
-      "company_name_normalized": "iberia pharmaceuticals india",
-      "filing_date": "2026-09-17",
-      "filing_type": "DRHP",
-      "stage": "DRHP",
-      "sector": "Healthcare",
-      "sub_sector": "Pharmaceuticals",
-      "business_summary": "Our Company is engaged in the business of marketing and distribution of pharmaceutical and derma",
-      "issue": {
-        "type": "Fresh",
-        "fresh_cr": null,
-        "ofs_cr": null,
-        "total_cr": null,
-        "market_cap_cr": null,
-        "issue_to_mktcap_pct": null,
-        "fresh_shares": null,
-        "ofs_shares": null,
-        "total_shares": null,
-        "face_value": 10.0
-      },
-      "financials": {
-        "revenue_fy25": {
-          "value": 96.54,
-          "source": "DRHP_PDF",
-          "confidence": "high"
-        },
-        "revenue_fy24": {
-          "value": 86.72,
-          "source": "DRHP_PDF",
-          "confidence": "high"
-        },
-        "rev_growth_pct": {
-          "value": 11.32,
-          "source": "derived",
-          "confidence": "high"
-        },
-        "ebitda_fy25": {
-          "value": 16.96,
-          "source": "DRHP_PDF",
-          "confidence": "high"
-        },
-        "ebitda_margin_pct": {
-          "value": 17.56,
-          "source": "derived",
-          "confidence": "high"
-        },
-        "pat_fy25": {
-          "value": 11.13,
-          "source": "DRHP_PDF",
-          "confidence": "high"
-        },
-        "pat_fy24": {
-          "value": 14.19,
-          "source": "DRHP_PDF",
-          "confidence": "high"
-        },
-        "pat_growth_pct": {
-          "value": -21.54,
-          "source": "derived",
-          "confidence": "high"
-        },
-        "pat_margin_pct": {
-          "value": 11.53,
-          "source": "derived",
-          "confidence": "high"
-        },
-        "roe_pct": {
-          "value": 24.31,
-          "source": "DRHP_PDF",
-          "confidence": "high"
-        },
-        "roce_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "debt_equity": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "asset_base_cr": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "promoter_hold_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        }
-      },
-      "score": {
-        "total": 34.0,
-        "components": {
-          "rev_growth": 7.55,
-          "pat_margin": 11.53,
-          "roe": 14.59,
-          "roce": null,
-          "pat_growth": 0.0,
-          "revenue_scale": 0.29
-        },
-        "bucket": "DIG DEEPER"
-      },
-      "lead_managers": [],
-      "stamps": [
-        "FILED_THIS_WEEK"
-      ],
-      "sources": {
-        "sebi_url": "https://www.sebi.gov.in/filings/public-issues/sep-2026/iberia-pharmaceuticals-india-limited-drhp_104542.html",
-        "drhp_pdf_url": "https://www.sebi.gov.in/sebi_data/commondocs/sep-2026/IBERIA%20PHARMACEUTICALS%20INDIA%20LIMITED_p.pdf"
-      },
-      "board": null,
-      "current_stage": "DRHP Filed",
-      "listing_outcome": null,
-      "groww": null,
-      "competitor_impact": null,
-      "risk_factors": null,
-      "sector_kpis": null
-    },
-    {
       "id": "abe97e8c2b4d",
       "company_name": "Anchor Offshore Services Limited",
       "company_name_normalized": "anchor offshore services",
@@ -551,6 +424,224 @@
       "current_stage": "DRHP Filed",
       "listing_outcome": null,
       "groww": null,
+      "competitor_impact": null,
+      "risk_factors": null,
+      "sector_kpis": null
+    },
+    {
+      "id": "2a5bd6dedb5e",
+      "company_name": "Karamtara Engineering Limited",
+      "company_name_normalized": "karamtara engineering",
+      "filing_date": "2026-09-24",
+      "filing_type": "Prospectus",
+      "stage": "IPO",
+      "sector": "Industrials",
+      "sub_sector": "Engineering",
+      "business_summary": null,
+      "issue": {
+        "type": null,
+        "fresh_cr": null,
+        "ofs_cr": null,
+        "total_cr": null,
+        "market_cap_cr": null,
+        "issue_to_mktcap_pct": null,
+        "fresh_shares": null,
+        "ofs_shares": null,
+        "total_shares": null,
+        "face_value": null
+      },
+      "financials": {
+        "revenue_fy25": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "revenue_fy24": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "rev_growth_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "ebitda_fy25": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "ebitda_margin_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "pat_fy25": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "pat_fy24": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "pat_growth_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "pat_margin_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "roe_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "roce_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "debt_equity": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "asset_base_cr": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        },
+        "promoter_hold_pct": {
+          "value": null,
+          "source": null,
+          "confidence": null
+        }
+      },
+      "score": {
+        "total": null,
+        "components": {
+          "rev_growth": null,
+          "pat_margin": null,
+          "roe": null,
+          "roce": null,
+          "pat_growth": null,
+          "revenue_scale": null
+        },
+        "bucket": "INSUFFICIENT"
+      },
+      "lead_managers": [],
+      "stamps": [
+        "FILED_THIS_WEEK"
+      ],
+      "sources": {
+        "sebi_url": "https://www.sebi.gov.in/filings/public-issues/sep-2026/karamtara-engineering-limited-prospectus_104682.html",
+        "drhp_pdf_url": null
+      },
+      "board": "Mainboard",
+      "current_stage": "Listed",
+      "listing_outcome": "Pending",
+      "groww": {
+        "match": {
+          "matched_name": "Karamtara Engineering Ltd.",
+          "confidence": 1.0,
+          "stock_slug": "karamtara-engineering-ltd",
+          "stock_url": "https://groww.in/stocks/karamtara-engineering-ltd",
+          "ipo_slug": "karamtara-engineering-ipo",
+          "ipo_url": "https://groww.in/ipo/karamtara-engineering-ipo",
+          "isin": "INE590T01012",
+          "nse_code": "KARAMTARA"
+        },
+        "provenance": {
+          "source_name": "Groww",
+          "source_url": "https://groww.in/stocks/karamtara-engineering-ltd",
+          "fetched_at": "2026-09-24T08:04:04+00:00",
+          "data_period": "Sep '26",
+          "status": "Live"
+        },
+        "fundamentals": {
+          "market_cap_cr": 11652.0,
+          "roe_pct": 18.75,
+          "debt_equity": 0.91,
+          "pe_ratio": 50.92,
+          "pb_ratio": 6.14,
+          "eps": 7.11,
+          "book_value": 58.96,
+          "dividend_yield_pct": 0.0,
+          "industry_pe": 47.26,
+          "promoter_hold_pct": 82.01,
+          "face_value": 10.0
+        },
+        "subscription": {
+          "qib": 34.27,
+          "nii": 31.04,
+          "retail": 9.64,
+          "employee": null,
+          "total": 21.26,
+          "as_of": "2026-09-11T16:55:46",
+          "source_url": "https://groww.in/ipo/karamtara-engineering-ipo",
+          "status": "Final"
+        },
+        "ipo": {
+          "board": "Mainboard",
+          "type": null,
+          "open_date": "2026-09-09",
+          "close_date": "2026-09-11",
+          "allotment_date": null,
+          "listing_date": null,
+          "price_band": "Rs.241 to Rs.254",
+          "issue_price": 254.0,
+          "lot_size": 59.0,
+          "min_investment": 14986.0,
+          "issue_size_cr": 875.0,
+          "fresh_cr": null,
+          "ofs_cr": null,
+          "listing_price": 320.0,
+          "listing_gain_pct": 25.98
+        },
+        "financials_by_year": {
+          "FY2022": {
+            "fiscal_year": "FY2022",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 1246.68,
+            "pat_cr": 12.65,
+            "net_worth_cr": 409.36
+          },
+          "FY2023": {
+            "fiscal_year": "FY2023",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 1601.07,
+            "pat_cr": 42.36,
+            "net_worth_cr": 450.71
+          },
+          "FY2024": {
+            "fiscal_year": "FY2024",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 2427.12,
+            "pat_cr": 102.65,
+            "net_worth_cr": 553.44
+          },
+          "FY2025": {
+            "fiscal_year": "FY2025",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 3165.36,
+            "pat_cr": 139.33,
+            "net_worth_cr": 983.19
+          },
+          "FY2026": {
+            "fiscal_year": "FY2026",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 4316.36,
+            "pat_cr": 228.75,
+            "net_worth_cr": 1219.92
+          }
+        },
+        "fetched_at": "2026-09-24T08:04:04+00:00"
+      },
       "competitor_impact": null,
       "risk_factors": null,
       "sector_kpis": null
@@ -808,20 +899,20 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/amtech-esters-ltd",
-          "fetched_at": "2026-09-23T08:14:01+00:00",
+          "fetched_at": "2026-09-24T08:04:12+00:00",
           "data_period": "Sep '26",
           "status": "Live"
         },
         "fundamentals": {
-          "market_cap_cr": 96.0,
+          "market_cap_cr": 98.0,
           "roe_pct": 21.57,
           "debt_equity": 0.17,
-          "pe_ratio": 22.52,
-          "pb_ratio": 2.57,
+          "pe_ratio": 22.87,
+          "pb_ratio": 2.61,
           "eps": 4.85,
           "book_value": 42.43,
           "dividend_yield_pct": 0.0,
-          "industry_pe": 37.12,
+          "industry_pe": 37.05,
           "promoter_hold_pct": 45.52,
           "face_value": 10.0
         },
@@ -875,7 +966,7 @@
             "net_worth_cr": 19.84
           }
         },
-        "fetched_at": "2026-09-23T08:14:01+00:00"
+        "fetched_at": "2026-09-24T08:04:12+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -998,7 +1089,42 @@
       "board": null,
       "current_stage": "Listed",
       "listing_outcome": null,
-      "groww": null,
+      "groww": {
+        "match": {
+          "matched_name": "National Stock Exchange Of India Ltd.",
+          "confidence": 1.0,
+          "stock_slug": "national-stock-exchange-of-india-ltd",
+          "stock_url": "https://groww.in/stocks/national-stock-exchange-of-india-ltd",
+          "ipo_slug": null,
+          "ipo_url": null,
+          "isin": "INE721I01024",
+          "nse_code": null
+        },
+        "provenance": {
+          "source_name": "Groww",
+          "source_url": "https://groww.in/stocks/national-stock-exchange-of-india-ltd",
+          "fetched_at": "2026-09-24T08:04:18+00:00",
+          "data_period": "Jun '26",
+          "status": "Live"
+        },
+        "fundamentals": {
+          "market_cap_cr": null,
+          "roe_pct": 22.8,
+          "debt_equity": 0.01,
+          "pe_ratio": 0.0,
+          "pb_ratio": 0.0,
+          "eps": 41.62,
+          "book_value": 129.75,
+          "dividend_yield_pct": 0.0,
+          "industry_pe": 21.57,
+          "promoter_hold_pct": 0.0,
+          "face_value": 1.0
+        },
+        "subscription": null,
+        "ipo": null,
+        "financials_by_year": {},
+        "fetched_at": "2026-09-24T08:04:18+00:00"
+      },
       "competitor_impact": null,
       "risk_factors": null,
       "sector_kpis": null
@@ -1136,21 +1262,21 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/hero-motors-ltd",
-          "fetched_at": "2026-09-23T08:14:09+00:00",
-          "data_period": null,
+          "fetched_at": "2026-09-24T08:04:22+00:00",
+          "data_period": "Sep '26",
           "status": "Live"
         },
         "fundamentals": {
-          "market_cap_cr": null,
+          "market_cap_cr": 4474.0,
           "roe_pct": 9.18,
           "debt_equity": 0.99,
-          "pe_ratio": 0.0,
-          "pb_ratio": 0.0,
-          "eps": 13.67,
-          "book_value": 48.62,
+          "pe_ratio": 108.25,
+          "pb_ratio": 4.07,
+          "eps": 0.91,
+          "book_value": 24.2,
           "dividend_yield_pct": 0.0,
-          "industry_pe": 38.66,
-          "promoter_hold_pct": null,
+          "industry_pe": 38.96,
+          "promoter_hold_pct": 61.63,
           "face_value": 10.0
         },
         "subscription": {
@@ -1180,8 +1306,30 @@
           "listing_price": 82.0,
           "listing_gain_pct": -2.38
         },
-        "financials_by_year": {},
-        "fetched_at": "2026-09-23T08:14:09+00:00"
+        "financials_by_year": {
+          "FY2024": {
+            "fiscal_year": "FY2024",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 1083.42,
+            "pat_cr": 17.04,
+            "net_worth_cr": 374.82
+          },
+          "FY2025": {
+            "fiscal_year": "FY2025",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 1111.23,
+            "pat_cr": 32.8,
+            "net_worth_cr": 426.01
+          },
+          "FY2026": {
+            "fiscal_year": "FY2026",
+            "basis": "CONSOLIDATED",
+            "revenue_cr": 1216.74,
+            "pat_cr": 41.17,
+            "net_worth_cr": 481.01
+          }
+        },
+        "fetched_at": "2026-09-24T08:04:22+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -1318,27 +1466,27 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/jindal-supreme-india-ltd",
-          "fetched_at": "2026-09-23T08:14:15+00:00",
-          "data_period": null,
+          "fetched_at": "2026-09-24T08:04:28+00:00",
+          "data_period": "Sep '26",
           "status": "Live"
         },
         "fundamentals": {
-          "market_cap_cr": null,
+          "market_cap_cr": 653.0,
           "roe_pct": 0.0,
           "debt_equity": 0.91,
           "pe_ratio": 0.0,
-          "pb_ratio": 0.0,
+          "pb_ratio": 3.32,
           "eps": 0.0,
-          "book_value": 37.58,
+          "book_value": 38.55,
           "dividend_yield_pct": 0.0,
-          "industry_pe": 22.5,
-          "promoter_hold_pct": null,
+          "industry_pe": 22.45,
+          "promoter_hold_pct": 73.68,
           "face_value": 10.0
         },
         "subscription": null,
         "ipo": null,
         "financials_by_year": {},
-        "fetched_at": "2026-09-23T08:14:15+00:00"
+        "fetched_at": "2026-09-24T08:04:28+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -1475,20 +1623,20 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/manipal-payment-and-identity-solutions-ltd",
-          "fetched_at": "2026-09-23T08:14:18+00:00",
+          "fetched_at": "2026-09-24T08:04:32+00:00",
           "data_period": "Sep '26",
           "status": "Live"
         },
         "fundamentals": {
-          "market_cap_cr": 7834.0,
+          "market_cap_cr": 8653.0,
           "roe_pct": 32.01,
           "debt_equity": 0.19,
-          "pe_ratio": 30.92,
-          "pb_ratio": 7.05,
+          "pe_ratio": 34.15,
+          "pb_ratio": 7.78,
           "eps": 10.93,
           "book_value": 47.97,
           "dividend_yield_pct": 0.0,
-          "industry_pe": 19.32,
+          "industry_pe": 19.17,
           "promoter_hold_pct": 53.92,
           "face_value": 2.0
         },
@@ -1520,7 +1668,7 @@
           "listing_gain_pct": -2.65
         },
         "financials_by_year": {},
-        "fetched_at": "2026-09-23T08:14:18+00:00"
+        "fetched_at": "2026-09-24T08:04:32+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -1657,21 +1805,21 @@
         "provenance": {
           "source_name": "Groww",
           "source_url": "https://groww.in/stocks/ss-retail-ltd",
-          "fetched_at": "2026-09-23T08:14:25+00:00",
-          "data_period": "Dec '25",
+          "fetched_at": "2026-09-24T08:04:38+00:00",
+          "data_period": "Sep '26",
           "status": "Live"
         },
         "fundamentals": {
-          "market_cap_cr": null,
-          "roe_pct": 0.0,
-          "debt_equity": 0.85,
-          "pe_ratio": 0.0,
-          "pb_ratio": 0.0,
-          "eps": 0.0,
-          "book_value": 34.36,
+          "market_cap_cr": 5690.0,
+          "roe_pct": 26.54,
+          "debt_equity": 1.06,
+          "pe_ratio": 96.0,
+          "pb_ratio": 9.71,
+          "eps": 7.97,
+          "book_value": 78.8,
           "dividend_yield_pct": 0.0,
-          "industry_pe": 67.16,
-          "promoter_hold_pct": 75.74,
+          "industry_pe": 67.51,
+          "promoter_hold_pct": 64.86,
           "face_value": 10.0
         },
         "subscription": {
@@ -1701,560 +1849,16 @@
           "listing_price": 624.0,
           "listing_gain_pct": 47.17
         },
-        "financials_by_year": {},
-        "fetched_at": "2026-09-23T08:14:25+00:00"
-      },
-      "competitor_impact": null,
-      "risk_factors": null,
-      "sector_kpis": null
-    },
-    {
-      "id": "f58018e17bac",
-      "company_name": "Rayzon Solar Limited",
-      "company_name_normalized": "rayzon solar",
-      "filing_date": "2026-09-17",
-      "filing_type": "Addendum",
-      "stage": "DRHP",
-      "sector": "Energy",
-      "sub_sector": "Renewables",
-      "business_summary": null,
-      "issue": {
-        "type": null,
-        "fresh_cr": null,
-        "ofs_cr": null,
-        "total_cr": null,
-        "market_cap_cr": null,
-        "issue_to_mktcap_pct": null,
-        "fresh_shares": null,
-        "ofs_shares": null,
-        "total_shares": null,
-        "face_value": null
-      },
-      "financials": {
-        "revenue_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "revenue_fy24": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "rev_growth_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "ebitda_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "ebitda_margin_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_fy24": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_growth_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_margin_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "roe_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "roce_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "debt_equity": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "asset_base_cr": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "promoter_hold_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        }
-      },
-      "score": {
-        "total": null,
-        "components": {
-          "rev_growth": null,
-          "pat_margin": null,
-          "roe": null,
-          "roce": null,
-          "pat_growth": null,
-          "revenue_scale": null
-        },
-        "bucket": "INSUFFICIENT"
-      },
-      "lead_managers": [],
-      "stamps": [
-        "FILED_THIS_WEEK",
-        "UPDATED"
-      ],
-      "sources": {
-        "sebi_url": "https://www.sebi.gov.in/filings/public-issues/sep-2026/rayzon-solar-limited-addendum-to-the-drhp_104532.html",
-        "drhp_pdf_url": null
-      },
-      "board": null,
-      "current_stage": "Updated/Corrected",
-      "listing_outcome": null,
-      "groww": null,
-      "competitor_impact": null,
-      "risk_factors": null,
-      "sector_kpis": null
-    },
-    {
-      "id": "d8563b1a726a",
-      "company_name": "Manika Plastech Limited",
-      "company_name_normalized": "manika plastech",
-      "filing_date": "2026-09-17",
-      "filing_type": "Prospectus",
-      "stage": "IPO",
-      "sector": "Unclassified",
-      "sub_sector": null,
-      "business_summary": null,
-      "issue": {
-        "type": null,
-        "fresh_cr": null,
-        "ofs_cr": null,
-        "total_cr": null,
-        "market_cap_cr": null,
-        "issue_to_mktcap_pct": null,
-        "fresh_shares": null,
-        "ofs_shares": null,
-        "total_shares": null,
-        "face_value": null
-      },
-      "financials": {
-        "revenue_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "revenue_fy24": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "rev_growth_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "ebitda_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "ebitda_margin_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_fy24": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_growth_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_margin_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "roe_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "roce_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "debt_equity": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "asset_base_cr": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "promoter_hold_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        }
-      },
-      "score": {
-        "total": null,
-        "components": {
-          "rev_growth": null,
-          "pat_margin": null,
-          "roe": null,
-          "roce": null,
-          "pat_growth": null,
-          "revenue_scale": null
-        },
-        "bucket": "INSUFFICIENT"
-      },
-      "lead_managers": [],
-      "stamps": [
-        "FILED_THIS_WEEK"
-      ],
-      "sources": {
-        "sebi_url": "https://www.sebi.gov.in/filings/public-issues/sep-2026/manika-plastech-limited-prospectus_104534.html",
-        "drhp_pdf_url": null
-      },
-      "board": "Mainboard",
-      "current_stage": "Listed",
-      "listing_outcome": "Pending",
-      "groww": {
-        "match": {
-          "matched_name": "Manika Plastech Ltd.",
-          "confidence": 1.0,
-          "stock_slug": "manika-plastech-ltd",
-          "stock_url": "https://groww.in/stocks/manika-plastech-ltd",
-          "ipo_slug": "manika-plastech-ipo",
-          "ipo_url": "https://groww.in/ipo/manika-plastech-ipo",
-          "isin": "INE0KWF01020",
-          "nse_code": "MANIKA"
-        },
-        "provenance": {
-          "source_name": "Groww",
-          "source_url": "https://groww.in/stocks/manika-plastech-ltd",
-          "fetched_at": "2026-09-23T08:14:32+00:00",
-          "data_period": "Sep '26",
-          "status": "Live"
-        },
-        "fundamentals": {
-          "market_cap_cr": 484.0,
-          "roe_pct": 15.18,
-          "debt_equity": 0.66,
-          "pe_ratio": 21.65,
-          "pb_ratio": 2.02,
-          "eps": 1.92,
-          "book_value": 20.61,
-          "dividend_yield_pct": 0.0,
-          "industry_pe": 36.74,
-          "promoter_hold_pct": 74.95,
-          "face_value": 2.0
-        },
-        "subscription": {
-          "qib": 10.94,
-          "nii": 62.99,
-          "retail": 22.31,
-          "employee": null,
-          "total": 27.91,
-          "as_of": "2026-09-16T17:35:45",
-          "source_url": "https://groww.in/ipo/manika-plastech-ipo",
-          "status": "Final"
-        },
-        "ipo": {
-          "board": "Mainboard",
-          "type": null,
-          "open_date": "2026-09-11",
-          "close_date": "2026-09-16",
-          "allotment_date": null,
-          "listing_date": null,
-          "price_band": "Rs.40 to Rs.43",
-          "issue_price": 43.0,
-          "lot_size": 348.0,
-          "min_investment": 14964.0,
-          "issue_size_cr": 125.5,
-          "fresh_cr": null,
-          "ofs_cr": null,
-          "listing_price": 43.0,
-          "listing_gain_pct": 0.0
-        },
         "financials_by_year": {
-          "FY2021": {
-            "fiscal_year": "FY2021",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 268.2,
-            "pat_cr": 6.99,
-            "net_worth_cr": 98.24
-          },
-          "FY2022": {
-            "fiscal_year": "FY2022",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 334.09,
-            "pat_cr": 10.83,
-            "net_worth_cr": 96.35
-          },
-          "FY2023": {
-            "fiscal_year": "FY2023",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 399.18,
-            "pat_cr": 12.36,
-            "net_worth_cr": 105.86
-          },
-          "FY2024": {
-            "fiscal_year": "FY2024",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 368.76,
-            "pat_cr": 11.53,
-            "net_worth_cr": 108.0
-          },
-          "FY2025": {
-            "fiscal_year": "FY2025",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 412.59,
-            "pat_cr": 19.33,
-            "net_worth_cr": 125.17
-          }
-        },
-        "fetched_at": "2026-09-23T08:14:32+00:00"
-      },
-      "competitor_impact": null,
-      "risk_factors": null,
-      "sector_kpis": null
-    },
-    {
-      "id": "50bfef31b5d7",
-      "company_name": "LCC Projects Limited",
-      "company_name_normalized": "lcc projects",
-      "filing_date": "2026-09-17",
-      "filing_type": "Prospectus",
-      "stage": "IPO",
-      "sector": "Unclassified",
-      "sub_sector": null,
-      "business_summary": null,
-      "issue": {
-        "type": null,
-        "fresh_cr": null,
-        "ofs_cr": null,
-        "total_cr": null,
-        "market_cap_cr": null,
-        "issue_to_mktcap_pct": null,
-        "fresh_shares": null,
-        "ofs_shares": null,
-        "total_shares": null,
-        "face_value": null
-      },
-      "financials": {
-        "revenue_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "revenue_fy24": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "rev_growth_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "ebitda_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "ebitda_margin_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_fy25": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_fy24": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_growth_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "pat_margin_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "roe_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "roce_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "debt_equity": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "asset_base_cr": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        },
-        "promoter_hold_pct": {
-          "value": null,
-          "source": null,
-          "confidence": null
-        }
-      },
-      "score": {
-        "total": null,
-        "components": {
-          "rev_growth": null,
-          "pat_margin": null,
-          "roe": null,
-          "roce": null,
-          "pat_growth": null,
-          "revenue_scale": null
-        },
-        "bucket": "INSUFFICIENT"
-      },
-      "lead_managers": [],
-      "stamps": [
-        "FILED_THIS_WEEK"
-      ],
-      "sources": {
-        "sebi_url": "https://www.sebi.gov.in/filings/public-issues/sep-2026/lcc-projects-limited-prospectus_104530.html",
-        "drhp_pdf_url": null
-      },
-      "board": "Mainboard",
-      "current_stage": "Listed",
-      "listing_outcome": "Pending",
-      "groww": {
-        "match": {
-          "matched_name": "LCC Projects Ltd.",
-          "confidence": 1.0,
-          "stock_slug": "lcc-projects-ltd",
-          "stock_url": "https://groww.in/stocks/lcc-projects-ltd",
-          "ipo_slug": "lcc-projects-ipo",
-          "ipo_url": "https://groww.in/ipo/lcc-projects-ipo",
-          "isin": "INE1FPN01026",
-          "nse_code": "LCCPROJECT"
-        },
-        "provenance": {
-          "source_name": "Groww",
-          "source_url": "https://groww.in/stocks/lcc-projects-ltd",
-          "fetched_at": "2026-09-23T08:14:38+00:00",
-          "data_period": "Sep '26",
-          "status": "Live"
-        },
-        "fundamentals": {
-          "market_cap_cr": 4276.0,
-          "roe_pct": 31.9,
-          "debt_equity": 0.97,
-          "pe_ratio": 14.92,
-          "pb_ratio": 3.73,
-          "eps": 9.89,
-          "book_value": 39.58,
-          "dividend_yield_pct": 0.0,
-          "industry_pe": 24.2,
-          "promoter_hold_pct": 89.9,
-          "face_value": 5.0
-        },
-        "subscription": {
-          "qib": 7.37,
-          "nii": 42.56,
-          "retail": 18.48,
-          "employee": null,
-          "total": 20.58,
-          "as_of": "2026-09-11T16:55:49",
-          "source_url": "https://groww.in/ipo/lcc-projects-ipo",
-          "status": "Final"
-        },
-        "ipo": {
-          "board": "Mainboard",
-          "type": null,
-          "open_date": "2026-09-09",
-          "close_date": "2026-09-11",
-          "allotment_date": null,
-          "listing_date": null,
-          "price_band": "Rs.139 to Rs.146",
-          "issue_price": 146.0,
-          "lot_size": 102.0,
-          "min_investment": 14892.0,
-          "issue_size_cr": 427.14,
-          "fresh_cr": null,
-          "ofs_cr": null,
-          "listing_price": 189.0,
-          "listing_gain_pct": 29.45
-        },
-        "financials_by_year": {
-          "FY2023": {
-            "fiscal_year": "FY2023",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 1234.64,
-            "pat_cr": 68.22,
-            "net_worth_cr": 261.19
-          },
-          "FY2024": {
-            "fiscal_year": "FY2024",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 2449.79,
-            "pat_cr": 122.0,
-            "net_worth_cr": 383.36
-          },
-          "FY2025": {
-            "fiscal_year": "FY2025",
-            "basis": "CONSOLIDATED",
-            "revenue_cr": 2941.01,
-            "pat_cr": 223.62,
-            "net_worth_cr": 606.78
-          },
           "FY2026": {
             "fiscal_year": "FY2026",
             "basis": "CONSOLIDATED",
-            "revenue_cr": 3639.45,
-            "pat_cr": 286.44,
-            "net_worth_cr": 893.25
+            "revenue_cr": 2352.85,
+            "pat_cr": 59.28,
+            "net_worth_cr": 231.34
           }
         },
-        "fetched_at": "2026-09-23T08:14:38+00:00"
+        "fetched_at": "2026-09-24T08:04:38+00:00"
       },
       "competitor_impact": null,
       "risk_factors": null,
@@ -2263,54 +1867,54 @@
   ],
   "ipo_market": {
     "available": true,
-    "as_of": "2026-09-23",
+    "as_of": "2026-09-24",
     "source": "NSE",
     "pulse": {
-      "drhp_filed": 6,
-      "updated": 2,
-      "ipo_open": 7,
+      "drhp_filed": 4,
+      "updated": 1,
+      "ipo_open": 10,
       "listing_soon": 0,
       "listed": 30,
       "positive_listing": null,
       "negative_listing": null
     },
     "by_board": {
-      "mainboard": 7,
-      "sme": 4
+      "mainboard": 11,
+      "sme": 5
     },
     "open_upcoming": [
       {
-        "company_name": "ArMee Infotech Limited",
+        "company_name": "Moneyview Limited",
         "board": "Mainboard",
         "sector": null,
-        "symbol": "ARMEE",
-        "issue_open": "2026-09-23",
-        "issue_close": "2026-09-25",
+        "symbol": "MONEYVIEW",
+        "issue_open": "2026-09-24",
+        "issue_close": "2026-09-28",
         "listing_date": null,
-        "price_band": "Rs.350 to Rs.375",
-        "issue_size_cr": 278.64,
-        "subscription_x": 0.29,
-        "issue_price": 375.0,
+        "price_band": "Rs.32 to Rs.34",
+        "issue_size_cr": 790.58,
+        "subscription_x": 0.58,
+        "issue_price": 34.0,
         "current_price": null,
         "gain_pct": null,
         "status": "Active",
         "stage": "IPO Open",
         "groww": {
           "match": {
-            "matched_name": "Armee Infotech Ltd",
+            "matched_name": "Moneyview Ltd",
             "confidence": 1.0,
             "stock_slug": null,
             "stock_url": null,
-            "ipo_slug": "armee-infotech-ipo",
-            "ipo_url": "https://groww.in/ipo/armee-infotech-ipo",
-            "isin": "INE0TWE01016",
+            "ipo_slug": "moneyview-ipo",
+            "ipo_url": "https://groww.in/ipo/moneyview-ipo",
+            "isin": "INE0PTN01011",
             "nse_code": null
           },
           "provenance": {
             "source_name": "Groww",
-            "source_url": "https://groww.in/ipo/armee-infotech-ipo",
-            "fetched_at": "2026-09-23T08:14:44+00:00",
-            "data_period": "2026-09-23T13:35:45",
+            "source_url": "https://groww.in/ipo/moneyview-ipo",
+            "fetched_at": "2026-09-24T08:04:44+00:00",
+            "data_period": "2026-09-24T13:25:55",
             "status": "Live"
           },
           "fundamentals": {
@@ -2327,131 +1931,53 @@
             "face_value": null
           },
           "subscription": {
-            "qib": 0.93,
-            "nii": 0.21,
-            "retail": 0.26,
+            "qib": 0.0,
+            "nii": 0.85,
+            "retail": 0.93,
             "employee": null,
-            "total": 0.34,
-            "as_of": "2026-09-23T13:35:45",
-            "source_url": "https://groww.in/ipo/armee-infotech-ipo",
+            "total": 0.65,
+            "as_of": "2026-09-24T13:25:55",
+            "source_url": "https://groww.in/ipo/moneyview-ipo",
             "status": "Live"
           },
           "ipo": {
             "board": "Mainboard",
             "type": null,
-            "open_date": "2026-09-23",
-            "close_date": "2026-09-25",
+            "open_date": "2026-09-24",
+            "close_date": "2026-09-28",
             "allotment_date": null,
             "listing_date": null,
-            "price_band": "Rs.350 to Rs.375",
-            "issue_price": 375.0,
-            "lot_size": 40.0,
-            "min_investment": 15000.0,
-            "issue_size_cr": 300.0,
+            "price_band": "Rs.32 to Rs.34",
+            "issue_price": 34.0,
+            "lot_size": 441.0,
+            "min_investment": 14994.0,
+            "issue_size_cr": 1091.68,
             "fresh_cr": null,
             "ofs_cr": null,
             "listing_price": null,
             "listing_gain_pct": null
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:44+00:00"
+          "fetched_at": "2026-09-24T08:04:44+00:00"
         }
       },
       {
-        "company_name": "Adroit Industries (India) Limited",
+        "company_name": "A-One Steels India Limited",
         "board": "Mainboard",
         "sector": null,
-        "symbol": "ADROITIND",
-        "issue_open": "2026-09-23",
-        "issue_close": "2026-09-25",
+        "symbol": "AONESTEELS",
+        "issue_open": "2026-09-24",
+        "issue_close": "2026-09-28",
         "listing_date": null,
-        "price_band": "Rs.126 to Rs.134",
-        "issue_size_cr": 105.5,
-        "subscription_x": 1.64,
-        "issue_price": 134.0,
+        "price_band": "Rs.385 to Rs.405",
+        "issue_size_cr": 299.09,
+        "subscription_x": 0.21,
+        "issue_price": 405.0,
         "current_price": null,
         "gain_pct": null,
         "status": "Active",
         "stage": "IPO Open",
         "groww": null
-      },
-      {
-        "company_name": "Elevate Campuses Limited",
-        "board": "Mainboard",
-        "sector": null,
-        "symbol": "ELEVATE",
-        "issue_open": "2026-09-23",
-        "issue_close": "2026-09-25",
-        "listing_date": null,
-        "price_band": "Rs.343 to Rs.362",
-        "issue_size_cr": 1218.98,
-        "subscription_x": 0.03,
-        "issue_price": 362.0,
-        "current_price": null,
-        "gain_pct": null,
-        "status": "Active",
-        "stage": "IPO Open",
-        "groww": {
-          "match": {
-            "matched_name": "Elevate Campuses Ltd",
-            "confidence": 1.0,
-            "stock_slug": null,
-            "stock_url": null,
-            "ipo_slug": "elevate-campuses-ipo",
-            "ipo_url": "https://groww.in/ipo/elevate-campuses-ipo",
-            "isin": "INE147X01013",
-            "nse_code": null
-          },
-          "provenance": {
-            "source_name": "Groww",
-            "source_url": "https://groww.in/ipo/elevate-campuses-ipo",
-            "fetched_at": "2026-09-23T08:14:50+00:00",
-            "data_period": "2026-09-23T13:35:49",
-            "status": "Live"
-          },
-          "fundamentals": {
-            "market_cap_cr": null,
-            "roe_pct": null,
-            "debt_equity": null,
-            "pe_ratio": null,
-            "pb_ratio": null,
-            "eps": null,
-            "book_value": null,
-            "dividend_yield_pct": null,
-            "industry_pe": null,
-            "promoter_hold_pct": null,
-            "face_value": null
-          },
-          "subscription": {
-            "qib": 0.08,
-            "nii": 0.13,
-            "retail": 0.09,
-            "employee": null,
-            "total": 0.09,
-            "as_of": "2026-09-23T13:35:49",
-            "source_url": "https://groww.in/ipo/elevate-campuses-ipo",
-            "status": "Live"
-          },
-          "ipo": {
-            "board": "Mainboard",
-            "type": null,
-            "open_date": "2026-09-23",
-            "close_date": "2026-09-25",
-            "allotment_date": null,
-            "listing_date": null,
-            "price_band": "Rs.343 to Rs.362",
-            "issue_price": 362.0,
-            "lot_size": 41.0,
-            "min_investment": 14842.0,
-            "issue_size_cr": 2100.0,
-            "fresh_cr": null,
-            "ofs_cr": null,
-            "listing_price": null,
-            "listing_gain_pct": null
-          },
-          "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:50+00:00"
-        }
       },
       {
         "company_name": "Swastika Infra Limited",
@@ -2463,7 +1989,7 @@
         "listing_date": null,
         "price_band": "Rs.175 to Rs.185",
         "issue_size_cr": 117.2,
-        "subscription_x": 0.42,
+        "subscription_x": 1.02,
         "issue_price": 185.0,
         "current_price": null,
         "gain_pct": null,
@@ -2483,8 +2009,8 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/ipo/swastika-infra-ipo",
-            "fetched_at": "2026-09-23T08:14:54+00:00",
-            "data_period": "2026-09-23T13:35:47",
+            "fetched_at": "2026-09-24T08:04:50+00:00",
+            "data_period": "2026-09-24T13:25:57",
             "status": "Live"
           },
           "fundamentals": {
@@ -2501,12 +2027,12 @@
             "face_value": null
           },
           "subscription": {
-            "qib": 0.0,
-            "nii": 0.93,
-            "retail": 0.41,
+            "qib": 0.69,
+            "nii": 2.12,
+            "retail": 1.2,
             "employee": null,
-            "total": 0.41,
-            "as_of": "2026-09-23T13:35:47",
+            "total": 1.25,
+            "as_of": "2026-09-24T13:25:57",
             "source_url": "https://groww.in/ipo/swastika-infra-ipo",
             "status": "Live"
           },
@@ -2528,7 +2054,181 @@
             "listing_gain_pct": null
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:54+00:00"
+          "fetched_at": "2026-09-24T08:04:50+00:00"
+        }
+      },
+      {
+        "company_name": "Adroit Industries (India) Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "ADROITIND",
+        "issue_open": "2026-09-23",
+        "issue_close": "2026-09-25",
+        "listing_date": null,
+        "price_band": "Rs.126 to Rs.134",
+        "issue_size_cr": 105.5,
+        "subscription_x": 6.99,
+        "issue_price": 134.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Active",
+        "stage": "IPO Open",
+        "groww": null
+      },
+      {
+        "company_name": "ArMee Infotech Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "ARMEE",
+        "issue_open": "2026-09-23",
+        "issue_close": "2026-09-25",
+        "listing_date": null,
+        "price_band": "Rs.350 to Rs.375",
+        "issue_size_cr": 278.64,
+        "subscription_x": 0.64,
+        "issue_price": 375.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Active",
+        "stage": "IPO Open",
+        "groww": {
+          "match": {
+            "matched_name": "Armee Infotech Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "armee-infotech-ipo",
+            "ipo_url": "https://groww.in/ipo/armee-infotech-ipo",
+            "isin": "INE0TWE01016",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/armee-infotech-ipo",
+            "fetched_at": "2026-09-24T08:04:55+00:00",
+            "data_period": "2026-09-24T13:25:56",
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": 0.94,
+            "nii": 0.6,
+            "retail": 0.98,
+            "employee": null,
+            "total": 0.88,
+            "as_of": "2026-09-24T13:25:56",
+            "source_url": "https://groww.in/ipo/armee-infotech-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-23",
+            "close_date": "2026-09-25",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.350 to Rs.375",
+            "issue_price": 375.0,
+            "lot_size": 40.0,
+            "min_investment": 15000.0,
+            "issue_size_cr": 300.0,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:04:55+00:00"
+        }
+      },
+      {
+        "company_name": "Elevate Campuses Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "ELEVATE",
+        "issue_open": "2026-09-23",
+        "issue_close": "2026-09-25",
+        "listing_date": null,
+        "price_band": "Rs.343 to Rs.362",
+        "issue_size_cr": 1218.98,
+        "subscription_x": 0.09,
+        "issue_price": 362.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Active",
+        "stage": "IPO Open",
+        "groww": {
+          "match": {
+            "matched_name": "Elevate Campuses Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "elevate-campuses-ipo",
+            "ipo_url": "https://groww.in/ipo/elevate-campuses-ipo",
+            "isin": "INE147X01013",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/elevate-campuses-ipo",
+            "fetched_at": "2026-09-24T08:04:59+00:00",
+            "data_period": "2026-09-24T13:26:00",
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": 0.18,
+            "nii": 0.31,
+            "retail": 0.19,
+            "employee": null,
+            "total": 0.22,
+            "as_of": "2026-09-24T13:26:00",
+            "source_url": "https://groww.in/ipo/elevate-campuses-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-23",
+            "close_date": "2026-09-25",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.343 to Rs.362",
+            "issue_price": 362.0,
+            "lot_size": 41.0,
+            "min_investment": 14842.0,
+            "issue_size_cr": 2100.0,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:04:59+00:00"
         }
       },
       {
@@ -2541,7 +2241,7 @@
         "listing_date": null,
         "price_band": "Rs.140 to Rs.148",
         "issue_size_cr": 501.76,
-        "subscription_x": 0.13,
+        "subscription_x": 0.33,
         "issue_price": 148.0,
         "current_price": null,
         "gain_pct": null,
@@ -2561,8 +2261,8 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/ipo/varmora-granito-ipo",
-            "fetched_at": "2026-09-23T08:14:57+00:00",
-            "data_period": "2026-09-23T13:35:45",
+            "fetched_at": "2026-09-24T08:05:03+00:00",
+            "data_period": "2026-09-24T13:25:55",
             "status": "Live"
           },
           "fundamentals": {
@@ -2579,12 +2279,12 @@
             "face_value": null
           },
           "subscription": {
-            "qib": 0.0,
-            "nii": 0.09,
-            "retail": 0.32,
+            "qib": 0.22,
+            "nii": 0.27,
+            "retail": 0.62,
             "employee": null,
-            "total": 0.18,
-            "as_of": "2026-09-23T13:35:45",
+            "total": 0.43,
+            "as_of": "2026-09-24T13:25:55",
             "source_url": "https://groww.in/ipo/varmora-granito-ipo",
             "status": "Live"
           },
@@ -2606,196 +2306,40 @@
             "listing_gain_pct": null
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:57+00:00"
+          "fetched_at": "2026-09-24T08:05:03+00:00"
         }
       },
       {
-        "company_name": "Pooja Logistics Limited",
+        "company_name": "Green Asia Impex Limited",
         "board": "SME",
         "sector": null,
-        "symbol": "POOJALOGIS",
-        "issue_open": "2026-09-23",
-        "issue_close": "2026-09-25",
-        "listing_date": null,
-        "price_band": null,
-        "issue_size_cr": null,
-        "subscription_x": 0.22,
-        "issue_price": null,
-        "current_price": null,
-        "gain_pct": null,
-        "status": "Active",
-        "stage": "IPO Open",
-        "groww": {
-          "match": {
-            "matched_name": "Pooja Logistics Ltd",
-            "confidence": 1.0,
-            "stock_slug": null,
-            "stock_url": null,
-            "ipo_slug": "pooja-logistics-ipo",
-            "ipo_url": "https://groww.in/ipo/pooja-logistics-ipo",
-            "isin": "INE1C2Q01017",
-            "nse_code": null
-          },
-          "provenance": {
-            "source_name": "Groww",
-            "source_url": "https://groww.in/ipo/pooja-logistics-ipo",
-            "fetched_at": "2026-09-23T08:15:01+00:00",
-            "data_period": "2026-09-23T13:25:45",
-            "status": "Live"
-          },
-          "fundamentals": {
-            "market_cap_cr": null,
-            "roe_pct": null,
-            "debt_equity": null,
-            "pe_ratio": null,
-            "pb_ratio": null,
-            "eps": null,
-            "book_value": null,
-            "dividend_yield_pct": null,
-            "industry_pe": null,
-            "promoter_hold_pct": null,
-            "face_value": null
-          },
-          "subscription": {
-            "qib": 0.0,
-            "nii": 0.13,
-            "retail": 0.25,
-            "employee": null,
-            "total": 0.16,
-            "as_of": "2026-09-23T13:25:45",
-            "source_url": "https://groww.in/ipo/pooja-logistics-ipo",
-            "status": "Live"
-          },
-          "ipo": {
-            "board": "SME",
-            "type": null,
-            "open_date": "2026-09-23",
-            "close_date": "2026-09-25",
-            "allotment_date": null,
-            "listing_date": null,
-            "price_band": "Rs.109 to Rs.115",
-            "issue_price": 115.0,
-            "lot_size": 1200.0,
-            "min_investment": 138000.0,
-            "issue_size_cr": 44.23,
-            "fresh_cr": null,
-            "ofs_cr": null,
-            "listing_price": null,
-            "listing_gain_pct": null
-          },
-          "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:15:01+00:00"
-        }
-      },
-      {
-        "company_name": "Coreintegra Consulting Services Limited",
-        "board": "SME",
-        "sector": null,
-        "symbol": "COREIN",
-        "issue_open": "2026-09-23",
-        "issue_close": "2026-09-25",
-        "listing_date": null,
-        "price_band": null,
-        "issue_size_cr": null,
-        "subscription_x": 0.11,
-        "issue_price": null,
-        "current_price": null,
-        "gain_pct": null,
-        "status": "Active",
-        "stage": "IPO Open",
-        "groww": {
-          "match": {
-            "matched_name": "Coreintegra Consulting Services Ltd",
-            "confidence": 1.0,
-            "stock_slug": null,
-            "stock_url": null,
-            "ipo_slug": "core-integra-consulting-ipo",
-            "ipo_url": "https://groww.in/ipo/core-integra-consulting-ipo",
-            "isin": "INE11ES01010",
-            "nse_code": null
-          },
-          "provenance": {
-            "source_name": "Groww",
-            "source_url": "https://groww.in/ipo/core-integra-consulting-ipo",
-            "fetched_at": "2026-09-23T08:15:05+00:00",
-            "data_period": "2026-09-23T13:35:47",
-            "status": "Live"
-          },
-          "fundamentals": {
-            "market_cap_cr": null,
-            "roe_pct": null,
-            "debt_equity": null,
-            "pe_ratio": null,
-            "pb_ratio": null,
-            "eps": null,
-            "book_value": null,
-            "dividend_yield_pct": null,
-            "industry_pe": null,
-            "promoter_hold_pct": null,
-            "face_value": null
-          },
-          "subscription": {
-            "qib": 1.05,
-            "nii": 0.0,
-            "retail": 0.02,
-            "employee": null,
-            "total": 0.11,
-            "as_of": "2026-09-23T13:35:47",
-            "source_url": "https://groww.in/ipo/core-integra-consulting-ipo",
-            "status": "Live"
-          },
-          "ipo": {
-            "board": "SME",
-            "type": null,
-            "open_date": "2026-09-23",
-            "close_date": "2026-09-25",
-            "allotment_date": null,
-            "listing_date": null,
-            "price_band": "Rs.74 to Rs.78",
-            "issue_price": 78.0,
-            "lot_size": 1600.0,
-            "min_investment": 124800.0,
-            "issue_size_cr": 21.99,
-            "fresh_cr": null,
-            "ofs_cr": null,
-            "listing_price": null,
-            "listing_gain_pct": null
-          },
-          "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:15:05+00:00"
-        }
-      },
-      {
-        "company_name": "Moneyview Limited",
-        "board": "Mainboard",
-        "sector": null,
-        "symbol": "MONEYVIEW",
+        "symbol": "GREENASIA",
         "issue_open": "2026-09-24",
         "issue_close": "2026-09-28",
         "listing_date": null,
-        "price_band": "Rs.32 to Rs.34",
-        "issue_size_cr": 1138.56,
-        "subscription_x": null,
-        "issue_price": 34.0,
+        "price_band": null,
+        "issue_size_cr": null,
+        "subscription_x": 0.01,
+        "issue_price": null,
         "current_price": null,
         "gain_pct": null,
-        "status": "Forthcoming",
-        "stage": "Upcoming",
+        "status": "Active",
+        "stage": "IPO Open",
         "groww": {
           "match": {
-            "matched_name": "Moneyview Ltd",
+            "matched_name": "Green Asia Impex Ltd",
             "confidence": 1.0,
             "stock_slug": null,
             "stock_url": null,
-            "ipo_slug": "moneyview-ipo",
-            "ipo_url": "https://groww.in/ipo/moneyview-ipo",
-            "isin": "INE0PTN01011",
+            "ipo_slug": "green-asia-impex-ipo",
+            "ipo_url": "https://groww.in/ipo/green-asia-impex-ipo",
+            "isin": "INE1WDS01018",
             "nse_code": null
           },
           "provenance": {
             "source_name": "Groww",
-            "source_url": "https://groww.in/ipo/moneyview-ipo",
-            "fetched_at": "2026-09-23T08:15:09+00:00",
+            "source_url": "https://groww.in/ipo/green-asia-impex-ipo",
+            "fetched_at": "2026-09-24T08:05:06+00:00",
             "data_period": null,
             "status": "Live"
           },
@@ -2819,47 +2363,437 @@
             "employee": null,
             "total": null,
             "as_of": null,
-            "source_url": "https://groww.in/ipo/moneyview-ipo",
+            "source_url": "https://groww.in/ipo/green-asia-impex-ipo",
             "status": "Live"
           },
           "ipo": {
-            "board": "Mainboard",
+            "board": "SME",
             "type": null,
             "open_date": "2026-09-24",
             "close_date": "2026-09-28",
             "allotment_date": null,
             "listing_date": null,
-            "price_band": "Rs.32 to Rs.34",
-            "issue_price": 34.0,
-            "lot_size": 441.0,
-            "min_investment": 14994.0,
-            "issue_size_cr": 1091.68,
+            "price_band": "Rs.85 to Rs.90",
+            "issue_price": 90.0,
+            "lot_size": 1600.0,
+            "min_investment": 144000.0,
+            "issue_size_cr": 60.1,
             "fresh_cr": null,
             "ofs_cr": null,
             "listing_price": null,
             "listing_gain_pct": null
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:15:09+00:00"
+          "fetched_at": "2026-09-24T08:05:06+00:00"
         }
       },
       {
-        "company_name": "A-One Steels India Limited",
+        "company_name": "Pooja Logistics Limited",
+        "board": "SME",
+        "sector": null,
+        "symbol": "POOJALOGIS",
+        "issue_open": "2026-09-23",
+        "issue_close": "2026-09-25",
+        "listing_date": null,
+        "price_band": null,
+        "issue_size_cr": null,
+        "subscription_x": 0.37,
+        "issue_price": null,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Active",
+        "stage": "IPO Open",
+        "groww": {
+          "match": {
+            "matched_name": "Pooja Logistics Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "pooja-logistics-ipo",
+            "ipo_url": "https://groww.in/ipo/pooja-logistics-ipo",
+            "isin": "INE1C2Q01017",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/pooja-logistics-ipo",
+            "fetched_at": "2026-09-24T08:05:10+00:00",
+            "data_period": "2026-09-24T13:25:58",
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": 0.0,
+            "nii": 0.21,
+            "retail": 0.66,
+            "employee": null,
+            "total": 0.36,
+            "as_of": "2026-09-24T13:25:58",
+            "source_url": "https://groww.in/ipo/pooja-logistics-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "SME",
+            "type": null,
+            "open_date": "2026-09-23",
+            "close_date": "2026-09-25",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.109 to Rs.115",
+            "issue_price": 115.0,
+            "lot_size": 1200.0,
+            "min_investment": 138000.0,
+            "issue_size_cr": 44.23,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:10+00:00"
+        }
+      },
+      {
+        "company_name": "Coreintegra Consulting Services Limited",
+        "board": "SME",
+        "sector": null,
+        "symbol": "COREIN",
+        "issue_open": "2026-09-23",
+        "issue_close": "2026-09-25",
+        "listing_date": null,
+        "price_band": null,
+        "issue_size_cr": null,
+        "subscription_x": 0.23,
+        "issue_price": null,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Active",
+        "stage": "IPO Open",
+        "groww": {
+          "match": {
+            "matched_name": "Coreintegra Consulting Services Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "core-integra-consulting-ipo",
+            "ipo_url": "https://groww.in/ipo/core-integra-consulting-ipo",
+            "isin": "INE11ES01010",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/core-integra-consulting-ipo",
+            "fetched_at": "2026-09-24T08:05:14+00:00",
+            "data_period": "2026-09-24T13:25:58",
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": 1.05,
+            "nii": 0.04,
+            "retail": 0.11,
+            "employee": null,
+            "total": 0.17,
+            "as_of": "2026-09-24T13:25:58",
+            "source_url": "https://groww.in/ipo/core-integra-consulting-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "SME",
+            "type": null,
+            "open_date": "2026-09-23",
+            "close_date": "2026-09-25",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.74 to Rs.78",
+            "issue_price": 78.0,
+            "lot_size": 1600.0,
+            "min_investment": 124800.0,
+            "issue_size_cr": 21.99,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:14+00:00"
+        }
+      },
+      {
+        "company_name": "Runwal Enterprises Limited",
         "board": "Mainboard",
         "sector": null,
-        "symbol": "AONESTEELS",
-        "issue_open": "2026-09-24",
-        "issue_close": "2026-09-28",
+        "symbol": "RUNWALENTR",
+        "issue_open": "2026-09-25",
+        "issue_close": "2026-09-29",
         "listing_date": null,
-        "price_band": "Rs.385 to Rs.405",
-        "issue_size_cr": 426.27,
+        "price_band": "Rs.290 to Rs.302",
+        "issue_size_cr": 520.87,
         "subscription_x": null,
-        "issue_price": 405.0,
+        "issue_price": 302.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Forthcoming",
+        "stage": "Upcoming",
+        "groww": {
+          "match": {
+            "matched_name": "Runwal Enterprises Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "runwal-enterprises-ipo",
+            "ipo_url": "https://groww.in/ipo/runwal-enterprises-ipo",
+            "isin": "INE804W01029",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/runwal-enterprises-ipo",
+            "fetched_at": "2026-09-24T08:05:18+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": null,
+            "nii": null,
+            "retail": null,
+            "employee": null,
+            "total": null,
+            "as_of": null,
+            "source_url": "https://groww.in/ipo/runwal-enterprises-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-25",
+            "close_date": "2026-09-29",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.290 to Rs.305",
+            "issue_price": 305.0,
+            "lot_size": 49.0,
+            "min_investment": 14945.0,
+            "issue_size_cr": 500.0,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:18+00:00"
+        }
+      },
+      {
+        "company_name": "AceVector Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "ACEVECTOR",
+        "issue_open": "2026-09-25",
+        "issue_close": "2026-09-29",
+        "listing_date": null,
+        "price_band": "Rs.30 to Rs.32",
+        "issue_size_cr": 439.13,
+        "subscription_x": null,
+        "issue_price": 32.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Forthcoming",
+        "stage": "Upcoming",
+        "groww": {
+          "match": {
+            "matched_name": "AceVector Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "acevector-ipo",
+            "ipo_url": "https://groww.in/ipo/acevector-ipo",
+            "isin": "INE580P01029",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/acevector-ipo",
+            "fetched_at": "2026-09-24T08:05:22+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": null,
+            "nii": null,
+            "retail": null,
+            "employee": null,
+            "total": null,
+            "as_of": null,
+            "source_url": "https://groww.in/ipo/acevector-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-25",
+            "close_date": "2026-09-29",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.30 to Rs.32",
+            "issue_price": 32.0,
+            "lot_size": 468.0,
+            "min_investment": 14976.0,
+            "issue_size_cr": 420.0,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:22+00:00"
+        }
+      },
+      {
+        "company_name": "Orient Cables (India) Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "ORIENTCABL",
+        "issue_open": "2026-09-25",
+        "issue_close": "2026-09-29",
+        "listing_date": null,
+        "price_band": "Rs.258 to Rs.272",
+        "issue_size_cr": 581.95,
+        "subscription_x": null,
+        "issue_price": 272.0,
         "current_price": null,
         "gain_pct": null,
         "status": "Forthcoming",
         "stage": "Upcoming",
         "groww": null
+      },
+      {
+        "company_name": "German Green Steel and Power Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "GERMAN",
+        "issue_open": "2026-09-25",
+        "issue_close": "2026-09-29",
+        "listing_date": null,
+        "price_band": "Rs.132 to Rs.139",
+        "issue_size_cr": 319.28,
+        "subscription_x": null,
+        "issue_price": 139.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Forthcoming",
+        "stage": "Upcoming",
+        "groww": {
+          "match": {
+            "matched_name": "German Green Steel & Power Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "german-green-steel-and-power-ipo",
+            "ipo_url": "https://groww.in/ipo/german-green-steel-and-power-ipo",
+            "isin": "INE0D4501011",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/german-green-steel-and-power-ipo",
+            "fetched_at": "2026-09-24T08:05:28+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": null,
+            "nii": null,
+            "retail": null,
+            "employee": null,
+            "total": null,
+            "as_of": null,
+            "source_url": "https://groww.in/ipo/german-green-steel-and-power-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "Mainboard",
+            "type": null,
+            "open_date": "2026-09-25",
+            "close_date": "2026-09-29",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.132 to Rs.139",
+            "issue_price": 139.0,
+            "lot_size": 107.0,
+            "min_investment": 14873.0,
+            "issue_size_cr": 303.9,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:28+00:00"
+        }
       },
       {
         "company_name": "Himalayan Solar Limited",
@@ -2877,7 +2811,67 @@
         "gain_pct": null,
         "status": "Forthcoming",
         "stage": "Upcoming",
-        "groww": null
+        "groww": {
+          "match": {
+            "matched_name": "Himalayan Solar Ltd",
+            "confidence": 1.0,
+            "stock_slug": null,
+            "stock_url": null,
+            "ipo_slug": "himalayan-solar-ipo",
+            "ipo_url": "https://groww.in/ipo/himalayan-solar-ipo",
+            "isin": "INE1B7I01014",
+            "nse_code": null
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/ipo/himalayan-solar-ipo",
+            "fetched_at": "2026-09-24T08:05:32+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": null,
+            "debt_equity": null,
+            "pe_ratio": null,
+            "pb_ratio": null,
+            "eps": null,
+            "book_value": null,
+            "dividend_yield_pct": null,
+            "industry_pe": null,
+            "promoter_hold_pct": null,
+            "face_value": null
+          },
+          "subscription": {
+            "qib": null,
+            "nii": null,
+            "retail": null,
+            "employee": null,
+            "total": null,
+            "as_of": null,
+            "source_url": "https://groww.in/ipo/himalayan-solar-ipo",
+            "status": "Live"
+          },
+          "ipo": {
+            "board": "SME",
+            "type": null,
+            "open_date": "2026-09-25",
+            "close_date": "2026-09-29",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.98 to Rs.103",
+            "issue_price": 103.0,
+            "lot_size": 1200.0,
+            "min_investment": 123600.0,
+            "issue_size_cr": 68.03,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": null,
+            "listing_gain_pct": null
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:32+00:00"
+        }
       },
       {
         "company_name": "Bench Mark Infotech Services Limited",
@@ -2899,6 +2893,190 @@
       }
     ],
     "recent_listings": [
+      {
+        "company_name": "Sonaselection India Limited",
+        "board": "Mainboard",
+        "sector": null,
+        "symbol": "SONA",
+        "issue_open": "2026-09-17",
+        "issue_close": "2026-09-21",
+        "listing_date": "2026-09-24",
+        "price_band": "Rs.94 to Rs.99",
+        "issue_size_cr": null,
+        "subscription_x": null,
+        "issue_price": 99.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Listed",
+        "stage": "Listed",
+        "groww": {
+          "match": {
+            "matched_name": "Sonaselection India Ltd.",
+            "confidence": 1.0,
+            "stock_slug": "sonaselection-india-ltd",
+            "stock_url": "https://groww.in/stocks/sonaselection-india-ltd",
+            "ipo_slug": null,
+            "ipo_url": null,
+            "isin": "INE0LLZ01011",
+            "nse_code": "SONA"
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/stocks/sonaselection-india-ltd",
+            "fetched_at": "2026-09-24T08:05:38+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": 32.66,
+            "debt_equity": 2.48,
+            "pe_ratio": 0.0,
+            "pb_ratio": 0.0,
+            "eps": 8.0,
+            "book_value": 24.49,
+            "dividend_yield_pct": 0.0,
+            "industry_pe": 32.5,
+            "promoter_hold_pct": null,
+            "face_value": 10.0
+          },
+          "subscription": null,
+          "ipo": null,
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:38+00:00"
+        }
+      },
+      {
+        "company_name": "SpectraA Technology Solutions Limited",
+        "board": "SME",
+        "sector": null,
+        "symbol": "SPECTRAA",
+        "issue_open": "2026-09-17",
+        "issue_close": "2026-09-21",
+        "listing_date": "2026-09-24",
+        "price_band": "Rs.112 to Rs.118",
+        "issue_size_cr": null,
+        "subscription_x": null,
+        "issue_price": 118.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Listed",
+        "stage": "Listed",
+        "groww": {
+          "match": {
+            "matched_name": "Spectraa Technology Solutions Ltd.",
+            "confidence": 1.0,
+            "stock_slug": "spectraa-technology-solutions-ltd",
+            "stock_url": "https://groww.in/stocks/spectraa-technology-solutions-ltd",
+            "ipo_slug": null,
+            "ipo_url": null,
+            "isin": "INE0GAN01010",
+            "nse_code": "SPECTRAA"
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/stocks/spectraa-technology-solutions-ltd",
+            "fetched_at": "2026-09-24T08:05:42+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": 46.51,
+            "debt_equity": 1.09,
+            "pe_ratio": 0.0,
+            "pb_ratio": 0.0,
+            "eps": 0.0,
+            "book_value": 0.0,
+            "dividend_yield_pct": 0.0,
+            "industry_pe": 46.95,
+            "promoter_hold_pct": null,
+            "face_value": 10.0
+          },
+          "subscription": null,
+          "ipo": null,
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:42+00:00"
+        }
+      },
+      {
+        "company_name": "Kheria Autocomp Limited",
+        "board": "SME",
+        "sector": null,
+        "symbol": "KHERIAAUTO",
+        "issue_open": "2026-09-17",
+        "issue_close": "2026-09-21",
+        "listing_date": "2026-09-24",
+        "price_band": "Rs.96 to Rs.101",
+        "issue_size_cr": null,
+        "subscription_x": null,
+        "issue_price": 101.0,
+        "current_price": null,
+        "gain_pct": null,
+        "status": "Listed",
+        "stage": "Listed",
+        "groww": {
+          "match": {
+            "matched_name": "Kheria Autocomp Ltd.",
+            "confidence": 1.0,
+            "stock_slug": "kheria-autocomp-ltd",
+            "stock_url": "https://groww.in/stocks/kheria-autocomp-ltd",
+            "ipo_slug": "kheria-autocomp-ipo",
+            "ipo_url": "https://groww.in/ipo/kheria-autocomp-ipo",
+            "isin": "INE0HOL01013",
+            "nse_code": "KHERIAAUTO"
+          },
+          "provenance": {
+            "source_name": "Groww",
+            "source_url": "https://groww.in/stocks/kheria-autocomp-ltd",
+            "fetched_at": "2026-09-24T08:05:47+00:00",
+            "data_period": null,
+            "status": "Live"
+          },
+          "fundamentals": {
+            "market_cap_cr": null,
+            "roe_pct": 28.9,
+            "debt_equity": 0.89,
+            "pe_ratio": 0.0,
+            "pb_ratio": 0.0,
+            "eps": 0.0,
+            "book_value": 35.13,
+            "dividend_yield_pct": 0.0,
+            "industry_pe": 46.81,
+            "promoter_hold_pct": null,
+            "face_value": 10.0
+          },
+          "subscription": {
+            "qib": 1.05,
+            "nii": 2.44,
+            "retail": 2.97,
+            "employee": null,
+            "total": 2.32,
+            "as_of": "2026-09-21T16:55:54",
+            "source_url": "https://groww.in/ipo/kheria-autocomp-ipo",
+            "status": "Final"
+          },
+          "ipo": {
+            "board": "SME",
+            "type": null,
+            "open_date": "2026-09-17",
+            "close_date": "2026-09-21",
+            "allotment_date": null,
+            "listing_date": null,
+            "price_band": "Rs.96 to Rs.101",
+            "issue_price": 101.0,
+            "lot_size": 1200.0,
+            "min_investment": 121200.0,
+            "issue_size_cr": 46.44,
+            "fresh_cr": null,
+            "ofs_cr": null,
+            "listing_price": 104.9,
+            "listing_gain_pct": 3.86
+          },
+          "financials_by_year": {},
+          "fetched_at": "2026-09-24T08:05:47+00:00"
+        }
+      },
       {
         "company_name": "Hero Motors Limited",
         "board": "Mainboard",
@@ -2929,21 +3107,21 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/hero-motors-ltd",
-            "fetched_at": "2026-09-23T08:14:09+00:00",
-            "data_period": null,
+            "fetched_at": "2026-09-24T08:04:22+00:00",
+            "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": null,
+            "market_cap_cr": 4474.0,
             "roe_pct": 9.18,
             "debt_equity": 0.99,
-            "pe_ratio": 0.0,
-            "pb_ratio": 0.0,
-            "eps": 13.67,
-            "book_value": 48.62,
+            "pe_ratio": 108.25,
+            "pb_ratio": 4.07,
+            "eps": 0.91,
+            "book_value": 24.2,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 38.66,
-            "promoter_hold_pct": null,
+            "industry_pe": 38.96,
+            "promoter_hold_pct": 61.63,
             "face_value": 10.0
           },
           "subscription": {
@@ -2973,8 +3151,30 @@
             "listing_price": 82.0,
             "listing_gain_pct": -2.38
           },
-          "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:09+00:00"
+          "financials_by_year": {
+            "FY2024": {
+              "fiscal_year": "FY2024",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 1083.42,
+              "pat_cr": 17.04,
+              "net_worth_cr": 374.82
+            },
+            "FY2025": {
+              "fiscal_year": "FY2025",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 1111.23,
+              "pat_cr": 32.8,
+              "net_worth_cr": 426.01
+            },
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 1216.74,
+              "pat_cr": 41.17,
+              "net_worth_cr": 481.01
+            }
+          },
+          "fetched_at": "2026-09-24T08:04:22+00:00"
         }
       },
       {
@@ -3007,21 +3207,21 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/ss-retail-ltd",
-            "fetched_at": "2026-09-23T08:14:25+00:00",
-            "data_period": "Dec '25",
+            "fetched_at": "2026-09-24T08:04:38+00:00",
+            "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": null,
-            "roe_pct": 0.0,
-            "debt_equity": 0.85,
-            "pe_ratio": 0.0,
-            "pb_ratio": 0.0,
-            "eps": 0.0,
-            "book_value": 34.36,
+            "market_cap_cr": 5690.0,
+            "roe_pct": 26.54,
+            "debt_equity": 1.06,
+            "pe_ratio": 96.0,
+            "pb_ratio": 9.71,
+            "eps": 7.97,
+            "book_value": 78.8,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 67.16,
-            "promoter_hold_pct": 75.74,
+            "industry_pe": 67.51,
+            "promoter_hold_pct": 64.86,
             "face_value": 10.0
           },
           "subscription": {
@@ -3051,8 +3251,16 @@
             "listing_price": 624.0,
             "listing_gain_pct": 47.17
           },
-          "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:25+00:00"
+          "financials_by_year": {
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 2352.85,
+              "pat_cr": 59.28,
+              "net_worth_cr": 231.34
+            }
+          },
+          "fetched_at": "2026-09-24T08:04:38+00:00"
         }
       },
       {
@@ -3085,33 +3293,33 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/jindal-supreme-india-ltd",
-            "fetched_at": "2026-09-23T08:14:15+00:00",
-            "data_period": null,
+            "fetched_at": "2026-09-24T08:04:28+00:00",
+            "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": null,
+            "market_cap_cr": 653.0,
             "roe_pct": 0.0,
             "debt_equity": 0.91,
             "pe_ratio": 0.0,
-            "pb_ratio": 0.0,
+            "pb_ratio": 3.32,
             "eps": 0.0,
-            "book_value": 37.58,
+            "book_value": 38.55,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 22.5,
-            "promoter_hold_pct": null,
+            "industry_pe": 22.45,
+            "promoter_hold_pct": 73.68,
             "face_value": 10.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:15+00:00"
+          "fetched_at": "2026-09-24T08:04:28+00:00"
         }
       },
       {
         "company_name": "Manika Plastech Limited",
         "board": "Mainboard",
-        "sector": "Unclassified",
+        "sector": null,
         "symbol": "MANIKA",
         "issue_open": "2026-09-11",
         "issue_close": "2026-09-16",
@@ -3138,20 +3346,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/manika-plastech-ltd",
-            "fetched_at": "2026-09-23T08:14:32+00:00",
+            "fetched_at": "2026-09-24T08:05:53+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 484.0,
+            "market_cap_cr": 495.0,
             "roe_pct": 15.18,
             "debt_equity": 0.66,
-            "pe_ratio": 21.65,
-            "pb_ratio": 2.02,
+            "pe_ratio": 22.13,
+            "pb_ratio": 2.06,
             "eps": 1.92,
             "book_value": 20.61,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 36.74,
+            "industry_pe": 36.37,
             "promoter_hold_pct": 74.95,
             "face_value": 2.0
           },
@@ -3183,13 +3391,6 @@
             "listing_gain_pct": 0.0
           },
           "financials_by_year": {
-            "FY2021": {
-              "fiscal_year": "FY2021",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 268.2,
-              "pat_cr": 6.99,
-              "net_worth_cr": 98.24
-            },
             "FY2022": {
               "fiscal_year": "FY2022",
               "basis": "CONSOLIDATED",
@@ -3217,9 +3418,16 @@
               "revenue_cr": 412.59,
               "pat_cr": 19.33,
               "net_worth_cr": 125.17
+            },
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 437.26,
+              "pat_cr": 22.4,
+              "net_worth_cr": 147.62
             }
           },
-          "fetched_at": "2026-09-23T08:14:32+00:00"
+          "fetched_at": "2026-09-24T08:05:53+00:00"
         }
       },
       {
@@ -3252,20 +3460,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/motilal-oswal-financial-services-ltd",
-            "fetched_at": "2026-09-23T08:15:19+00:00",
+            "fetched_at": "2026-09-24T08:05:59+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 60660.0,
+            "market_cap_cr": 62710.0,
             "roe_pct": 14.5,
             "debt_equity": 1.65,
-            "pe_ratio": 30.59,
-            "pb_ratio": 4.71,
+            "pe_ratio": 31.62,
+            "pb_ratio": 4.87,
             "eps": 32.89,
             "book_value": 213.74,
-            "dividend_yield_pct": 0.6,
-            "industry_pe": 33.7,
+            "dividend_yield_pct": 0.58,
+            "industry_pe": 33.63,
             "promoter_hold_pct": 67.2,
             "face_value": 1.0
           },
@@ -3308,7 +3516,7 @@
               "net_worth_cr": 12952.17
             }
           },
-          "fetched_at": "2026-09-23T08:15:19+00:00"
+          "fetched_at": "2026-09-24T08:05:59+00:00"
         }
       },
       {
@@ -3341,20 +3549,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/pnb-housing-finance-ltd",
-            "fetched_at": "2026-09-23T08:15:23+00:00",
+            "fetched_at": "2026-09-24T08:06:03+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 29356.0,
+            "market_cap_cr": 29732.0,
             "roe_pct": 11.92,
             "debt_equity": 3.7,
-            "pe_ratio": 12.68,
-            "pb_ratio": 1.53,
+            "pe_ratio": 12.84,
+            "pb_ratio": 1.55,
             "eps": 88.77,
             "book_value": 736.93,
-            "dividend_yield_pct": 0.71,
-            "industry_pe": 19.01,
+            "dividend_yield_pct": 0.7,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 28.03,
             "face_value": 10.0
           },
@@ -3397,7 +3605,7 @@
               "net_worth_cr": 19219.13
             }
           },
-          "fetched_at": "2026-09-23T08:15:23+00:00"
+          "fetched_at": "2026-09-24T08:06:03+00:00"
         }
       },
       {
@@ -3430,20 +3638,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/veegaland-developers-ltd",
-            "fetched_at": "2026-09-23T08:15:27+00:00",
+            "fetched_at": "2026-09-24T08:06:07+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 681.0,
+            "market_cap_cr": 695.0,
             "roe_pct": 9.97,
             "debt_equity": 0.32,
             "pe_ratio": 0.0,
-            "pb_ratio": 1.43,
+            "pb_ratio": 1.46,
             "eps": 0.0,
             "book_value": 97.83,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 48.43,
+            "industry_pe": 48.85,
             "promoter_hold_pct": 63.69,
             "face_value": 10.0
           },
@@ -3475,7 +3683,7 @@
             "listing_gain_pct": 10.0
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:15:27+00:00"
+          "fetched_at": "2026-09-24T08:06:07+00:00"
         }
       },
       {
@@ -3508,20 +3716,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/manipal-payment-and-identity-solutions-ltd",
-            "fetched_at": "2026-09-23T08:14:18+00:00",
+            "fetched_at": "2026-09-24T08:04:32+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 7834.0,
+            "market_cap_cr": 8653.0,
             "roe_pct": 32.01,
             "debt_equity": 0.19,
-            "pe_ratio": 30.92,
-            "pb_ratio": 7.05,
+            "pe_ratio": 34.15,
+            "pb_ratio": 7.78,
             "eps": 10.93,
             "book_value": 47.97,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 19.32,
+            "industry_pe": 19.17,
             "promoter_hold_pct": 53.92,
             "face_value": 2.0
           },
@@ -3553,13 +3761,13 @@
             "listing_gain_pct": -2.65
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:14:18+00:00"
+          "fetched_at": "2026-09-24T08:04:32+00:00"
         }
       },
       {
         "company_name": "Karamtara Engineering Limited",
         "board": "Mainboard",
-        "sector": null,
+        "sector": "Industrials",
         "symbol": "KARAMTARA",
         "issue_open": "2026-09-09",
         "issue_close": "2026-09-11",
@@ -3586,20 +3794,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/karamtara-engineering-ltd",
-            "fetched_at": "2026-09-23T08:15:33+00:00",
+            "fetched_at": "2026-09-24T08:04:04+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 11738.0,
+            "market_cap_cr": 11652.0,
             "roe_pct": 18.75,
             "debt_equity": 0.91,
-            "pe_ratio": 51.3,
-            "pb_ratio": 6.19,
+            "pe_ratio": 50.92,
+            "pb_ratio": 6.14,
             "eps": 7.11,
             "book_value": 58.96,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 47.74,
+            "industry_pe": 47.26,
             "promoter_hold_pct": 82.01,
             "face_value": 10.0
           },
@@ -3667,13 +3875,13 @@
               "net_worth_cr": 1219.92
             }
           },
-          "fetched_at": "2026-09-23T08:15:33+00:00"
+          "fetched_at": "2026-09-24T08:04:04+00:00"
         }
       },
       {
         "company_name": "LCC Projects Limited",
         "board": "Mainboard",
-        "sector": "Unclassified",
+        "sector": null,
         "symbol": "LCCPROJECT",
         "issue_open": "2026-09-09",
         "issue_close": "2026-09-11",
@@ -3700,20 +3908,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/lcc-projects-ltd",
-            "fetched_at": "2026-09-23T08:14:38+00:00",
+            "fetched_at": "2026-09-24T08:06:13+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 4276.0,
+            "market_cap_cr": 4249.0,
             "roe_pct": 31.9,
             "debt_equity": 0.97,
-            "pe_ratio": 14.92,
-            "pb_ratio": 3.73,
+            "pe_ratio": 14.83,
+            "pb_ratio": 3.71,
             "eps": 9.89,
             "book_value": 39.58,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 24.2,
+            "industry_pe": 24.1,
             "promoter_hold_pct": 89.9,
             "face_value": 5.0
           },
@@ -3774,7 +3982,7 @@
               "net_worth_cr": 893.25
             }
           },
-          "fetched_at": "2026-09-23T08:14:38+00:00"
+          "fetched_at": "2026-09-24T08:06:13+00:00"
         }
       },
       {
@@ -3807,16 +4015,16 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/rentomojo-ltd",
-            "fetched_at": "2026-09-23T08:15:40+00:00",
+            "fetched_at": "2026-09-24T08:06:18+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 5458.0,
+            "market_cap_cr": 5430.0,
             "roe_pct": 35.26,
             "debt_equity": 0.79,
-            "pe_ratio": 52.32,
-            "pb_ratio": 12.08,
+            "pe_ratio": 52.05,
+            "pb_ratio": 12.02,
             "eps": 10.02,
             "book_value": 43.4,
             "dividend_yield_pct": 0.0,
@@ -3852,7 +4060,7 @@
             "listing_gain_pct": 19.42
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:15:40+00:00"
+          "fetched_at": "2026-09-24T08:06:18+00:00"
         }
       },
       {
@@ -3885,20 +4093,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/steamhouse-india-ltd",
-            "fetched_at": "2026-09-23T08:15:46+00:00",
+            "fetched_at": "2026-09-24T08:06:24+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 3102.0,
+            "market_cap_cr": 3067.0,
             "roe_pct": 22.36,
             "debt_equity": 1.94,
-            "pe_ratio": 80.15,
-            "pb_ratio": 5.39,
+            "pe_ratio": 79.26,
+            "pb_ratio": 5.33,
             "eps": 1.4,
             "book_value": 20.83,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 37.63,
+            "industry_pe": 37.62,
             "promoter_hold_pct": 77.96,
             "face_value": 2.0
           },
@@ -3945,7 +4153,7 @@
               "net_worth_cr": 172.77
             }
           },
-          "fetched_at": "2026-09-23T08:15:46+00:00"
+          "fetched_at": "2026-09-24T08:06:24+00:00"
         }
       },
       {
@@ -3978,20 +4186,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/asset-reconstruction-company-india-ltd",
-            "fetched_at": "2026-09-23T08:15:52+00:00",
+            "fetched_at": "2026-09-24T08:06:30+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 4516.0,
+            "market_cap_cr": 4890.0,
             "roe_pct": null,
             "debt_equity": null,
-            "pe_ratio": 14.32,
-            "pb_ratio": 1.19,
+            "pe_ratio": 15.5,
+            "pb_ratio": 1.29,
             "eps": 9.71,
             "book_value": 116.38,
-            "dividend_yield_pct": 0.72,
-            "industry_pe": 19.01,
+            "dividend_yield_pct": 0.66,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 77.45,
             "face_value": 10.0
           },
@@ -4034,7 +4242,7 @@
               "net_worth_cr": 2955.21
             }
           },
-          "fetched_at": "2026-09-23T08:15:52+00:00"
+          "fetched_at": "2026-09-24T08:06:30+00:00"
         }
       },
       {
@@ -4067,20 +4275,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/vinod-texworld-ltd",
-            "fetched_at": "2026-09-23T08:15:56+00:00",
+            "fetched_at": "2026-09-24T08:06:34+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 124.0,
+            "market_cap_cr": 118.0,
             "roe_pct": 24.31,
             "debt_equity": 1.65,
             "pe_ratio": 0.0,
-            "pb_ratio": 1.45,
+            "pb_ratio": 1.37,
             "eps": 0.0,
             "book_value": 53.0,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 50.04,
+            "industry_pe": 49.64,
             "promoter_hold_pct": 66.84,
             "face_value": 10.0
           },
@@ -4112,7 +4320,7 @@
             "listing_gain_pct": 0.0
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:15:56+00:00"
+          "fetched_at": "2026-09-24T08:06:34+00:00"
         }
       },
       {
@@ -4145,20 +4353,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/glass-wall-systems-india-ltd",
-            "fetched_at": "2026-09-23T08:16:02+00:00",
+            "fetched_at": "2026-09-24T08:06:40+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 2720.0,
+            "market_cap_cr": 2522.0,
             "roe_pct": 32.24,
             "debt_equity": 0.03,
-            "pe_ratio": 32.46,
-            "pb_ratio": 8.5,
+            "pe_ratio": 30.09,
+            "pb_ratio": 7.88,
             "eps": 9.53,
             "book_value": 36.38,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 24.43,
+            "industry_pe": 24.54,
             "promoter_hold_pct": 53.22,
             "face_value": 2.0
           },
@@ -4187,7 +4395,7 @@
               "net_worth_cr": 259.88
             }
           },
-          "fetched_at": "2026-09-23T08:16:02+00:00"
+          "fetched_at": "2026-09-24T08:06:40+00:00"
         }
       },
       {
@@ -4220,20 +4428,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/kanohar-electricals-ltd",
-            "fetched_at": "2026-09-23T08:16:06+00:00",
+            "fetched_at": "2026-09-24T08:06:44+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 6894.0,
+            "market_cap_cr": 7187.0,
             "roe_pct": 34.8,
             "debt_equity": 0.1,
-            "pe_ratio": 53.15,
-            "pb_ratio": 10.25,
+            "pe_ratio": 55.41,
+            "pb_ratio": 10.68,
             "eps": 16.38,
             "book_value": 84.97,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 57.79,
+            "industry_pe": 57.22,
             "promoter_hold_pct": 74.65,
             "face_value": 2.0
           },
@@ -4265,7 +4473,7 @@
             "listing_gain_pct": 8.47
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:16:06+00:00"
+          "fetched_at": "2026-09-24T08:06:44+00:00"
         }
       },
       {
@@ -4298,20 +4506,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/prasol-chemicals-ltd",
-            "fetched_at": "2026-09-23T08:16:12+00:00",
+            "fetched_at": "2026-09-24T08:06:51+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 4171.0,
+            "market_cap_cr": 4387.0,
             "roe_pct": 18.53,
             "debt_equity": 0.25,
-            "pe_ratio": 50.16,
-            "pb_ratio": 7.89,
+            "pe_ratio": 52.76,
+            "pb_ratio": 8.3,
             "eps": 14.05,
             "book_value": 89.3,
-            "dividend_yield_pct": 0.17,
-            "industry_pe": 40.34,
+            "dividend_yield_pct": 0.16,
+            "industry_pe": 40.24,
             "promoter_hold_pct": 75.25,
             "face_value": 2.0
           },
@@ -4365,7 +4573,7 @@
               "net_worth_cr": 367.47
             }
           },
-          "fetched_at": "2026-09-23T08:16:12+00:00"
+          "fetched_at": "2026-09-24T08:06:51+00:00"
         }
       },
       {
@@ -4398,33 +4606,26 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/indiabulls-housing-finance-ltd",
-            "fetched_at": "2026-09-23T08:16:18+00:00",
+            "fetched_at": "2026-09-24T08:06:57+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 16535.0,
-            "roe_pct": -5.51,
-            "debt_equity": 2.42,
+            "market_cap_cr": 16773.0,
+            "roe_pct": -3.42,
+            "debt_equity": 2.73,
             "pe_ratio": null,
-            "pb_ratio": 0.88,
-            "eps": -66.03,
-            "book_value": 162.29,
+            "pb_ratio": 0.94,
+            "eps": -62.29,
+            "book_value": 154.36,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 23.23,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 28.34,
             "face_value": 2.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {
-            "FY2021": {
-              "fiscal_year": "FY2021",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10030.12,
-              "pat_cr": 1201.59,
-              "net_worth_cr": 16133.86
-            },
             "FY2022": {
               "fiscal_year": "FY2022",
               "basis": "CONSOLIDATED",
@@ -4452,9 +4653,16 @@
               "revenue_cr": 8683.25,
               "pat_cr": -1807.46,
               "net_worth_cr": 21822.45
+            },
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 8190.23,
+              "pat_cr": -7144.56,
+              "net_worth_cr": 18991.47
             }
           },
-          "fetched_at": "2026-09-23T08:16:18+00:00"
+          "fetched_at": "2026-09-24T08:06:57+00:00"
         }
       },
       {
@@ -4487,7 +4695,7 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/dar-credit-capital-ltd",
-            "fetched_at": "2026-09-23T08:16:22+00:00",
+            "fetched_at": "2026-09-24T08:07:01+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
@@ -4500,21 +4708,21 @@
             "eps": 7.18,
             "book_value": 74.18,
             "dividend_yield_pct": 2.47,
-            "industry_pe": 23.23,
+            "industry_pe": 23.01,
             "promoter_hold_pct": 69.14,
             "face_value": 10.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:16:22+00:00"
+          "fetched_at": "2026-09-24T08:07:01+00:00"
         }
       },
       {
         "company_name": "Sammaan Capital Limited",
         "board": "Mainboard",
         "sector": null,
-        "symbol": "975SCL35",
+        "symbol": "SCL003",
         "issue_open": "2025-02-27",
         "issue_close": "2025-03-12",
         "listing_date": "2026-09-16",
@@ -4540,33 +4748,26 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/indiabulls-housing-finance-ltd",
-            "fetched_at": "2026-09-23T08:16:18+00:00",
+            "fetched_at": "2026-09-24T08:06:57+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 16535.0,
-            "roe_pct": -5.51,
-            "debt_equity": 2.42,
+            "market_cap_cr": 16773.0,
+            "roe_pct": -3.42,
+            "debt_equity": 2.73,
             "pe_ratio": null,
-            "pb_ratio": 0.88,
-            "eps": -66.03,
-            "book_value": 162.29,
+            "pb_ratio": 0.94,
+            "eps": -62.29,
+            "book_value": 154.36,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 23.23,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 28.34,
             "face_value": 2.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {
-            "FY2021": {
-              "fiscal_year": "FY2021",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10030.12,
-              "pat_cr": 1201.59,
-              "net_worth_cr": 16133.86
-            },
             "FY2022": {
               "fiscal_year": "FY2022",
               "basis": "CONSOLIDATED",
@@ -4594,16 +4795,23 @@
               "revenue_cr": 8683.25,
               "pat_cr": -1807.46,
               "net_worth_cr": 21822.45
+            },
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 8190.23,
+              "pat_cr": -7144.56,
+              "net_worth_cr": 18991.47
             }
           },
-          "fetched_at": "2026-09-23T08:16:18+00:00"
+          "fetched_at": "2026-09-24T08:06:57+00:00"
         }
       },
       {
         "company_name": "Sammaan Capital Limited",
         "board": "Mainboard",
         "sector": null,
-        "symbol": "975SCL35",
+        "symbol": "SCL19325A",
         "issue_open": "2024-12-09",
         "issue_close": "2024-12-20",
         "listing_date": "2026-09-16",
@@ -4629,33 +4837,26 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/indiabulls-housing-finance-ltd",
-            "fetched_at": "2026-09-23T08:16:18+00:00",
+            "fetched_at": "2026-09-24T08:06:57+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 16535.0,
-            "roe_pct": -5.51,
-            "debt_equity": 2.42,
+            "market_cap_cr": 16773.0,
+            "roe_pct": -3.42,
+            "debt_equity": 2.73,
             "pe_ratio": null,
-            "pb_ratio": 0.88,
-            "eps": -66.03,
-            "book_value": 162.29,
+            "pb_ratio": 0.94,
+            "eps": -62.29,
+            "book_value": 154.36,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 23.23,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 28.34,
             "face_value": 2.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {
-            "FY2021": {
-              "fiscal_year": "FY2021",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10030.12,
-              "pat_cr": 1201.59,
-              "net_worth_cr": 16133.86
-            },
             "FY2022": {
               "fiscal_year": "FY2022",
               "basis": "CONSOLIDATED",
@@ -4683,16 +4884,23 @@
               "revenue_cr": 8683.25,
               "pat_cr": -1807.46,
               "net_worth_cr": 21822.45
+            },
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 8190.23,
+              "pat_cr": -7144.56,
+              "net_worth_cr": 18991.47
             }
           },
-          "fetched_at": "2026-09-23T08:16:18+00:00"
+          "fetched_at": "2026-09-24T08:06:57+00:00"
         }
       },
       {
         "company_name": "Sammaan Capital Limited",
         "board": "Mainboard",
         "sector": null,
-        "symbol": "975SCL35",
+        "symbol": "SCL19325A",
         "issue_open": "2024-09-06",
         "issue_close": "2024-09-19",
         "listing_date": "2026-09-16",
@@ -4718,33 +4926,26 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/indiabulls-housing-finance-ltd",
-            "fetched_at": "2026-09-23T08:16:18+00:00",
+            "fetched_at": "2026-09-24T08:06:57+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 16535.0,
-            "roe_pct": -5.51,
-            "debt_equity": 2.42,
+            "market_cap_cr": 16773.0,
+            "roe_pct": -3.42,
+            "debt_equity": 2.73,
             "pe_ratio": null,
-            "pb_ratio": 0.88,
-            "eps": -66.03,
-            "book_value": 162.29,
+            "pb_ratio": 0.94,
+            "eps": -62.29,
+            "book_value": 154.36,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 23.23,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 28.34,
             "face_value": 2.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {
-            "FY2021": {
-              "fiscal_year": "FY2021",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10030.12,
-              "pat_cr": 1201.59,
-              "net_worth_cr": 16133.86
-            },
             "FY2022": {
               "fiscal_year": "FY2022",
               "basis": "CONSOLIDATED",
@@ -4772,9 +4973,16 @@
               "revenue_cr": 8683.25,
               "pat_cr": -1807.46,
               "net_worth_cr": 21822.45
+            },
+            "FY2026": {
+              "fiscal_year": "FY2026",
+              "basis": "CONSOLIDATED",
+              "revenue_cr": 8190.23,
+              "pat_cr": -7144.56,
+              "net_worth_cr": 18991.47
             }
           },
-          "fetched_at": "2026-09-23T08:16:18+00:00"
+          "fetched_at": "2026-09-24T08:06:57+00:00"
         }
       },
       {
@@ -4807,27 +5015,27 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/akme-fintrade-india-ltd",
-            "fetched_at": "2026-09-23T08:16:26+00:00",
+            "fetched_at": "2026-09-24T08:07:05+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 367.0,
+            "market_cap_cr": 361.0,
             "roe_pct": 9.98,
             "debt_equity": 1.19,
-            "pe_ratio": 8.27,
-            "pb_ratio": 0.86,
+            "pe_ratio": 8.12,
+            "pb_ratio": 0.85,
             "eps": 1.01,
             "book_value": 9.68,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 23.23,
+            "industry_pe": 23.01,
             "promoter_hold_pct": 39.02,
             "face_value": 1.0
           },
           "subscription": null,
           "ipo": null,
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:16:26+00:00"
+          "fetched_at": "2026-09-24T08:07:05+00:00"
         }
       },
       {
@@ -4860,20 +5068,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/pranav-constructions-ltd",
-            "fetched_at": "2026-09-23T08:16:32+00:00",
+            "fetched_at": "2026-09-24T08:07:09+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 1159.0,
+            "market_cap_cr": 1192.0,
             "roe_pct": 28.91,
             "debt_equity": 1.08,
-            "pe_ratio": 16.26,
-            "pb_ratio": 2.06,
+            "pe_ratio": 16.72,
+            "pb_ratio": 2.12,
             "eps": 6.33,
             "book_value": 49.93,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 24.43,
+            "industry_pe": 24.54,
             "promoter_hold_pct": 49.03,
             "face_value": 10.0
           },
@@ -4927,7 +5135,7 @@
               "net_worth_cr": 246.7
             }
           },
-          "fetched_at": "2026-09-23T08:16:32+00:00"
+          "fetched_at": "2026-09-24T08:07:09+00:00"
         }
       },
       {
@@ -4960,20 +5168,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/qualiance-international-ltd",
-            "fetched_at": "2026-09-23T08:16:39+00:00",
+            "fetched_at": "2026-09-24T08:07:15+00:00",
             "data_period": "Sep '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 234.0,
+            "market_cap_cr": 246.0,
             "roe_pct": 34.25,
             "debt_equity": 0.82,
             "pe_ratio": 0.0,
-            "pb_ratio": 3.35,
+            "pb_ratio": 3.51,
             "eps": 0.0,
             "book_value": 51.92,
             "dividend_yield_pct": 0.0,
-            "industry_pe": 50.04,
+            "industry_pe": 49.64,
             "promoter_hold_pct": 63.66,
             "face_value": 10.0
           },
@@ -5005,7 +5213,7 @@
             "listing_gain_pct": 77.09
           },
           "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:16:39+00:00"
+          "fetched_at": "2026-09-24T08:07:15+00:00"
         }
       },
       {
@@ -5038,20 +5246,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/iifl-holdings-ltd",
-            "fetched_at": "2026-09-23T08:16:45+00:00",
+            "fetched_at": "2026-09-24T08:07:22+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 26347.0,
+            "market_cap_cr": 26981.0,
             "roe_pct": 11.93,
             "debt_equity": 5.01,
-            "pe_ratio": 11.68,
-            "pb_ratio": 1.89,
+            "pe_ratio": 11.96,
+            "pb_ratio": 1.94,
             "eps": 52.85,
             "book_value": 326.15,
-            "dividend_yield_pct": 0.65,
-            "industry_pe": 19.01,
+            "dividend_yield_pct": 0.63,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 24.85,
             "face_value": 2.0
           },
@@ -5094,7 +5302,7 @@
               "net_worth_cr": 15619.09
             }
           },
-          "fetched_at": "2026-09-23T08:16:45+00:00"
+          "fetched_at": "2026-09-24T08:07:22+00:00"
         }
       },
       {
@@ -5127,20 +5335,20 @@
           "provenance": {
             "source_name": "Groww",
             "source_url": "https://groww.in/stocks/iifl-holdings-ltd",
-            "fetched_at": "2026-09-23T08:16:45+00:00",
+            "fetched_at": "2026-09-24T08:07:22+00:00",
             "data_period": "Jun '26",
             "status": "Live"
           },
           "fundamentals": {
-            "market_cap_cr": 26347.0,
+            "market_cap_cr": 26981.0,
             "roe_pct": 11.93,
             "debt_equity": 5.01,
-            "pe_ratio": 11.68,
-            "pb_ratio": 1.89,
+            "pe_ratio": 11.96,
+            "pb_ratio": 1.94,
             "eps": 52.85,
             "book_value": 326.15,
-            "dividend_yield_pct": 0.65,
-            "industry_pe": 19.01,
+            "dividend_yield_pct": 0.63,
+            "industry_pe": 18.83,
             "promoter_hold_pct": 24.85,
             "face_value": 2.0
           },
@@ -5183,243 +5391,48 @@
               "net_worth_cr": 15619.09
             }
           },
-          "fetched_at": "2026-09-23T08:16:45+00:00"
-        }
-      },
-      {
-        "company_name": "IIFL Finance Limited",
-        "board": "Mainboard",
-        "sector": null,
-        "symbol": "935IIFL33",
-        "issue_open": "2023-06-09",
-        "issue_close": "2023-06-22",
-        "listing_date": "2026-09-11",
-        "price_band": "Rs.1000",
-        "issue_size_cr": null,
-        "subscription_x": null,
-        "issue_price": 1000.0,
-        "current_price": null,
-        "gain_pct": null,
-        "status": "Listed",
-        "stage": "Listed",
-        "groww": {
-          "match": {
-            "matched_name": "IIFL Finance Ltd.",
-            "confidence": 1.0,
-            "stock_slug": "iifl-holdings-ltd",
-            "stock_url": "https://groww.in/stocks/iifl-holdings-ltd",
-            "ipo_slug": null,
-            "ipo_url": null,
-            "isin": "INE530B01024",
-            "nse_code": "IIFL"
-          },
-          "provenance": {
-            "source_name": "Groww",
-            "source_url": "https://groww.in/stocks/iifl-holdings-ltd",
-            "fetched_at": "2026-09-23T08:16:45+00:00",
-            "data_period": "Jun '26",
-            "status": "Live"
-          },
-          "fundamentals": {
-            "market_cap_cr": 26347.0,
-            "roe_pct": 11.93,
-            "debt_equity": 5.01,
-            "pe_ratio": 11.68,
-            "pb_ratio": 1.89,
-            "eps": 52.85,
-            "book_value": 326.15,
-            "dividend_yield_pct": 0.65,
-            "industry_pe": 19.01,
-            "promoter_hold_pct": 24.85,
-            "face_value": 2.0
-          },
-          "subscription": null,
-          "ipo": null,
-          "financials_by_year": {
-            "FY2022": {
-              "fiscal_year": "FY2022",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 7023.61,
-              "pat_cr": 1188.25,
-              "net_worth_cr": 6469.73
-            },
-            "FY2023": {
-              "fiscal_year": "FY2023",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 8447.3,
-              "pat_cr": 1607.55,
-              "net_worth_cr": 10202.14
-            },
-            "FY2024": {
-              "fiscal_year": "FY2024",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10490.47,
-              "pat_cr": 1974.22,
-              "net_worth_cr": 12056.44
-            },
-            "FY2025": {
-              "fiscal_year": "FY2025",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10237.07,
-              "pat_cr": 578.16,
-              "net_worth_cr": 13954.97
-            },
-            "FY2026": {
-              "fiscal_year": "FY2026",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 13373.83,
-              "pat_cr": 1816.7,
-              "net_worth_cr": 15619.09
-            }
-          },
-          "fetched_at": "2026-09-23T08:16:45+00:00"
-        }
-      },
-      {
-        "company_name": "IIFL Finance Limited",
-        "board": "Mainboard",
-        "sector": null,
-        "symbol": "935IIFL33",
-        "issue_open": "2023-01-06",
-        "issue_close": "2023-01-18",
-        "listing_date": "2026-09-11",
-        "price_band": "Rs.1000",
-        "issue_size_cr": null,
-        "subscription_x": null,
-        "issue_price": 1000.0,
-        "current_price": null,
-        "gain_pct": null,
-        "status": "Listed",
-        "stage": "Listed",
-        "groww": {
-          "match": {
-            "matched_name": "IIFL Finance Ltd.",
-            "confidence": 1.0,
-            "stock_slug": "iifl-holdings-ltd",
-            "stock_url": "https://groww.in/stocks/iifl-holdings-ltd",
-            "ipo_slug": null,
-            "ipo_url": null,
-            "isin": "INE530B01024",
-            "nse_code": "IIFL"
-          },
-          "provenance": {
-            "source_name": "Groww",
-            "source_url": "https://groww.in/stocks/iifl-holdings-ltd",
-            "fetched_at": "2026-09-23T08:16:45+00:00",
-            "data_period": "Jun '26",
-            "status": "Live"
-          },
-          "fundamentals": {
-            "market_cap_cr": 26347.0,
-            "roe_pct": 11.93,
-            "debt_equity": 5.01,
-            "pe_ratio": 11.68,
-            "pb_ratio": 1.89,
-            "eps": 52.85,
-            "book_value": 326.15,
-            "dividend_yield_pct": 0.65,
-            "industry_pe": 19.01,
-            "promoter_hold_pct": 24.85,
-            "face_value": 2.0
-          },
-          "subscription": null,
-          "ipo": null,
-          "financials_by_year": {
-            "FY2022": {
-              "fiscal_year": "FY2022",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 7023.61,
-              "pat_cr": 1188.25,
-              "net_worth_cr": 6469.73
-            },
-            "FY2023": {
-              "fiscal_year": "FY2023",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 8447.3,
-              "pat_cr": 1607.55,
-              "net_worth_cr": 10202.14
-            },
-            "FY2024": {
-              "fiscal_year": "FY2024",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10490.47,
-              "pat_cr": 1974.22,
-              "net_worth_cr": 12056.44
-            },
-            "FY2025": {
-              "fiscal_year": "FY2025",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 10237.07,
-              "pat_cr": 578.16,
-              "net_worth_cr": 13954.97
-            },
-            "FY2026": {
-              "fiscal_year": "FY2026",
-              "basis": "CONSOLIDATED",
-              "revenue_cr": 13373.83,
-              "pat_cr": 1816.7,
-              "net_worth_cr": 15619.09
-            }
-          },
-          "fetched_at": "2026-09-23T08:16:45+00:00"
-        }
-      },
-      {
-        "company_name": "Dollex Agrotech Limited",
-        "board": "SME",
-        "sector": null,
-        "symbol": "DOLLEX",
-        "issue_open": "2022-12-15",
-        "issue_close": "2022-12-20",
-        "listing_date": "2026-09-11",
-        "price_band": "Rs.35",
-        "issue_size_cr": null,
-        "subscription_x": null,
-        "issue_price": 38.0,
-        "current_price": null,
-        "gain_pct": null,
-        "status": "Listed",
-        "stage": "Listed",
-        "groww": {
-          "match": {
-            "matched_name": "Dollex Agrotech Ltd.",
-            "confidence": 1.0,
-            "stock_slug": "dollex-agrotech-ltd",
-            "stock_url": "https://groww.in/stocks/dollex-agrotech-ltd",
-            "ipo_slug": null,
-            "ipo_url": null,
-            "isin": "INE0JHH01011",
-            "nse_code": "DOLLEX"
-          },
-          "provenance": {
-            "source_name": "Groww",
-            "source_url": "https://groww.in/stocks/dollex-agrotech-ltd",
-            "fetched_at": "2026-09-23T08:16:48+00:00",
-            "data_period": "Jun '26",
-            "status": "Live"
-          },
-          "fundamentals": {
-            "market_cap_cr": 159.0,
-            "roe_pct": 6.79,
-            "debt_equity": 1.27,
-            "pe_ratio": 19.97,
-            "pb_ratio": 1.28,
-            "eps": 1.99,
-            "book_value": 31.03,
-            "dividend_yield_pct": 0.0,
-            "industry_pe": 27.49,
-            "promoter_hold_pct": 54.2,
-            "face_value": 10.0
-          },
-          "subscription": null,
-          "ipo": null,
-          "financials_by_year": {},
-          "fetched_at": "2026-09-23T08:16:48+00:00"
+          "fetched_at": "2026-09-24T08:07:22+00:00"
         }
       }
     ]
   },
   "groww_conflicts": [
+    {
+      "company": "Moneyview Limited",
+      "field": "issue_size_cr",
+      "official_value": 790.58,
+      "official_source": "NSE",
+      "groww_value": 1091.68,
+      "groww_url": "https://groww.in/ipo/moneyview-ipo",
+      "note": null
+    },
+    {
+      "company": "Moneyview Limited",
+      "field": "subscription_x",
+      "official_value": 0.58,
+      "official_source": "NSE",
+      "groww_value": 0.65,
+      "groww_url": "https://groww.in/ipo/moneyview-ipo",
+      "note": null
+    },
+    {
+      "company": "Swastika Infra Limited",
+      "field": "issue_size_cr",
+      "official_value": 117.2,
+      "official_source": "NSE",
+      "groww_value": 160.87,
+      "groww_url": "https://groww.in/ipo/swastika-infra-ipo",
+      "note": null
+    },
+    {
+      "company": "Swastika Infra Limited",
+      "field": "subscription_x",
+      "official_value": 1.02,
+      "official_source": "NSE",
+      "groww_value": 1.25,
+      "groww_url": "https://groww.in/ipo/swastika-infra-ipo",
+      "note": null
+    },
     {
       "company": "ArMee Infotech Limited",
       "field": "issue_size_cr",
@@ -5432,9 +5445,9 @@
     {
       "company": "ArMee Infotech Limited",
       "field": "subscription_x",
-      "official_value": 0.29,
+      "official_value": 0.64,
       "official_source": "NSE",
-      "groww_value": 0.34,
+      "groww_value": 0.88,
       "groww_url": "https://groww.in/ipo/armee-infotech-ipo",
       "note": null
     },
@@ -5450,19 +5463,10 @@
     {
       "company": "Elevate Campuses Limited",
       "field": "subscription_x",
-      "official_value": 0.03,
+      "official_value": 0.09,
       "official_source": "NSE",
-      "groww_value": 0.09,
+      "groww_value": 0.22,
       "groww_url": "https://groww.in/ipo/elevate-campuses-ipo",
-      "note": null
-    },
-    {
-      "company": "Swastika Infra Limited",
-      "field": "issue_size_cr",
-      "official_value": 117.2,
-      "official_source": "NSE",
-      "groww_value": 160.87,
-      "groww_url": "https://groww.in/ipo/swastika-infra-ipo",
       "note": null
     },
     {
@@ -5475,36 +5479,63 @@
       "note": null
     },
     {
-      "company": "Pooja Logistics Limited",
+      "company": "Varmora Granito Limited",
       "field": "subscription_x",
-      "official_value": 0.22,
+      "official_value": 0.33,
       "official_source": "NSE",
-      "groww_value": 0.16,
-      "groww_url": "https://groww.in/ipo/pooja-logistics-ipo",
+      "groww_value": 0.43,
+      "groww_url": "https://groww.in/ipo/varmora-granito-ipo",
       "note": null
     },
     {
-      "company": "Moneyview Limited",
-      "field": "issue_size_cr",
-      "official_value": 1138.56,
+      "company": "Coreintegra Consulting Services Limited",
+      "field": "subscription_x",
+      "official_value": 0.23,
       "official_source": "NSE",
-      "groww_value": 1091.68,
-      "groww_url": "https://groww.in/ipo/moneyview-ipo",
+      "groww_value": 0.17,
+      "groww_url": "https://groww.in/ipo/core-integra-consulting-ipo",
+      "note": null
+    },
+    {
+      "company": "Runwal Enterprises Limited",
+      "field": "issue_size_cr",
+      "official_value": 520.87,
+      "official_source": "NSE",
+      "groww_value": 500.0,
+      "groww_url": "https://groww.in/ipo/runwal-enterprises-ipo",
+      "note": null
+    },
+    {
+      "company": "AceVector Limited",
+      "field": "issue_size_cr",
+      "official_value": 439.13,
+      "official_source": "NSE",
+      "groww_value": 420.0,
+      "groww_url": "https://groww.in/ipo/acevector-ipo",
+      "note": null
+    },
+    {
+      "company": "German Green Steel and Power Limited",
+      "field": "issue_size_cr",
+      "official_value": 319.28,
+      "official_source": "NSE",
+      "groww_value": 303.9,
+      "groww_url": "https://groww.in/ipo/german-green-steel-and-power-ipo",
       "note": null
     }
   ],
   "groww_summary": {
-    "companies_seen": 55,
-    "distinct_companies": 43,
-    "matched": 32,
-    "stock_pages": 25,
-    "ipo_pages": 22,
-    "records_enriched": 44,
-    "fields_populated": 846,
-    "conflicts": 8,
+    "companies_seen": 57,
+    "distinct_companies": 48,
+    "matched": 40,
+    "stock_pages": 28,
+    "ipo_pages": 28,
+    "records_enriched": 49,
+    "fields_populated": 887,
+    "conflicts": 14,
     "fetch_failures": 0,
-    "network_fetches": 92,
+    "network_fetches": 106,
     "cache_hits": 0,
-    "unmatched_count": 11
+    "unmatched_count": 8
   }
 }
